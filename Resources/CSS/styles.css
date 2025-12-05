@@ -12,7 +12,7 @@
 
         .hero {
             position: relative;
-            background: url(/img/1.jpg) center/cover no-repeat;
+            background: url(../IMG/1.jpg) center/cover no-repeat;
             height: 100vh;
             color: white;
             display: flex;
@@ -125,7 +125,7 @@
         }
 
         .invitacion-section {
-            background: url(/img/2.jpg) center/cover no-repeat;
+            background: url(../IMG/2.jpg) center/cover no-repeat;
             position: relative;
             padding: 80px 20px;
             border-top: 4px solid gold;
@@ -618,4 +618,5 @@
   background-color: #c49d2c;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   transform: scale(1.03);
+
 }
