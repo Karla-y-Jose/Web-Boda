@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KARLA & JOSE 2026</title>
+    <!-- ICONO EXPLORADOR -->
+    <link rel="shortcut icon" href="Resources/IMG/logo.jpg">
+    <!-- ELEMENTOS EXTERNOS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <!-- ESTILOS -->
+    <link rel="stylesheet" href="Resources/CSS/styles.css">
+</head>
+
+<body>
+    <!-- Sección 1: Portada -->
+    <section class="hero" id="inicio">
+
+        <h1>Karla & Jose</h1>
+        <p>Estamos por celebrar el momento mas importante de nuestra vida<br>¡Queremos que seas parte!</p>
+        <div class="countdown" id="countdown">
+            18 de Diciembre de 2026
+        </div>
+        <audio id="weddingSong" class="music-button" src="Resources/MP3/How Deep Is Your Love - Bee Gees.mp3" autoplay></audio>
+        <button class="music-button" onclick="toggleMusic()" >▶ Reproducir Canción</button>
+      
+    </section>
+    <section id="historia" class="historia-section">
+        <div class="historia-container">
+            <div class="historia-texto">
+                <h2>Nuestra Historia</h2>
+                <p>"Por el servicio a Dios coincidimos. Y ahora con la bendición de Dios nos unimos para servirnos"</p>
+            </div>
+            <div class="historia-imagen">
+                <img src="Resources/IMG/2.jpg" alt="Nuestra Historia" />
+            </div>
+        </div>
+    </section>
+
+    <section id="indicaciones" class="indicaciones-section">
+        <div class="container-indicaciones">
+            <h2 class="section-title">Indicaciones</h2>
+            <div class="indicaciones-grid">
+                <!-- Vestimenta -->
+                <div class="indicacion-box">
+                    <h3>Código de Vestimenta</h3>
+                    <p>Formal (Se sugiere colores de día)</p>
+                    <p><strong>Caballeros:</strong> Traje</p>
+                    <p><strong>Damas:</strong> Vestido largo</p>
+                    <p class="nota-novia">
+                        “Favor de guardar los tonos blancos y sus derivados para la novia”
+                    </p>
+                </div>
+
+                <!-- Niños -->
+                <div class="indicacion-box">
+                    <h3>Niños</h3>
+                    <p>
+                        Apreciamos a tu hijo. Sin embargo, esta celebración es solo para adultos, debido al volumen de
+                        la música, clima y la forma en la que deseamos llevar a cabo este evento. Sabemos que en el
+                        futuro habrá oportunidad de convivir con ellos.
+                    </p>
+                </div>
+
+                <!-- Confirmación -->
+                <div class="indicacion-box">
+                    <h3>Asistencia</h3>
+                    <p>Confirmación necesaria a la brevedad posible.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="invitacion" class="invitacion-section">
+        <div class="invitacion-overlay">
+            <img src="Resources/IMG/logo2.png" alt="Logo Monse & Mario" class="logo-boda" />
+            <h2>¡Estás invitado!</h2>
+            <p>
+                Tú eres una persona muy importante para nosotros.<br />
+                Nos encantaría contar con tu presencia en este día tan especial.
+            </p>
+            <div class="countdown-min" id="countdown-invitacion">
+                <div><span id="d">00</span><small>Días</small></div>
+                <div><span id="h">00</span><small>Horas</small></div>
+                <div><span id="m">00</span><small>Minutos</small></div>
+                <div><span id="s">00</span><small>Segundos</small></div>
+            </div>
+
+            <!-- Confirmación de asistencia -->
+            <div class="confirmacion-wrapper">
+                <h3>Confirma tu asistencia</h3>
+                <p class="instrucciones">
+                    Una vez que confirmes tu asistencia, podrás descargar tu boleto QR.
+                </p>
+                <form action="https://eventoespecial.com.mx/MonseyMario/buscar_boleto" method="post" class="confirmacion-form" id="guest_form">
+                    <input type="hidden" name="_token" value="m3Rcbgl3d3zCuvYifswcdZNYSM2tJiTXdP8WCUFI" autocomplete="off">                    <div class="error-message"></div>
+                    <div class="success-message"></div>
+                    <input type="text" name="name" id="name" placeholder="Ingresa tu nombre"
+                        class="input-confirmacion" />
+                    <button type="submit" class="boton-confirmar">Buscar</button>
+                </form>
+
+                <div class="section-title center-aligned" id="resultados"></div>
+            </div>
+        </div>
+    </section>
+    <section id="familia" class="familia-section">
+        <div class="container-familia">
+            <h2 class="titulo-familia">Padres & Padrinos</h2>
+
+            <div class="familia-grid">
+                <!-- Padres de Montserrat -->
+                <div class="familia-box">
+                    <h3>Padres de Montserrat</h3>
+                    <p>Laura Sánchez Lozano</p>
+                    <p>Salvador Martín Morales Castillo</p>
+                </div>
+
+                <!-- Padres de Mario -->
+                <div class="familia-box">
+                    <h3>Padres de Mario</h3>
+                    <p>Lorenza Ramírez Cornejo</p>
+                    <p>Eduardo Mercado Velázquez</p>
+                </div>
+
+                <!-- Padrinos -->
+                <div class="familia-box">
+                    <h3>Padrinos</h3>
+                    <p>María Guadalupe Ramírez Cornejo</p>
+                    <p>Raúl Hernández Jauregui</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeria" class="galeria-section">
+        <div class="container-galeria">
+            <div class="galeria-grid">
+                <div class="foto-box" data-aos="fade-up">
+                    <img src="Resources/IMG/5.jpg" alt="Montserrat y Mario 1" class="foto-vertical" />
+                </div>
+                <div class="foto-box" data-aos="fade-up" data-aos-delay="150">
+                    <img src="Resources/IMG/1.jpg" alt="Montserrat y Mario 2" class="foto-vertical" />
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="celebracion" class="celebracion-section">
+        <div class="celebracion-overlay">
+            <div class="container-celebracion">
+                <!-- Iglesia -->
+                <div class="evento-box evento-izquierda" data-aos="fade-right">
+                    <div class="evento-icono">
+                        <img src="Resources/IMG/misa.png" alt="Iglesia" />
+                    </div>
+                    <div class="evento-detalle">
+                        <h3>Parroquia Nuestra Señora de Guadalupe</h3>
+                        <p>Filiberto Ruvalcaba Sánchez 18,<br>San José, 45260 Ixtlahuacán del Río, Jal.</p>
+                        <p><strong>Horario:</strong> 1:00 PM</p>
+                        <a href="https://www.google.com/maps?q=Parroquia+Nuestra+Señora+de+Guadalupe+Ixtlahuacán+del+Río"
+                            target="_blank" class="boton-maps">
+                            <i class="fa fa-car"></i> Ver ubicación
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Fiesta -->
+                <div class="evento-box evento-derecha" data-aos="fade-left">
+                    <div class="evento-icono">
+                        <img src="Resources/IMG/copas.png" alt="Fiesta" />
+                    </div>
+                    <div class="evento-detalle">
+                        <h3>Hacienda la Josefina</h3>
+                        <p>45260 Ixtlahuacán del Río, Jal.</p>
+                        <p><strong>Horario:</strong> 3:00 PM</p>
+                        <a href="https://www.google.com/maps?q=Hacienda+la+Josefina+Ixtlahuacán+del+Río"
+                            target="_blank" class="boton-maps">
+                            <i class="fa fa-car"></i> Ver ubicación
+                        </a>
+                    </div>
+                </div>
+                <div class="evento-box evento-hospedaje" data-aos="fade-up">
+                    <div class="evento-icono">
+                        <img src="Resources/IMG/airbnb.png" alt="Fiesta" />
+                    </div>
+                    <div class="evento-detalle">
+                        <h3>¿Te gustaría quedarte cerca?</h3>
+                        <p>Encuentra hospedaje en Ixtlahuacán del Río a través de Airbnb.</p>
+                        <a href="https://www.airbnb.mx/s/Ixtlahuac%C3%A1n-del-R%C3%ADo--Mexico/homes?refinement_paths%5B%5D=%2Fhomes&place_id=ChIJv6j058q-KIQRReBMbNpQV5Y&checkin=2025-10-30&checkout=2025-11-02&adults=1"
+                            target="_blank" class="boton-maps">
+                            <i class="fa fa-bed"></i> Ver opciones en Airbnb
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer id="mesa-regalos" class="footer-regalos">
+        <div class="footer-overlay">
+            <div class="footer-contenido" data-aos="fade-up">
+                <div class="footer-icono">
+                    <img src="Resources/IMG/gift.png" style="max-width: 350px; " alt="Regalo" />
+                </div>
+
+                <p class="footer-frase">
+                    Verte disfrutar de nuestra fiesta para nosotros es un gran regalo.<br />
+                    Sin embargo, si deseas ayudarnos a decorar nuestro hogar,<br />
+                    te compartimos el enlace de nuestra mesa de regalos en Liverpool.
+                </p>
+                <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51564034" target="_blank"
+                    class="boton-footer">
+                    🎁 Ir a la mesa de regalos
+                </a>
+                <p style="margin-top: 2%;">Numero de evento liverpool: 51564034 </p>
+                <div class="footer-final">
+                    <p>Con cariño,</p>
+                    <h4>Montserrat & Mario</h4>
+                    <p>1 de Noviembre, 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script> AOS.init(); </script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"64a71ffd047845a5801720f9c7212bd3","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+    <!-- SCRIPTS INTERNOS -->
+    <script src="Resources/JS/scripts.js"></script>
+</body>
+
+</html>
