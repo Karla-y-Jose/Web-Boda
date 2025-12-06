@@ -2,148 +2,160 @@
 //  BUSCAR BOLETO Y ASISTENCIA
 // ===============================
 
+const API_BASE = "https://eventoespecial.com.mx/MonseyMario";
+const API_TOKEN = "m3Rcbgl3d3zCuvYifswcdZNYSM2tJiTXdP8WCUFI";
+const WHATSAPP_NUMBER = "3321765410";
+
 $(document).ready(function() {
+    let guestData = []; // Cache de datos globales
+
     $('#guest_form').on('submit', function(e) {
         e.preventDefault();
 
         $.ajax({
-            url: "https://eventoespecial.com.mx/MonseyMario/buscar_boleto",
+            url: API_BASE + "/buscar_boleto",
             method: "POST",
             data: {
-                _token: "m3Rcbgl3d3zCuvYifswcdZNYSM2tJiTXdP8WCUFI",
+                _token: API_TOKEN,
                 name: $('#name').val()
             },
             success: function(response) {
                 let resultados = $('#resultados');
                 resultados.empty();
 
-                if (response.success) {
-                    let data = response.data;
+                if (response.success && response.data.length > 0) {
+                    guestData = response.data;
+                    let grupoConfirmado = true;
 
-                    if (data.length > 0) {
-                        let grupoConfirmado = true;
+                    guestData.forEach(function(invitado) {
+                        let asistenciaConfirmada = invitado.asistencia === 'si';
+                        let contenido = crearContenidoInvitado(invitado, asistenciaConfirmada);
+                        
+                        resultados.append(contenido);
 
-                        data.forEach(function(invitado) {
-                            let asistenciaConfirmada = invitado.asistencia === 'si';
-
-                            let contenido = `
-                                <div class="mb-4" data-id="${invitado.id}" data-codigo_grup="${invitado.codigo_famili}">
-                                    <span class="nombreInvitado">${invitado.Nombre}</span><br/>
-                                    <input type="radio" name="asistencia_${invitado.id}" value="si" ${asistenciaConfirmada ? 'checked' : ''}> Sí
-                                    <input type="radio" name="asistencia_${invitado.id}" value="no" ${invitado.invitacion === 'no' ? 'checked' : ''}> No
-                                    <br/><span class="no_asiste"></span>
-                            `;
-
-                            if (asistenciaConfirmada) {
-                                contenido += `
-                                    <div class="download">
-                                        <form action="https://eventoespecial.com.mx/MonseyMario/ticket/:id" method="get" class="contact-form" id="form_${invitado.id}">
-                                            <button type="submit" class="btn btn-sm boton mt-4 mb-4 boton-dorado" style="width: 60%; background-color: #d4af37; color: #FFF;">Descargar boleto</button>
-                                        </form>
-                                    </div>`;
-                            } else {
-                                grupoConfirmado = false;
-                            }
-
-                            contenido += `</div>`;
-                            resultados.append(contenido);
-
-                            if (asistenciaConfirmada) {
-                                let form = document.getElementById(`form_${invitado.id}`);
-                                form.action = form.action.replace(':id', encodeURIComponent(invitado.id));
-                            }
-                        });
-
-                        if (grupoConfirmado) {
-                            resultados.append(`
-                                <div id="download_all_container">
-                                    <form action="https://eventoespecial.com.mx/MonseyMario/boletos_familia/:codigo_grup" method="get" class="contact-form" id="form_descargar_todos">
-                                        <button type="submit" class="btn btn-sm boton mt-4 mb-4 boton-dorado" style="width: 60%; background-color: #d4af37; color: #FFF;">Descargar todos los boletos</button>
-                                    </form>
-                                </div>
-                            `);
-
-                            let form = document.getElementById('form_descargar_todos');
-                            form.action = form.action.replace(':codigo_grup', data[0].id_familia);
+                        if (asistenciaConfirmada) {
+                            let form = document.getElementById(`form_${invitado.id}`);
+                            form.action = form.action.replace(':id', encodeURIComponent(invitado.id));
+                        } else {
+                            grupoConfirmado = false;
                         }
+                    });
 
-                        // CAMBIO DE RADIO BUTTON
-                        $('input[type=radio]').on('change', function() {
-                            let value = $(this).val();
-                            let id = $(this).closest('div').data('id');
-                            let codigoGrupo = $(this).closest('div').data('codigo_grup');
-                            let nombreInvitado = $(this).siblings('.nombreInvitado').text();
-                            let mensajeSpan = $(this).siblings('span.no_asiste');
-
-                            // Actualizar asistencia
-                            $.ajax({
-                                url: "https://eventoespecial.com.mx/MonseyMario/actualizar_asistencia",
-                                method: "POST",
-                                data: {
-                                    _token: "m3Rcbgl3d3zCuvYifswcdZNYSM2tJiTXdP8WCUFI",
-                                    id: id,
-                                    asistencia: value
-                                }
-                            });
-
-                            if (value === 'no') {
-                                mensajeSpan.text(`Lamentamos que no puedas acompañarnos, ${nombreInvitado}.`);
-
-                                setTimeout(function() {
-                                    window.open(`https://wa.me/3321765410?text=Hola, ${nombreInvitado} no podrá asistir`, '_blank');
-                                }, 2000);
-
-                                $(this).closest('div').find('.download').remove();
-
-                            } else {
-                                mensajeSpan.text('');
-
-                                if (!$(this).closest('div').find('.download').length) {
-                                    $(this).closest('div').append(`
-                                        <div class="download">
-                                            <form action="https://eventoespecial.com.mx/MonseyMario/ticket/:id" method="get" class="contact-form" id="form_${id}">
-                                                <button type="submit" class="btn btn-sm boton mt-4 mb-4 boton-dorado" style="width: 60%; background-color: #d4af37; color: #FFF;">Descargar boleto</button>
-                                            </form>
-                                        </div>
-                                    `);
-
-                                    let form = document.getElementById(`form_${id}`);
-                                    form.action = form.action.replace(':id', encodeURIComponent(id));
-                                }
-                            }
-
-                            // Revisar confirmación completa del grupo
-                            let allConfirmed = true;
-                            $('input[value="si"]').each(function() {
-                                if (!$(this).is(':checked')) {
-                                    allConfirmed = false;
-                                }
-                            });
-
-                            if (allConfirmed) {
-                                if (!$('#download_all_container').length) {
-                                    resultados.append(`
-                                        <div id="download_all_container">
-                                            <form action="https://eventoespecial.com.mx/MonseyMario/boletos_familia/:codigo_grup" method="get" class="contact-form" id="form_descargar_todos">
-                                                <button type="submit" class="btn btn-sm boton mt-4 mb-4 boton-dorado" style="width: 60%; background-color: #d4af37; color: #FFF;">Descargar todos los boletos</button>
-                                            </form>
-                                        </div>
-                                    `);
-                                }
-                                let form = document.getElementById('form_descargar_todos');
-                                form.action = form.action.replace(':codigo_grup', codigoGrupo);
-                                $('#download_all_container').show();
-                            } else {
-                                $('#download_all_container').hide();
-                            }
-                        });
+                    if (grupoConfirmado) {
+                        agregarBotonDescargaTodos(resultados, guestData[0].id_familia);
                     }
+
+                    // Delegar evento de cambio en radio buttons
+                    resultados.on('change', 'input[type=radio]', function() {
+                        manejarCambioAsistencia(this, resultados);
+                    });
                 } else {
-                    alert(response.message);
+                    alert(response.message || 'No se encontraron invitados');
                 }
             }
         });
     });
+
+    function crearContenidoInvitado(invitado, asistenciaConfirmada) {
+        let contenido = `
+            <div class="guest-item" data-id="${invitado.id}" data-codigo_grup="${invitado.codigo_famili}">
+                <span class="nombreInvitado">${invitado.Nombre}</span><br/>
+                <input type="radio" name="asistencia_${invitado.id}" value="si" ${asistenciaConfirmada ? 'checked' : ''}> Sí
+                <input type="radio" name="asistencia_${invitado.id}" value="no" ${invitado.invitacion === 'no' ? 'checked' : ''}> No
+                <br/><span class="no_asiste"></span>
+        `;
+
+        if (asistenciaConfirmada) {
+            contenido += `
+                <div class="download">
+                    <form action="${API_BASE}/ticket/:id" method="get" class="descarga-form" id="form_${invitado.id}">
+                        <button type="submit" class="boton-dorado">Descargar boleto</button>
+                    </form>
+                </div>`;
+        }
+
+        contenido += `</div>`;
+        return contenido;
+    }
+
+    function agregarBotonDescargaTodos(resultados, codigoGrupo) {
+        resultados.append(`
+            <div id="download_all_container">
+                <form action="${API_BASE}/boletos_familia/${codigoGrupo}" method="get" class="descarga-form" id="form_descargar_todos">
+                    <button type="submit" class="boton-dorado">Descargar todos los boletos</button>
+                </form>
+            </div>
+        `);
+    }
+
+    function manejarCambioAsistencia(element, resultados) {
+        let $element = $(element);
+        let value = $element.val();
+        let $guestDiv = $element.closest('.guest-item');
+        let id = $guestDiv.data('id');
+        let codigoGrupo = $guestDiv.data('codigo_grup');
+        let nombreInvitado = $guestDiv.find('.nombreInvitado').text();
+        let mensajeSpan = $guestDiv.find('span.no_asiste');
+
+        // Actualizar asistencia en servidor
+        $.ajax({
+            url: API_BASE + "/actualizar_asistencia",
+            method: "POST",
+            data: {
+                _token: API_TOKEN,
+                id: id,
+                asistencia: value
+            }
+        });
+
+        if (value === 'no') {
+            mensajeSpan.text(`Lamentamos que no puedas acompañarnos, ${nombreInvitado}.`);
+            $guestDiv.find('.download').remove();
+
+            setTimeout(function() {
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=Hola, ${nombreInvitado} no podrá asistir`, '_blank');
+            }, 2000);
+        } else {
+            mensajeSpan.text('');
+
+            if (!$guestDiv.find('.download').length) {
+                $guestDiv.append(`
+                    <div class="download">
+                        <form action="${API_BASE}/ticket/:id" method="get" class="descarga-form" id="form_${id}">
+                            <button type="submit" class="boton-dorado">Descargar boleto</button>
+                        </form>
+                    </div>
+                `);
+
+                let form = document.getElementById(`form_${id}`);
+                form.action = form.action.replace(':id', encodeURIComponent(id));
+            }
+        }
+
+        actualizarVisibilidadDescargaTodos(resultados, codigoGrupo);
+    }
+
+    function actualizarVisibilidadDescargaTodos(resultados, codigoGrupo) {
+        let allConfirmed = true;
+        resultados.find('input[value="si"]').each(function() {
+            if (!$(this).is(':checked')) {
+                allConfirmed = false;
+            }
+        });
+
+        let $downloadContainer = $('#download_all_container');
+        if (allConfirmed) {
+            if (!$downloadContainer.length) {
+                agregarBotonDescargaTodos(resultados, codigoGrupo);
+            } else {
+                $downloadContainer.show();
+            }
+        } else {
+            if ($downloadContainer.length) {
+                $downloadContainer.hide();
+            }
+        }
+    }
 });
 
 
