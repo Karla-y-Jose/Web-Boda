@@ -60,12 +60,19 @@ $(document).ready(function() {
         var $btn = $form.find('button[type="submit"]');
         $btn.prop('disabled', true).text('Enviando...');
 
-        // Use fetch with explicit error handling and logging
+        // Use form-encoded data (URLSearchParams) to avoid CORS preflight
+        var formParams = new URLSearchParams();
+        formParams.append('name', formData.name);
+        formParams.append('email', formData.email);
+        formParams.append('guests', formData.guests);
+        formParams.append('dietary', formData.dietary);
+        formParams.append('attending', formData.attending);
+        formParams.append('message', formData.message);
+        formParams.append('secret', formData.secret);
+
         fetch(RSVP_ENDPOINT, {
             method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+            body: formParams
         })
         .then(function(res) {
             console.log('Response status:', res.status);
@@ -237,6 +244,12 @@ function formatearFechaCalendario(fecha) {
 
 // Google Maps Integration
 function initMap() {
+    // Check if google.maps is available
+    if (typeof google === 'undefined' || !google.maps) {
+        console.warn('Google Maps API not loaded or billing not enabled');
+        return;
+    }
+
     var zapopan = { lat: 20.7282, lng: -103.3863 };
     
     // Check if map element exists
@@ -280,7 +293,7 @@ function initMap() {
             position: { lat: venue.lat, lng: venue.lng },
             map: map,
             title: venue.name,
-            icon: 'http://maps.google.com/mapfiles/ms/icons/gold-dot.png'
+            icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
         });
 
         var infowindow = new google.maps.InfoWindow({
@@ -323,4 +336,3 @@ $.fn.modal = function(action) {
     }
     return this;
 };
-
