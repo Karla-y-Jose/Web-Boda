@@ -30,7 +30,7 @@ $(document).ready(function() {
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure `RSVP_ENDPOINT` with the deployed Apps Script web app URL.
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwz_-KfSr5pNsh0V3nkcdzalkV4rqtHQKDCwVRfp2wEYqaJ8jzMUr1RmB6h4Q8e69NbSw/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxAMLQgfVWguPOFkZLtikRgZ4CxCrCQmlFsVHNVksJxQPLFjM6JDY9coJrtXDgDjytJ0w/exec';
     var RSVP_TOKEN = '230223'; // Must match SECRET_TOKEN in Apps Script
 
     $('#rsvp-form').on('submit', function(e) {
@@ -323,3 +323,4 @@ $.fn.modal = function(action) {
     }
     return this;
 };
+
