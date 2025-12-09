@@ -1,233 +1,470 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html class="no-js" lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KARLA & JOSE 2026</title>
-    <!-- ICONO EXPLORADOR -->
-    <link rel="shortcut icon" href="Resources/IMG/logo.png">
-    <!-- ELEMENTOS EXTERNOS -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600&display=swap">
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
-    <!-- ESTILOS -->
-    <link rel="stylesheet" href="Resources/CSS/styles.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Karla & Jose - Boda 2026</title>
+    <meta name="description" content="¡Te invitamos a celebrar nuestro matrimonio!">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    
+    <!-- OG Meta Tags -->
+    <meta property="og:title" content="Karla & Jose - Boda 2026">
+    <meta property="og:description" content="¡Te invitamos a celebrar nuestro matrimonio el 18 de Diciembre de 2026!">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="img/logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/normalize.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script>
+        // Fallback CDN loading
+        function loadCssFromCDN(css) {
+            const link = document.createElement('link');
+            if (css === 'font-awesome.css') {
+                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css';
+            }
+            link.rel = 'stylesheet';
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }
+
+        function loadJsFromCDN(js) {
+            if (js === 'jquery.js') {
+                document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+            }
+        }
+    </script>
 </head>
 
-<body>
-    <!-- Sección 1: Portada -->
-    <section class="hero" id="inicio">
-
-        <h1>Karla & Jose</h1>
-        <p>Estamos por celebrar el momento mas importante de nuestra vida<br>¡Queremos que seas parte!</p>
-        <div class="countdown" id="countdown">
-            18 de Diciembre de 2026
-        </div>
-        <audio id="weddingSong" class="music-button" src="Resources/MP3/How Deep Is Your Love - Bee Gees.mp3" autoplay></audio>
-        <button class="music-button" onclick="toggleMusic()" >▶ Reproducir Canción</button>
-      
-    </section>
-    <section id="historia" class="historia-section">
-        <div class="historia-container">
-            <div class="historia-texto">
-                <h2>Nuestra Historia</h2>
-                <p>"Un encuentro casual como compañeros de trabajo termino convirtiendose en una promesa de por vida"</p>
-            </div>
-            <div class="historia-imagen">
-                <img src="Resources/IMG/2.jpg" alt="Nuestra Historia" />
-            </div>
-        </div>
-    </section>
-
-    <section id="indicaciones" class="indicaciones-section">
-        <div class="container-indicaciones">
-            <h2 class="section-title">Indicaciones</h2>
-            <div class="indicaciones-grid">
-                <!-- Vestimenta -->
-                <div class="indicacion-box">
-                    <h3>Código de Vestimenta</h3>
-                    <p>Formal (Se sugiere colores de noche)</p>
-                    <p><strong>Caballeros:</strong> Traje</p>
-                    <p><strong>Damas:</strong> Vestido largo</p>
-                    <p class="nota-novia">
-                        “Favor de guardar los tonos blancos y sus derivados para la novia”
-                    </p>
-                </div>
-
-                <!-- Niños -->
-                <div class="indicacion-box">
-                    <h3>Niños</h3>
-                    <p>
-                        Apreciamos a tu hijo. Sin embargo, esta celebración es solo para adultos, debido al volumen de
-                        la música, clima y la forma en la que deseamos llevar a cabo este evento. Sabemos que en el
-                        futuro habrá oportunidad de convivir con ellos.
-                    </p>
-                </div>
-
-                <!-- Confirmación -->
-                <div class="indicacion-box">
-                    <h3>Asistencia</h3>
-                    <p>Confirmación necesaria a la brevedad posible.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="invitacion" class="invitacion-section">
-        <div class="invitacion-overlay">
-            <img src="Resources/IMG/logo2.png" alt="Logo Monse & Mario" class="logo-boda" />
-            <h2>¡Estás invitado!</h2>
-            <p>
-                Tú eres una persona muy importante para nosotros.<br />
-                Nos encantaría contar con tu presencia en este día tan especial.
-            </p>
-            <div class="countdown-min" id="countdown-invitacion">
-                <div><span id="d">00</span><small>Días</small></div>
-                <div><span id="h">00</span><small>Horas</small></div>
-                <div><span id="m">00</span><small>Minutos</small></div>
-                <div><span id="s">00</span><small>Segundos</small></div>
-            </div>
-
-            <!-- Confirmación de asistencia -->
-            <div class="confirmacion-wrapper">
-                <h3>Confirma tu asistencia</h3>
-                <p class="instrucciones">
-                    Una vez que confirmes tu asistencia, podrás descargar tu boleto QR.
-                </p>
-                <form action="https://eventoespecial.com.mx/MonseyMario/buscar_boleto" method="post" class="confirmacion-form" id="guest_form">
-                    <input type="hidden" name="_token" value="m3Rcbgl3d3zCuvYifswcdZNYSM2tJiTXdP8WCUFI" autocomplete="off">                    <div class="error-message"></div>
-                    <div class="success-message"></div>
-                    <input type="text" name="name" id="name" placeholder="Ingresa tu nombre"
-                        class="input-confirmacion" />
-                    <button type="submit" class="boton-confirmar">Buscar</button>
-                </form>
-
-                <div class="section-title center-aligned" id="resultados"></div>
-            </div>
-        </div>
-    </section>
-    <section id="familia" class="familia-section">
-        <div class="container-familia">
-            <h2 class="titulo-familia">Padres & Padrinos</h2>
-
-            <div class="familia-grid">
-                <!-- Padres de Montserrat -->
-                <div class="familia-box">
-                    <h3>Padres de Karla</h3>
-                    <p>Maria Eduviges Guzman</p>
-                    <p>Luis Arturo Sanchez</p>
-                </div>
-
-                <!-- Padres de Mario -->
-                <div class="familia-box">
-                    <h3>Padres de Jose</h3>
-                    <p>Maria del Carmen Rodriguez</p>
-                    <p>Jose Martin Sanchez</p>
-                </div>
-
-                <!-- Padrinos -->
-                <div class="familia-box">
-                    <h3>Padrinos</h3>
-                    <p>Laura Sánchez Lozano</p>
-                    <p>Salvador Martín Morales Castillo</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="galeria" class="galeria-section">
-        <div class="container-galeria">
-            <div class="galeria-grid">
-                <div class="foto-box" data-aos="fade-up">
-                    <img src="Resources/IMG/3.jpg" alt="Karla y Jose 1" class="foto-vertical" />
-                </div>
-                <div class="foto-box" data-aos="fade-up" data-aos-delay="150">
-                    <img src="Resources/IMG/4.jpg" alt="Karla y Jose 2" class="foto-vertical" />
-                </div>
-            </div>
-        </div>
-    </section>
-    <section id="celebracion" class="celebracion-section">
-        <div class="celebracion-overlay">
-            <div class="container-celebracion">
-                <!-- Iglesia -->
-                <div class="evento-box evento-izquierda" data-aos="fade-right">
-                    <div class="evento-icono">
-                        <img src="Resources/IMG/misa.png" alt="Iglesia" />
-                    </div>
-                    <div class="evento-detalle">
-                        <h3>Parroquia Nuestra señora de Altagracia</h3>
-                        <p>Altagracia,<br>Altagracia, Zapopan, Jal.</p>
-                        <p><strong>Horario:</strong> 6:00 PM</p>
-                        <a href="https://www.google.com/maps?q=Parroquia+Nuestra+Señora+de+Altagracia+Zapopan"
-                            target="_blank" class="boton-maps">
-                            <i class="fa fa-car"></i> Ver ubicación
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Fiesta -->
-                <div class="evento-box evento-derecha" data-aos="fade-left">
-                    <div class="evento-icono">
-                        <img src="Resources/IMG/copas.png" alt="Fiesta" />
-                    </div>
-                    <div class="evento-detalle">
-                        <h3>Salon Andira</h3>
-                        <p>45200, Calandrias, Zapopan, Jal.</p>
-                        <p><strong>Horario:</strong> 8:00 PM</p>
-                        <a href="https://www.google.com/maps?q=Andira+Salon+de+Eventos+zapopan"
-                            target="_blank" class="boton-maps">
-                            <i class="fa fa-car"></i> Ver ubicación
-                        </a>
-                    </div>
-                </div>
-                <div class="evento-box evento-hospedaje" data-aos="fade-up">
-                    <div class="evento-icono">
-                        <img src="Resources/IMG/airbnb.png" alt="Fiesta" />
-                    </div>
-                    <div class="evento-detalle">
-                        <h3>¿Te gustaría quedarte cerca?</h3>
-                        <p>Encuentra hospedaje en Zapopan a través de Airbnb.</p>
-                        <a href="https://www.airbnb.mx/s/Zapopan--Mexico/homes?refinement_paths%5B%5D=%2Fhomes&place_id=ChIJF6v3nS6yKIQRm6JdQG2r8gY&checkin=2026-12-17&checkout=2026-12-19&adults=1"
-                            target="_blank" class="boton-maps">
-                            <i class="fa fa-bed"></i> Ver opciones en Airbnb
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <footer id="mesa-regalos" class="footer-regalos">
-        <div class="footer-overlay">
-            <div class="footer-contenido" data-aos="fade-up">
-                <div class="footer-icono">
-                    <img src="Resources/IMG/gift.png" alt="Regalo" />
-                </div>
-
-                <p class="footer-frase">
-                    Verte disfrutar de nuestra fiesta para nosotros es un gran regalo.<br />
-                    Sin embargo, si deseas ayudarnos a decorar nuestro hogar,<br />
-                    te compartimos el enlace de nuestra mesa de regalos en Liverpool.
-                </p>
-                <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos" target="_blank"
-                    class="boton-footer">
-                    🎁 Ir a la mesa de regalos
+<body id="top">
+    <!-- Navigation -->
+    <section class="navigation">
+        <header>
+            <div class="header-content">
+                <a href="#top" class="logo">
+                    <i class="fa fa-heart logo-heart" aria-hidden="true"></i>
+                    <span class="logo-name-green">Karla</span>
+                    <span class="logo-sep">&amp;</span>
+                    <span class="logo-name-gold">Jose</span>
                 </a>
-                <p class="footer-evento-numero">Numero de evento liverpool: ?? </p>
-                <div class="footer-final">
-                    <p>Con cariño,</p>
+                <div class="header-nav">
+                    <nav>
+                        <ul class="primary-nav">
+                            <li><a href="#intro">Nuestra Historia</a></li>
+                            <li><a href="#events">Eventos</a></li>
+                            <li><a href="#venue">Ubicación</a></li>
+                            <li><a href="#gallery">Galería</a></li>
+                        </ul>
+                        <ul class="member-actions">
+                            <li><a href="#rsvp" class="btn btn-white btn-small">RSVP</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="navicon">
+                    <a class="nav-toggle" href="#"><span></span></a>
+                </div>
+            </div>
+        </header>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="hero-content text-center">
+                        <h1>Karla & Jose</h1>
+                        <p class="intro">18 de Diciembre, 2026</p>
+                        <p class="intro-subtitle">Estamos por celebrar el momento más importante de nuestra vida</p>
+                        <div id="countdown-hero" class="countdown-hero">
+                            <div><span id="d-hero">00</span><p>Días</p></div>
+                            <div><span id="h-hero">00</span><p>Horas</p></div>
+                            <div><span id="m-hero">00</span><p>Minutos</p></div>
+                            <div><span id="s-hero">00</span><p>Segundos</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 hidden-xs"></div>
+                <div class="col-sm-4 hidden-xs text-center">
+                    <a href="#rsvp" class="btn btn-accent btn-large rsvp-btn">Confirmar Asistencia</a>
+                </div>
+                <div class="col-sm-4 hidden-xs"></div>
+            </div>
+        </div>
+        <div class="down-arrow"><a href="#intro"><i class="fa fa-angle-down"></i></a></div>
+    </section>
+
+    <!-- Intro / Our Story -->
+    <section id="intro" class="section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">Nuestra Historia</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p>
+                        Un encuentro casual como compañeros de trabajo terminó convirtiéndose en una promesa de por vida.
+                        Lo que comenzó como una amistad en la oficina evolucionó en una relación llena de amor, 
+                        complicidad y sueños compartidos. Hoy, después de tanto tiempo juntos, queremos que todos nuestros 
+                        seres queridos sean testigos de este momento tan especial en nuestras vidas.
+                    </p>
+                    <p>
+                        Con mucha alegría te invitamos a ser parte de esta celebración donde uniremos nuestras vidas 
+                        y nuestras familias en una sola.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <img src="img/2.jpg" alt="Nuestra Historia" style="width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Timeline -->
+    <section id="events" class="events section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="header text-center">Eventos</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-sm-12 col-xs-12 leftcol">
+                    <div class="event-item">
+                        <h5>Ceremonia Religiosa</h5>
+                        <p class="time"><i class="fa fa-clock-o"></i> 6:00 PM - 18 de Diciembre</p>
+                        <p>
+                            <i class="fa fa-map-marker"></i> 
+                            <strong>Parroquia Nuestra Señora de Altagracia</strong><br>
+                            Altagracia, Zapopan, Jalisco
+                        </p>
+                        <p>
+                            El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.
+                        </p>
+                        <div class="event-buttons">
+                            <a href="https://www.google.com/maps?q=Parroquia+Nuestra+Señora+de+Altagracia+Zapopan" target="_blank" class="btn btn-small btn-accent">
+                                <i class="fa fa-map-marker"></i> Ver Ubicación
+                            </a>
+                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, Altagracia, Zapopan, Jal.', '20261218T180000', '20261218T190000')" class="btn btn-small btn-accent">
+                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-12 col-xs-12 rightcol">
+                    <div class="event-item">
+                        <h5>Recepción y Cena</h5>
+                        <p class="time"><i class="fa fa-clock-o"></i> 8:00 PM - 18 de Diciembre</p>
+                        <p>
+                            <i class="fa fa-map-marker"></i> 
+                            <strong>Salon Andira</strong><br>
+                            Calandrias, Zapopan, Jalisco
+                        </p>
+                        <p>
+                            Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.
+                        </p>
+                        <div class="event-buttons">
+                            <a href="https://www.google.com/maps?q=Andira+Salon+de+Eventos+Zapopan" target="_blank" class="btn btn-small btn-accent">
+                                <i class="fa fa-map-marker"></i> Ver Ubicación
+                            </a>
+                            <a href="uber://?action=setPickupLocation&pickup[formatted_address]=Zapopan,Jalisco&pickup[latitude]=20.7282&pickup[longitude]=-103.3863&dropoff[latitude]=20.7282&dropoff[longitude]=-103.3863" onclick="if(!navigator.userAgent.includes('Uber')){window.location.href='https://www.uber.com/';return false;};" class="btn btn-small btn-accent">
+                                <i class="fa fa-taxi"></i> Reservar Uber
+                            </a>
+                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Recepción', 'Salon Andira, Calandrias, Zapopan, Jal.', '20261218T200000', '20261219T020000')" class="btn btn-small btn-accent">
+                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dress Code Info -->
+            <div class="row section-padding" style="margin-top: 40px;">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="dress-code-box">
+                        <h4><i class="fa fa-star"></i> Código de Vestimenta</h4>
+                        <p>
+                            <strong>Formal:</strong> Te sugerimos usar colores de noche. 
+                            Caballeros en traje y Damas en vestido largo.
+                        </p>
+                        <p style="color: #2E8B57; font-style: italic;">
+                            "Favor de guardar los tonos blancos y sus derivados para la novia"
+                        </p>
+                        <h4 style="margin-top: 20px;"><i class="fa fa-child"></i> Sobre los Niños</h4>
+                        <p>
+                            Apreciamos mucho a tus hijos. Sin embargo, esta celebración está diseñada únicamente para adultos, 
+                            debido al volumen de la música y la forma en que deseamos llevar a cabo este evento especial.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accommodations -->
+    <section class="accommodations section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">¿Te gustaría quedarte cerca?</h3>
+                    <p>Encuentra hospedaje en Zapopan a través de Airbnb</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center">
+                    <a href="https://www.airbnb.mx/s/Zapopan--Mexico/homes?refinement_paths%5B%5D=%2Fhomes&checkin=2026-12-17&checkout=2026-12-19&adults=1" target="_blank" class="btn btn-fill btn-large">
+                        <i class="fa fa-bed"></i> Ver Opciones en Airbnb
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="gallery section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">Momentos Especiales</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="img/3.jpg" class="gallery-item">
+                        <div class="img-wrap">
+                            <img src="img/3.jpg" alt="Karla y Jose">
+                            <div class="overlay">
+                                <i class="fa fa-search"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="img/4.jpg" class="gallery-item">
+                        <div class="img-wrap">
+                            <img src="img/4.jpg" alt="Karla y Jose">
+                            <div class="overlay">
+                                <i class="fa fa-search"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Venue / Map -->
+    <section id="venue" class="venue section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">¿Cómo llego?</h3>
+                    <p>Es más fácil de lo que crees</p>
+                </div>
+            </div>
+        </div>
+        <div id="map-canvas" style="height: 500px; width: 100%; margin-top: 40px;"></div>
+        <div id="map-content-wrapper" class="container" style="margin-top: 30px;">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="map-info-box">
+                        <h5><i class="fa fa-map-marker"></i> Receptor Principal</h5>
+                        <p><strong>Salon Andira</strong></p>
+                        <p>Calandrias, Zapopan<br>Jalisco, México</p>
+                        <p><i class="fa fa-phone"></i> <a href="tel:">Contactar</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RSVP Section -->
+    <section id="rsvp" class="rsvp text-center section-padding">
+        <div id="rsvp-modal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        <div class="section-padding">
+                            <h3>¡Gracias!</h3>
+                            <p>Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
+                            <p style="margin-top: 20px; color: #2E8B57;">
+                                <i class="fa fa-heart"></i> Karla & Jose
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <h3>Confirma tu asistencia</h3>
+                    <p>Por favor completa el formulario para confirmar tu asistencia y número de invitados.</p>
+
+                    <!-- RSVP form inspired by Rampatra (will POST to a Google Apps Script endpoint) -->
+                    <form id="rsvp-form" class="rsvp-form" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-input-group">
+                                    <i class="fa fa-user"></i>
+                                    <input type="text" name="name" id="rsvp-name" placeholder="Tu nombre completo" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-input-group">
+                                    <i class="fa fa-envelope"></i>
+                                    <input type="email" name="email" id="rsvp-email" placeholder="Correo electrónico" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-input-group">
+                                    <i class="fa fa-users"></i>
+                                    <input type="number" name="guests" id="rsvp-guests" placeholder="Invitados (incluyéndote)" min="1" value="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-input-group">
+                                    <i class="fa fa-cutlery"></i>
+                                    <select name="dietary" id="rsvp-dietary" class="form-control" style="padding:12px 15px; border-radius:4px;">
+                                        <option value="">Preferencias alimentarias (opcional)</option>
+                                        <option value="Ninguna">Ninguna</option>
+                                        <option value="Vegetariano">Vegetariano</option>
+                                        <option value="Vegano">Vegano</option>
+                                        <option value="Sin gluten">Sin gluten</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12" style="margin-top:12px;">
+                                <label style="margin-right:12px;">¿Asistirás?</label>
+                                <label style="margin-right:8px;"><input type="radio" name="attending" value="Sí" checked> Sí</label>
+                                <label><input type="radio" name="attending" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top:12px;">
+                            <div class="col-md-12">
+                                <div class="form-input-group">
+                                    <i class="fa fa-comment"></i>
+                                    <input type="text" name="message" id="rsvp-message" placeholder="Mensaje (opcional)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12" id="alert-wrapper"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">Enviar RSVP</button>
+                    </form>
+
+                    <div id="rsvp-results" style="margin-top:20px;"></div>
+                    <p style="margin-top:12px; font-size:13px; color:#666;">Nota: Las respuestas se guardarán en una hoja de cálculo segura. Te daré los pasos para configurar el backend (Google Sheets + Apps Script).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parents & Godparents -->
+    <section class="parents section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">Nuestras Familias</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="family-box">
+                        <h5>Papás de Karla</h5>
+                        <p>Maria Eduviges Guzman</p>
+                        <p>Luis Arturo Sanchez</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="family-box">
+                        <h5>Papás de Jose</h5>
+                        <p>Maria del Carmen Rodriguez</p>
+                        <p>Jose Martin Sanchez</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="family-box">
+                        <h5>Padrinos</h5>
+                        <p>Laura Sánchez Lozano</p>
+                        <p>Salvador Martín Morales Castillo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gift Registry -->
+    <section id="gifts" class="gifts section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">Mesa de Regalos</h3>
+                    <p>Tu presencia es el mejor regalo, pero si deseas ayudarnos...</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center">
+                    <p>
+                        Encontraste la mesa de regalos en Liverpool donde podrás ayudarnos a 
+                        decorar nuestro hogar.
+                    </p>
+                    <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos" target="_blank" class="btn btn-fill btn-large">
+                        <i class="fa fa-gift"></i> Ver Mesa de Regalos
+                    </a>
+                    <p style="margin-top: 15px; font-size: 14px; color: #666;">Número de evento: TBD</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 text-center content">
+                    <span class="to-top-wrapper"><a href="#top" class="to-top"><i class="fa fa-angle-up"></i></a></span>
+                    <p>Con amor,</p>
                     <h4>Karla & Jose</h4>
                     <p>18 de Diciembre, 2026</p>
+                    <p style="margin-top: 30px; font-size: 13px; color: #999;">
+                        Hecho con <span class="fa fa-heart" style="color: #2E8B57;"></span> para celebrar nuestro amor
+                    </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- SCRIPTS -->
-    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script> AOS.init(); </script>
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"64a71ffd047845a5801720f9c7212bd3","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-    <!-- SCRIPTS INTERNOS -->
-    <script src="Resources/JS/scripts.js"></script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" onerror="loadJsFromCDN('jquery.js')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlPw3GQYI3faa_9mRE6plWuM7xNEmrwH0&callback=initMap"></script>
+    <script src="js/scripts.js"></script>
 </body>
 </html>

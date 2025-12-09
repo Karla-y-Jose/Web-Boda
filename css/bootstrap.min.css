@@ -1,0 +1,163 @@
+/* Bootstrap Minimal CSS Grid System */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6,
+.col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12,
+.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
+.col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+.col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+.col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+.col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+    position: relative;
+    min-height: 1px;
+    padding: 0 15px;
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+}
+
+.col-xs-1 { max-width: 8.333%; flex-basis: 8.333%; }
+.col-xs-2 { max-width: 16.666%; flex-basis: 16.666%; }
+.col-xs-3 { max-width: 25%; flex-basis: 25%; }
+.col-xs-4 { max-width: 33.333%; flex-basis: 33.333%; }
+.col-xs-5 { max-width: 41.666%; flex-basis: 41.666%; }
+.col-xs-6 { max-width: 50%; flex-basis: 50%; }
+.col-xs-7 { max-width: 58.333%; flex-basis: 58.333%; }
+.col-xs-8 { max-width: 66.666%; flex-basis: 66.666%; }
+.col-xs-9 { max-width: 75%; flex-basis: 75%; }
+.col-xs-10 { max-width: 83.333%; flex-basis: 83.333%; }
+.col-xs-11 { max-width: 91.666%; flex-basis: 91.666%; }
+.col-xs-12 { max-width: 100%; flex-basis: 100%; }
+
+@media (min-width: 768px) {
+    .col-sm-1 { max-width: 8.333%; flex-basis: 8.333%; }
+    .col-sm-2 { max-width: 16.666%; flex-basis: 16.666%; }
+    .col-sm-3 { max-width: 25%; flex-basis: 25%; }
+    .col-sm-4 { max-width: 33.333%; flex-basis: 33.333%; }
+    .col-sm-5 { max-width: 41.666%; flex-basis: 41.666%; }
+    .col-sm-6 { max-width: 50%; flex-basis: 50%; }
+    .col-sm-7 { max-width: 58.333%; flex-basis: 58.333%; }
+    .col-sm-8 { max-width: 66.666%; flex-basis: 66.666%; }
+    .col-sm-9 { max-width: 75%; flex-basis: 75%; }
+    .col-sm-10 { max-width: 83.333%; flex-basis: 83.333%; }
+    .col-sm-11 { max-width: 91.666%; flex-basis: 91.666%; }
+    .col-sm-12 { max-width: 100%; flex-basis: 100%; }
+}
+
+@media (min-width: 992px) {
+    .col-md-1 { max-width: 8.333%; flex-basis: 8.333%; }
+    .col-md-2 { max-width: 16.666%; flex-basis: 16.666%; }
+    .col-md-3 { max-width: 25%; flex-basis: 25%; }
+    .col-md-4 { max-width: 33.333%; flex-basis: 33.333%; }
+    .col-md-5 { max-width: 41.666%; flex-basis: 41.666%; }
+    .col-md-6 { max-width: 50%; flex-basis: 50%; }
+    .col-md-7 { max-width: 58.333%; flex-basis: 58.333%; }
+    .col-md-8 { max-width: 66.666%; flex-basis: 66.666%; }
+    .col-md-9 { max-width: 75%; flex-basis: 75%; }
+    .col-md-10 { max-width: 83.333%; flex-basis: 83.333%; }
+    .col-md-11 { max-width: 91.666%; flex-basis: 91.666%; }
+    .col-md-12 { max-width: 100%; flex-basis: 100%; }
+
+    .col-md-offset-1 { margin-left: 8.333%; }
+    .col-md-offset-2 { margin-left: 16.666%; }
+    .col-md-offset-3 { margin-left: 25%; }
+    .col-md-offset-4 { margin-left: 33.333%; }
+    .col-md-offset-5 { margin-left: 41.666%; }
+    .col-md-offset-6 { margin-left: 50%; }
+}
+
+@media (min-width: 1200px) {
+    .col-lg-1 { max-width: 8.333%; flex-basis: 8.333%; }
+    .col-lg-2 { max-width: 16.666%; flex-basis: 16.666%; }
+    .col-lg-3 { max-width: 25%; flex-basis: 25%; }
+    .col-lg-4 { max-width: 33.333%; flex-basis: 33.333%; }
+    .col-lg-5 { max-width: 41.666%; flex-basis: 41.666%; }
+    .col-lg-6 { max-width: 50%; flex-basis: 50%; }
+    .col-lg-7 { max-width: 58.333%; flex-basis: 58.333%; }
+    .col-lg-8 { max-width: 66.666%; flex-basis: 66.666%; }
+    .col-lg-9 { max-width: 75%; flex-basis: 75%; }
+    .col-lg-10 { max-width: 83.333%; flex-basis: 83.333%; }
+    .col-lg-11 { max-width: 91.666%; flex-basis: 91.666%; }
+    .col-lg-12 { max-width: 100%; flex-basis: 100%; }
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.fade {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.in,
+.modal.show {
+    opacity: 1;
+}
+
+.modal.in .modal-dialog,
+.modal.show .modal-dialog {
+    transform: translate(0, 0);
+}
+
+.modal.fade.in,
+.modal.fade.show {
+    display: block;
+}
+
+.modal-dialog {
+    position: relative;
+    margin: auto;
+    width: 90%;
+    max-width: 500px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.modal-content {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.close {
+    float: right;
+    font-size: 21px;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    opacity: 0.5;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    padding: 0;
+}
+
+.close:hover {
+    opacity: 0.75;
+}
