@@ -6,37 +6,26 @@
     <title>Karla & Jose - Boda 2026</title>
     <meta name="description" content="¡Te invitamos a celebrar nuestro matrimonio!">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
-    
+    <meta name="theme-color" content="#0f3b2e">
     <!-- OG Meta Tags -->
     <meta property="og:title" content="Karla & Jose - Boda 2026">
     <meta property="og:description" content="¡Te invitamos a celebrar nuestro matrimonio el 18 de Diciembre de 2026!">
     <meta property="og:type" content="website">
-
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/logo.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
-
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Didot&family=Karla:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <script>
-        // Fallback CDN loading
-        function loadCssFromCDN(css) {
-            const link = document.createElement('link');
-            if (css === 'font-awesome.css') {
-                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css';
-            }
-            link.rel = 'stylesheet';
-            document.getElementsByTagName('head')[0].appendChild(link);
-        }
-
         function loadJsFromCDN(js) {
             if (js === 'jquery.js') {
                 document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
@@ -46,45 +35,38 @@
 </head>
 
 <body id="top">
-    <!-- Navigation -->
-    <section class="navigation">
-        <header>
-            <div class="header-content">
-                <a href="#top" class="logo">
-                    <i class="fa fa-heart logo-heart" aria-hidden="true"></i>
-                    <span class="logo-name-green">Karla</span>
-                    <span class="logo-sep">&amp;</span>
-                    <span class="logo-name-gold">Jose</span>
-                </a>
-                <div class="header-nav">
-                    <nav>
-                        <ul class="primary-nav">
-                            <li><a href="#intro">Nuestra Historia</a></li>
-                            <li><a href="#events">Eventos</a></li>
-                            <li><a href="#venue">Ubicación</a></li>
-                            <li><a href="#gallery">Galería</a></li>
-                        </ul>
-                        <ul class="member-actions">
-                            <li><a href="#rsvp" class="btn btn-white btn-small">RSVP</a></li>
-                        </ul>
-                    </nav>
-                </div>
-                <div class="navicon">
-                    <a class="nav-toggle" href="#"><span></span></a>
-                </div>
-            </div>
-        </header>
-    </section>
-
-    <!-- Hero Section -->
+    <!-- Hero Section with Navigation -->
     <section class="hero">
+        <!-- Navigation Bar -->
+        <section class="navigation">
+            <header >
+                <div class="header-content">
+                    <div class="logo"><a href="#top"><img src="img/logo-blanco2.png" alt="Karla & Jose"></a></div>
+                    <div class="header-nav">
+                        <nav>
+                            <ul class="primary-nav">
+                                <li><a href="#intro">Nuestra Historia</a></li>
+                                <li><a href="#events">Eventos</a></li>
+                                <li><a href="#gallery">Galería</a></li>
+                                <li><a href="#venue">Ubicación</a></li>
+                            </ul>
+                            <ul class="member-actions">
+                                <li><a href="#rsvp" class="btn-white btn-small">CONFIRMACIÓN</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="navicon">
+                        <a class="nav-toggle" href="#"><span></span></a>
+                    </div>
+                </div>
+            </header>
+        </section>
+        <!-- Hero Content -->
         <div class="container">
             <div class="row">
                 <div class="col-md-10 col-md-offset-1">
                     <div class="hero-content text-center">
-                        <h1>Karla & Jose</h1>
-                        <p class="intro">18 de Diciembre, 2026</p>
-                        <p class="intro-subtitle">Estamos por celebrar el momento más importante de nuestra vida</p>
+                        <img src="img/logo2.png" alt="Karla & Jose">
                         <div id="countdown-hero" class="countdown-hero">
                             <div><span id="d-hero">00</span><p>Días</p></div>
                             <div><span id="h-hero">00</span><p>Horas</p></div>
@@ -102,7 +84,7 @@
                 <div class="col-sm-4 hidden-xs"></div>
             </div>
         </div>
-        <div class="down-arrow"><a href="#intro"><i class="fa fa-angle-down"></i></a></div>
+        <div class="down-arrow floating-arrow"><a href="#intro"><i class="fa fa-angle-down"></i></a></div>
     </section>
 
     <!-- Intro / Our Story -->
@@ -114,10 +96,10 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-md-3 hidden-sm hidden-xs"><img src="img/6.png" class="wp1" alt="Jose"></div>
                 <div class="col-md-6">
                     <p>
-                        Un encuentro casual como compañeros de trabajo terminó convirtiéndose en una promesa de por vida.
-                        Lo que comenzó como una amistad en la oficina evolucionó en una relación llena de amor, 
+                        Lo que comenzó como una amistad en el trabajo evolucionó en una relación llena de amor, 
                         complicidad y sueños compartidos. Hoy, después de tanto tiempo juntos, queremos que todos nuestros 
                         seres queridos sean testigos de este momento tan especial en nuestras vidas.
                     </p>
@@ -126,13 +108,20 @@
                         y nuestras familias en una sola.
                     </p>
                 </div>
-                <div class="col-md-6">
-                    <img src="img/2.jpg" alt="Nuestra Historia" style="width: 100%; border-radius: 8px;">
+                <div class="col-md-3 hidden-sm hidden-xs"><img src="img/7.png" class="wp2" alt="Karla"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 hidden-md hidden-lg" style="text-align: center;">
+                    <div class="intro-images-mobile">
+                        <img src="img/6.png" class="wp8 intro-img-left" alt="Jose">
+                        <img src="img/7.png" class="wp9 intro-img-right" alt="Karla">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
+    
     <!-- Events Timeline -->
     <section id="events" class="events section-padding">
         <div class="container">
@@ -302,6 +291,7 @@
                         <div class="section-padding">
                             <h3>¡Gracias!</h3>
                             <p>Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
+                                                        <div id="add-to-cal" style="margin-top: 20px;"></div>
                             <p style="margin-top: 20px; color: #2E8B57;">
                                 <i class="fa fa-heart"></i> Karla & Jose
                             </p>
@@ -336,21 +326,17 @@
 
                         <div class="row">
                             <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-input-group">
-                                    <i class="fa fa-users"></i>
-                                    <input type="number" name="guests" id="rsvp-guests" placeholder="Invitados (incluyéndote)" min="1" value="1" required>
+                                    <i class="fa fa-key"></i>
+                                    <input type="text" name="invite_code" id="rsvp-invite-code" placeholder="Código de invitación" required>
                                 </div>
                             </div>
                             <div class="col-md-8">
+                            <div class="col-md-6">
                                 <div class="form-input-group">
-                                    <i class="fa fa-cutlery"></i>
-                                    <select name="dietary" id="rsvp-dietary" class="form-control" style="padding:12px 15px; border-radius:4px;">
-                                        <option value="">Preferencias alimentarias (opcional)</option>
-                                        <option value="Ninguna">Ninguna</option>
-                                        <option value="Vegetariano">Vegetariano</option>
-                                        <option value="Vegano">Vegano</option>
-                                        <option value="Sin gluten">Sin gluten</option>
-                                    </select>
+                                    <i class="fa fa-users"></i>
+                                    <input type="number" name="extras" id="rsvp-guests" placeholder="Invitados adicionales" min="0" max="4" required>
                                 </div>
                             </div>
                         </div>
@@ -464,7 +450,10 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" onerror="loadJsFromCDN('jquery.js')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlPw3GQYI3faa_9mRE6plWuM7xNEmrwH0&callback=initMap"></script>
+    <!-- Waypoints JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/scripts.js"></script>
 </body>
 </html>

@@ -3,25 +3,86 @@
    ============================================ */
 
 $(document).ready(function() {
-    // ========== Fixed Navigation ==========
-    $(window).on('scroll', function() {
-        if ($(this).scrollTop() > 50) {
-            $('.navigation').addClass('fixed-nav');
-        } else {
-            $('.navigation').removeClass('fixed-nav');
-        }
+    // ========== Waypoints Animations ==================
+    $('.wp1').waypoint(function () {
+        $('.wp1').addClass('animated fadeInLeft');
+    }, {
+        offset: '75%'
+    });
+    $('.wp2').waypoint(function () {
+        $('.wp2').addClass('animated fadeInRight');
+    }, {
+        offset: '75%'
+    });
+    $('.wp3').waypoint(function () {
+        $('.wp3').addClass('animated fadeInLeft');
+    }, {
+        offset: '75%'
+    });
+    $('.wp4').waypoint(function () {
+        $('.wp4').addClass('animated fadeInRight');
+    }, {
+        offset: '75%'
+    });
+    $('.wp5').waypoint(function () {
+        $('.wp5').addClass('animated fadeInLeft');
+    }, {
+        offset: '75%'
+    });
+    $('.wp6').waypoint(function () {
+        $('.wp6').addClass('animated fadeInRight');
+    }, {
+        offset: '75%'
+    });
+    $('.wp7').waypoint(function () {
+        $('.wp7').addClass('animated fadeInUp');
+    }, {
+        offset: '75%'
+    });
+    $('.wp8').waypoint(function () {
+        $('.wp8').addClass('animated fadeInLeft');
+    }, {
+        offset: '75%'
+    });
+    $('.wp9').waypoint(function () {
+        $('.wp9').addClass('animated fadeInRight');
+    }, {
+        offset: '75%'
     });
 
-    // ========== Mobile Navigation Toggle ==========
-    $('.nav-toggle').click(function(e) {
-        e.preventDefault();
+    // ========== Nav Transformicon ==================
+    /* When user clicks the Icon */
+    $('.nav-toggle').click(function () {
         $(this).toggleClass('active');
+        $('.header-nav').toggleClass('open');
+        event.preventDefault();
+    });
+    
+    /* When user clicks a link */
+    $('.header-nav li a').click(function () {
+        $('.nav-toggle').toggleClass('active');
         $('.header-nav').toggleClass('open');
     });
 
-    $('.header-nav a').click(function() {
-        $('.nav-toggle').removeClass('active');
-        $('.header-nav').removeClass('open');
+    // ========== Header BG Scroll ==================
+    $(function () {
+        $(window).scroll(function () {
+            var scroll = $(window).scrollTop();
+
+            if (scroll >= 20) {
+                $('section.navigation').addClass('fixed');
+                // add class to header to hide the pseudo-element keyline
+                $('header').addClass('scrolled').css({
+                    "padding": "35px 0"
+                });
+            } else {
+                $('section.navigation').removeClass('fixed');
+                // remove the class so the keyline (header::after) is visible again
+                $('header').removeClass('scrolled').css({
+                    "padding": "50px 0"
+                });
+            }
+        });
     });
 
     // ========== Countdown Timer ==========
@@ -29,75 +90,49 @@ $(document).ready(function() {
     setInterval(updateCountdown, 1000);
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
-    // Configure `RSVP_ENDPOINT` with the deployed Apps Script web app URL.
+    // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
     var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxAMLQgfVWguPOFkZLtikRgZ4CxCrCQmlFsVHNVksJxQPLFjM6JDY9coJrtXDgDjytJ0w/exec';
-    var RSVP_TOKEN = '230223'; // Must match SECRET_TOKEN in Apps Script
 
     $('#rsvp-form').on('submit', function(e) {
         e.preventDefault();
-
-        var $form = $(this);
-        var formData = {
-            name: $('#rsvp-name').val().trim(),
-            email: $('#rsvp-email').val().trim(),
-            guests: $('#rsvp-guests').val() || '1',
-            dietary: $('#rsvp-dietary').val() || '',
-            attending: $('input[name="attending"]:checked').val() || 'Sí',
-            message: $('#rsvp-message').val().trim(),
-            secret: RSVP_TOKEN
-        };
-
-        if (!formData.name || !formData.email) {
-            showAlert('warning', 'Por favor completa tu nombre y correo.');
-            return;
-        }
-
-        if (!RSVP_ENDPOINT) {
-            showAlert('danger', 'El endpoint de RSVP no está configurado.');
-            return;
-        }
-
-        var $btn = $form.find('button[type="submit"]');
-        $btn.prop('disabled', true).text('Enviando...');
-
-        // Use form-encoded data (URLSearchParams) to avoid CORS preflight
-        var formParams = new URLSearchParams();
-        formParams.append('name', formData.name);
-        formParams.append('email', formData.email);
-        formParams.append('guests', formData.guests);
-        formParams.append('dietary', formData.dietary);
-        formParams.append('attending', formData.attending);
-        formParams.append('message', formData.message);
-        formParams.append('secret', formData.secret);
-
-        fetch(RSVP_ENDPOINT, {
-            method: 'POST',
-            body: formParams
-        })
-        .then(function(res) {
-            console.log('Response status:', res.status);
-            if (!res.ok) {
-                throw new Error('HTTP ' + res.status);
-            }
-            return res.json();
-        })
-        .then(function(json) {
-            console.log('Response JSON:', json);
-            if (json && json.result === 'success') {
-                $form[0].reset();
-                showAlert('success', '¡Gracias! Tu respuesta ha sido guardada.');
-            } else {
-                showAlert('danger', 'Respuesta del servidor: ' + (json.message || 'Error desconocido'));
-            }
-        })
-        .catch(function(err) {
-            console.error('RSVP error:', err);
-            showAlert('danger', 'Error: ' + err.message);
-        })
-        .finally(function() {
-            $btn.prop('disabled', false).text('Enviar RSVP');
-        });
+        var data = $(this).serialize();
+        var $btn = $(this).find('button[type="submit"]');
+        
+        $('#alert-wrapper').html(alert_markup('info', '<strong>Un momento...</strong> Estamos guardando tus datos.'));
+        $btn.prop('disabled', true);
+        
+        $.post(RSVP_ENDPOINT, data)
+            .done(function(response) {
+                console.log('RSVP Response:', response);
+                if (response.result === 'error') {
+                    $('#alert-wrapper').html(alert_markup('danger', '<strong>¡Lo sentimos!</strong> ' + response.message));
+                } else {
+                    $('#alert-wrapper').html('');
+                    $('#rsvp-form')[0].reset();
+                    
+                    // Show confirmation modal with add-to-calendar option
+                    $('#rsvp-modal').modal('show');
+                    
+                    // Add calendar button
+                    var calendarBtn = '<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda%20de%20Karla%20%26%20Jose&dates=20261218T180000/20261218T230000&location=Zapopan,%20Jalisco" target="_blank" class="btn btn-fill" style="background:#d4af37; color:#fff; padding:10px 20px; margin-top:10px; display:inline-block; text-decoration:none; border-radius:4px;">📅 Agregar al Calendario</a>';
+                    $('#add-to-cal').html(calendarBtn);
+                }
+            })
+            .fail(function(err) {
+                console.error('RSVP error:', err);
+                $('#alert-wrapper').html(alert_markup('danger', '<strong>¡Lo sentimos!</strong> Hay un problema con el servidor. Por favor intenta más tarde.'));
+            })
+            .always(function() {
+                $btn.prop('disabled', false);
+            });
     });
+     
+     // Helper function for alert markup (Rampatra style)
+     function alert_markup(alert_type, msg) {
+         return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">' 
+                + msg + 
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
+     }
 
     // ========== Bootstrap Modal Plugin ==========
     $(document).on('click', '[data-dismiss="modal"]', function() {
@@ -242,35 +277,30 @@ function formatearFechaCalendario(fecha) {
     return fecha;
 }
 
-// Google Maps Integration
+// Leaflet Map Integration
 function initMap() {
-    // Check if google.maps is available
-    if (typeof google === 'undefined' || !google.maps) {
-        console.warn('Google Maps API not loaded or billing not enabled');
+    // Check if map element exists
+    if (!document.getElementById('map-canvas')) {
+        console.warn('Map container element not found');
+        return;
+    }
+
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+        console.warn('Leaflet library not loaded');
         return;
     }
 
     var zapopan = { lat: 20.7282, lng: -103.3863 };
     
-    // Check if map element exists
-    if (!document.getElementById('map-canvas')) return;
+    // Create Leaflet map
+    var map = L.map('map-canvas').setView([zapopan.lat, zapopan.lng], 14);
 
-    var map = new google.maps.Map(document.getElementById('map-canvas'), {
-        zoom: 14,
-        center: zapopan,
-        styles: [
-            {
-                "featureType": "all",
-                "elementType": "labels.text.fill",
-                "stylers": [{ "color": "#ffffff" }]
-            },
-            {
-                "featureType": "all",
-                "elementType": "labels.text.stroke",
-                "stylers": [{ "color": "#000000" }, { "lightness": 13 }]
-            }
-        ]
-    });
+    // Add OpenStreetMap tiles (free, no billing required)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
 
     // Venue markers
     var venues = [
@@ -278,30 +308,43 @@ function initMap() {
             name: 'Parroquia Nuestra Señora de Altagracia',
             lat: 20.7282,
             lng: -103.3863,
-            info: 'Ceremonia - 6:00 PM'
+            info: 'Ceremonia - 6:00 PM',
+            color: '#d4af37' // Gold for ceremony
         },
         {
             name: 'Salon Andira',
             lat: 20.7282,
             lng: -103.3863,
-            info: 'Recepción - 8:00 PM'
+            info: 'Recepción - 8:00 PM',
+            color: '#2E8B57' // Green for reception
         }
     ];
 
+    // Custom marker icons
+    function createCustomIcon(color) {
+        var html = '<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ' + color + '; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>';
+        return L.divIcon({
+            html: html,
+            className: 'custom-marker',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15]
+        });
+    }
+
     venues.forEach(function(venue) {
-        var marker = new google.maps.Marker({
-            position: { lat: venue.lat, lng: venue.lng },
-            map: map,
-            title: venue.name,
-            icon: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-        });
+        var marker = L.marker(
+            [venue.lat, venue.lng],
+            { icon: createCustomIcon(venue.color) }
+        ).addTo(map);
 
-        var infowindow = new google.maps.InfoWindow({
-            content: '<div style="color:#000; padding: 10px;"><strong>' + venue.name + '</strong><br>' + venue.info + '</div>'
-        });
+        var popupContent = '<div style="font-family: Montserrat, sans-serif; text-align: center;">' +
+                          '<strong style="color: #2E8B57; font-size: 14px;">' + venue.name + '</strong><br>' +
+                          '<span style="color: #666; font-size: 12px;">' + venue.info + '</span></div>';
 
-        marker.addListener('click', function() {
-            infowindow.open(map, marker);
+        marker.bindPopup(popupContent);
+        marker.on('click', function() {
+            marker.openPopup();
         });
     });
 }
