@@ -50,6 +50,26 @@ $(document).ready(function() {
         offset: '75%'
     });
 
+    // ========== Family Cards Animations ==================
+    $('.family-fade-left').waypoint(function (direction) {
+        if (direction === 'down') {
+            $(this.element).removeClass('animated-out').addClass('animated');
+        } else {
+            $(this.element).removeClass('animated').addClass('animated-out');
+        }
+    }, {
+        offset: '85%'
+    });
+    $('.family-fade-right').waypoint(function (direction) {
+        if (direction === 'down') {
+            $(this.element).removeClass('animated-out').addClass('animated');
+        } else {
+            $(this.element).removeClass('animated').addClass('animated-out');
+        }
+    }, {
+        offset: '85%'
+    });
+
     // ========== Nav Transformicon ==================
     /* When user clicks the Icon */
     $('.nav-toggle').click(function () {
@@ -217,64 +237,101 @@ function updateCountdown() {
 
 // Add to Calendar Function
 function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
-    var startDate = formatearFechaCalendario(inicio);
-    var endDate = formatearFechaCalendario(fin);
     var encodedTitulo = encodeURIComponent(titulo);
     var encodedUbicacion = encodeURIComponent(ubicacion);
+    
+    // Generar archivo ICS para Apple Calendar
+    var icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Boda Karla & Jose//ES',
+        'BEGIN:VEVENT',
+        'DTSTART:' + inicio,
+        'DTEND:' + fin,
+        'SUMMARY:' + titulo,
+        'LOCATION:' + ubicacion,
+        'DESCRIPTION:' + titulo,
+        'STATUS:CONFIRMED',
+        'END:VEVENT',
+        'END:VCALENDAR'
+    ].join('\r\n');
+    
+    var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    var icsUrl = URL.createObjectURL(icsBlob);
 
     var opciones = `
-        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                    background: white; padding: 30px; border-radius: 10px; 
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; 
-                    min-width: 300px;">
-            <h3 style="margin-top: 0; color: #333; margin-bottom: 20px;">Agregar al Calendario</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
-                   target="_blank" 
-                   style="padding: 12px 15px; background: #d4af37; color: #fff; text-decoration: none; 
-                       border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                   📅 Google Calendar
-                </a>
-                <a href="https://outlook.live.com/owa/?rru=addnewevent&subject=${encodedTitulo}&startdt=${startDate}&enddt=${endDate}&location=${encodedUbicacion}"
-                   target="_blank"
-                   style="padding: 12px 15px; background: #d4af37; color: #fff; text-decoration: none; 
-                       border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                   📧 Outlook / Office 365
-                </a>
-                <a href="https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodedTitulo}&st=${inicio}&et=${fin}&in_loc=${encodedUbicacion}"
-                   target="_blank"
-                   style="padding: 12px 15px; background: #d4af37; color: #fff; text-decoration: none; 
-                       border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                   🌐 Yahoo Calendar
-                </a>
-                <button onclick="this.parentElement.parentElement.remove()" style="padding: 12px 15px; background: #999; 
-                        color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                   Cerrar
-                </button>
+        <div id="calendar-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                                             background: rgba(0,0,0,0.6); z-index: 9998; cursor: pointer; 
+                                             backdrop-filter: blur(2px); animation: fadeIn 0.3s ease;">
+            <div onclick="event.stopPropagation()" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 40px; border-radius: 16px; 
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05); z-index: 9999; text-align: center; 
+                        min-width: 340px; max-width: 420px; animation: slideIn 0.3s ease;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                    <div style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); 
+                                border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; 
+                                justify-content: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); flex-shrink: 0;">
+                        <i class="fa fa-calendar" style="color: #fff; font-size: 24px;"></i>
+                    </div>
+                    <h2 style="margin: 0; color: #2c3e50; font-family: 'Didot', serif; font-size: 24px; font-weight: 400; letter-spacing: 0.5px;">Agregar al Calendario</h2>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
+                       target="_blank" 
+                       class="calendar-modal-btn-gold"
+                       style="padding: 16px 24px; background: #d4af37; color: #2E8B57; text-decoration: none; 
+                           border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
+                           transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
+                           justify-content: center; letter-spacing: 0.3px;">
+                       <i class="fa fa-google calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Google Calendar
+                    </a>
+                    <a href="${icsUrl}" download="evento-boda.ics"
+                       class="calendar-modal-btn-gold"
+                       style="padding: 16px 24px; background: #d4af37; color: #2E8B57; text-decoration: none; 
+                           border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
+                           transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
+                           justify-content: center; letter-spacing: 0.3px;">
+                       <i class="fa fa-apple calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Apple Calendar
+                    </a>
+                    <button onclick="cerrarModalCalendario()" class="calendar-modal-btn-green"
+                            style="padding: 14px 24px; background: #2E8B57; color: #fff; 
+                            border: 2px solid #2E8B57; border-radius: 8px; font-weight: 600; cursor: pointer; 
+                            transition: all 0.3s ease; font-size: 14px; margin-top: 10px; letter-spacing: 0.3px;">
+                       Cerrar
+                    </button>
+                </div>
             </div>
         </div>
-        <div onclick="this.remove()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                                             background: rgba(0,0,0,0.5); z-index: 9998; cursor: pointer;"></div>
+        <style>
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideIn {
+                from { opacity: 0; transform: translate(-50%, -45%); }
+                to { opacity: 1; transform: translate(-50%, -50%); }
+            }
+        </style>
     `;
 
     var modal = document.createElement('div');
+    modal.id = 'calendar-modal-container';
     modal.innerHTML = opciones;
     document.body.appendChild(modal);
+    
+    // Cerrar al hacer clic en el overlay
+    document.getElementById('calendar-modal-overlay').onclick = function(e) {
+        if (e.target.id === 'calendar-modal-overlay') {
+            cerrarModalCalendario();
+        }
+    };
 }
 
-function formatearFechaCalendario(fecha) {
-    if (fecha.includes('T')) {
-        var fechaParte = fecha.split('T')[0];
-        var horaParte = fecha.split('T')[1];
-        var año = fechaParte.substring(0, 4);
-        var mes = fechaParte.substring(4, 6);
-        var dia = fechaParte.substring(6, 8);
-        var horas = horaParte.substring(0, 2);
-        var minutos = horaParte.substring(2, 4);
-        var segundos = horaParte.substring(4, 6);
-        return año + '-' + mes + '-' + dia + 'T' + horas + ':' + minutos + ':' + segundos;
+function cerrarModalCalendario() {
+    var modal = document.getElementById('calendar-modal-container');
+    if (modal) {
+        modal.remove();
     }
-    return fecha;
 }
 
 // Leaflet Map Integration
@@ -291,10 +348,10 @@ function initMap() {
         return;
     }
 
-    var zapopan = { lat: 20.7282, lng: -103.3863 };
+    var zapopan = { lat: 20.7784148, lng: -103.4550886 };
     
     // Create Leaflet map
-    var map = L.map('map-canvas').setView([zapopan.lat, zapopan.lng], 14);
+    var map = L.map('map-canvas').setView([zapopan.lat, zapopan.lng], 13);
 
     // Add OpenStreetMap tiles (free, no billing required)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -306,15 +363,15 @@ function initMap() {
     var venues = [
         {
             name: 'Parroquia Nuestra Señora de Altagracia',
-            lat: 20.7282,
-            lng: -103.3863,
+            lat: 20.744395,
+            lng: -103.3928862,
             info: 'Ceremonia - 6:00 PM',
             color: '#d4af37' // Gold for ceremony
         },
         {
             name: 'Salon Andira',
-            lat: 20.7282,
-            lng: -103.3863,
+            lat: 20.7784148,
+            lng: -103.4550886,
             info: 'Recepción - 8:00 PM',
             color: '#2E8B57' // Green for reception
         }

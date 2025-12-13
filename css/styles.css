@@ -163,7 +163,7 @@ header nav ul li {
 }
 
 header nav ul.primary-nav {
-    margin: 0 0 0 75px;
+    margin: 0;
 }
 
 header nav ul.primary-nav li a {
@@ -172,7 +172,7 @@ header nav ul.primary-nav li a {
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 1px;
-    margin: 0 20px;
+    margin: 0 13px;
     transition: all 300ms ease-in-out;
     position: relative;
 }
@@ -198,7 +198,7 @@ header nav ul.primary-nav li a:hover:after {
 }
 
 header nav ul.member-actions {
-    margin-left: 40px;
+    margin-left: 25px;
     position: static;
 }
 
@@ -207,7 +207,34 @@ header nav ul.member-actions li a {
     text-transform: uppercase;
     font-size: 13px;
     font-weight: 600;
-    margin: 0 15px;
+    margin: 0 10px;
+}
+
+header nav ul.member-actions li:first-child a {
+    letter-spacing: 1px;
+    position: relative;
+    margin: 0 13px;
+    transition: all 300ms ease-in-out;
+}
+
+header nav ul.member-actions li:first-child a:after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #d4af37;
+    transform: translateX(-50%);
+    transition: width 300ms ease-in-out;
+}
+
+header nav ul.member-actions li:first-child a:hover {
+    color: #d4af37;
+}
+
+header nav ul.member-actions li:first-child a:hover:after {
+    width: 100%;
 }
 
 /* Button Styles */
@@ -306,15 +333,15 @@ header nav ul.member-actions li a {
    ============================================ */
 
 .hero {
-    min-height: 750px;
-    background: linear-gradient(135deg, rgba(15, 59, 46, 0.65) 0%, rgba(212, 175, 55, 0.15) 100%), 
+    min-height: 850px;
+    background: linear-gradient(135deg, rgba(15, 59, 46, 0.75) 0%, rgba(212, 175, 55, 0.15) 100%), 
                 url('../img/1.jpg') center center;
     background-size: cover;
     background-attachment: fixed;
     background-position: center 20%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /*align-items: center;*/
     justify-content: center;
     position: relative;
     color: #fff;
@@ -338,7 +365,7 @@ header nav ul.member-actions li a {
 
 .hero-content {
     text-align: center;
-    padding: 60px 20px 0;
+    padding: 0 20px 0;
 }
 
 .hero-content img {
@@ -378,18 +405,18 @@ header nav ul.member-actions li a {
     display: flex;
     justify-content: center;
     gap: 40px;
-    margin-top: 40px;
     flex-wrap: wrap;
     animation: fadeInUp 1s ease-out 0.6s backwards;
+    padding-bottom: 10px;
 }
 
 .countdown-hero div {
     text-align: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 30px 25px;
+    padding: 10px 5px;
+    /*background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);*/
     transition: all 300ms ease-in-out;
     min-width: 90px;
 }
@@ -420,7 +447,12 @@ header nav ul.member-actions li a {
     animation: fadeInUp 1s ease-out 0.8s backwards;
 }
 
-.btn-fill {
+.hero .row .btn:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.btn.btn-fill {
     background-color: #d4af37;
     color: #0f3b2e;
     border: 2px solid #d4af37;
@@ -429,24 +461,25 @@ header nav ul.member-actions li a {
     text-transform: uppercase;
     font-size: 13px;
     font-weight: 700;
-    transition: all 300ms ease-in-out;
     display: inline-block;
     cursor: pointer;
     letter-spacing: 1px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
-.btn-fill:hover {
-    background-color: transparent;
+.btn.btn-fill:hover {
+    background-color: #fff;
     color: #d4af37;
-    border-color: #d4af37;
+    border: 2px solid #d4af37;
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
 /* Down Arrow */
 .down-arrow {
     position: absolute;
-    bottom: 40px;
+    bottom: 0px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
@@ -597,6 +630,15 @@ section {
 
 .events {
     background: #fff;
+}
+
+.events .leftcol {
+    padding-right: 30px;
+    border-right: 2px solid #2E8B57;
+}
+
+.events .rightcol {
+    padding-left: 30px;
 }
 
 .event-item {
@@ -849,12 +891,76 @@ section {
     margin-bottom: 30px;
     border-radius: 8px;
     background: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 2px solid #2E8B57;
+    box-shadow: 0 2px 10px rgba(46, 139, 87, 0.15);
     transition: all 0.3s ease;
+    opacity: 0;
 }
 
 .family-box:hover {
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 20px rgba(46, 139, 87, 0.25);
+    transform: translateY(-5px);
+    border-color: #d4af37;
+}
+
+.family-fade-left.animated {
+    animation: fadeInLeft 0.8s ease forwards;
+}
+
+.family-fade-right.animated {
+    animation: fadeInRight 0.8s ease forwards;
+}
+
+.family-fade-left.animated-out {
+    animation: fadeOutLeft 0.8s ease forwards;
+}
+
+.family-fade-right.animated-out {
+    animation: fadeOutRight 0.8s ease forwards;
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+}
+
+@keyframes fadeOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(50px);
+    }
 }
 
 .family-box h5 {
@@ -885,7 +991,7 @@ section {
 footer {
     background: #0F3B2E;
     color: #fff;
-    padding: 60px 0 30px;
+    padding: 60px 0 5px 0;
     text-align: center;
 }
 
@@ -924,6 +1030,10 @@ footer p {
     transform: translateY(-3px);
 }
 
+#logo2-blanco {
+    height: 100px;
+}
+
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
@@ -957,9 +1067,20 @@ footer p {
     }
 
     header nav {
-        position: relative;
-        top: 45%;
-        transform: translatey(-45%);
+        position: static;
+        transform: none;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    header nav ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     nav ul li a {
@@ -968,18 +1089,26 @@ footer p {
         text-transform: uppercase;
         font-weight: 600;
         transition: all 300ms ease-in-out;
+        text-align: center;
     }
 
     nav ul li {
         margin-bottom: 25px;
+        text-align: center;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     nav ul.primary-nav li {
-        display: block;
+        display: flex;
+        justify-content: center;
     }
 
     nav ul.member-actions li {
-        display: block;
+        display: flex;
+        justify-content: center;
     }
 
     nav a.login {
@@ -988,18 +1117,33 @@ footer p {
 
     nav ul.primary-nav {
         margin: 0;
-        padding: 0;
+        padding: 65px 0;
         text-align: center;
+        width: 100%;
     }
 
     nav ul.primary-nav li a {
-        padding-right: 0;
+        padding: 0;
+        margin: 0 !important;
+        display: inline-block;
+        text-align: center;
+    }
+
+    header nav ul.primary-nav li a {
+        margin: 0 !important;
+        padding: 0;
     }
 
     nav .member-actions {
         position: static;
+        margin: 20px 0 0 0;
+        width: 100%;
         padding: 0;
         text-align: center;
+    }
+
+    nav .member-actions li a {
+        margin: 0 !important;
     }
 
     nav ul.primary-nav li,
@@ -1051,6 +1195,9 @@ footer p {
         opacity: 0;
         transition: opacity 0.5s, visibility 0s 0.5s;
         display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         pointer-events: none;
     }
 
@@ -1102,7 +1249,7 @@ footer p {
     }
     
     header nav ul.member-actions {
-        margin-left: 20px;
+        margin-left: 0;
     }
 }
 
@@ -1147,9 +1294,9 @@ footer p {
     }
 
     header nav {
-        position: relative;
-        top: 45%;
-        transform: translatey(-45%);
+        position: static;
+        transform: none;
+        width: 100%;
     }
 
     header nav ul li {
@@ -1162,7 +1309,6 @@ footer p {
         margin: 0;
         display: block;
         padding: 20px 0;
-        border-bottom: 1px solid #333;
     }
 
     header nav ul.member-actions {
@@ -1172,12 +1318,33 @@ footer p {
 
     header nav ul.member-actions li {
         display: block;
-        border-bottom: 1px solid #333;
     }
 
     header nav ul.member-actions li a {
         display: block;
         padding: 20px 0;
+        font-size: 22px;
+        color: #fff;
+    }
+
+    header nav ul.member-actions li:first-child a:after {
+        display: none;
+    }
+
+    header nav ul.member-actions li a.btn-white {
+        border: 2px solid #fff;
+        padding: 12px 30px;
+        border-radius: 25px;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        background-color: transparent;
+    }
+
+    header nav ul.member-actions li a.btn-white:hover {
+        background-color: #d4af37;
+        border-color: #d4af37;
+        color: #0f3b2e;
     }
 
     header nav ul.primary-nav li a {
@@ -1529,4 +1696,32 @@ footer p {
     #map-canvas {
         height: 250px;
     }
+}
+
+/* ============================================
+   CALENDAR MODAL BUTTONS
+   ============================================ */
+
+.calendar-modal-btn-gold {
+    display: block;
+}
+
+.calendar-modal-btn-gold:hover {
+    background: #2E8B57 !important;
+    color: #d4af37 !important;
+    border-color: #d4af37 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+}
+
+.calendar-modal-btn-gold:hover .calendar-icon {
+    color: #d4af37 !important;
+}
+
+.calendar-modal-btn-green:hover {
+    background: #fff !important;
+    color: #2E8B57 !important;
+    border-color: #2E8B57 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 139, 87, 0.2);
 }
