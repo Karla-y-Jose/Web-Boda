@@ -111,43 +111,172 @@ $(document).ready(function() {
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxAMLQgfVWguPOFkZLtikRgZ4CxCrCQmlFsVHNVksJxQPLFjM6JDY9coJrtXDgDjytJ0w/exec';
+    // IMPORTANTE: Reemplaza esta URL con la URL de tu Apps Script desplegado
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw01xJ0LhxySesqIzJgKgL4kcAz46AxuiVbKCspIsqpQtHt-vXE0dbkFmSuPmvrFUgaDA/exec';
+    
+    var currentGuests = [];
 
-    $('#rsvp-form').on('submit', function(e) {
+    // Buscar invitado por nombre
+    $('#rsvp-search-form').on('submit', function(e) {
         e.preventDefault();
-        var data = $(this).serialize();
+        var searchName = $('#rsvp-search-name').val().trim();
         var $btn = $(this).find('button[type="submit"]');
         
-        $('#alert-wrapper').html(alert_markup('info', '<strong>Un momento...</strong> Estamos guardando tus datos.'));
+        if (!searchName) {
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu nombre.'));
+            return;
+        }
+        
+        $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
-        $.post(RSVP_ENDPOINT, data)
-            .done(function(response) {
-                console.log('RSVP Response:', response);
-                if (response.result === 'error') {
-                    $('#alert-wrapper').html(alert_markup('danger', '<strong>¡Lo sentimos!</strong> ' + response.message));
-                } else {
-                    $('#alert-wrapper').html('');
-                    $('#rsvp-form')[0].reset();
-                    
-                    // Show confirmation modal with add-to-calendar option
+        $.ajax({
+            url: RSVP_ENDPOINT,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                action: 'searchGuest',
+                name: searchName
+            })
+        })
+        .done(function(response) {
+            console.log('Search Response:', response);
+            
+            if (response.result === 'success') {
+                currentGuests = response.invitados;
+                displayGuestList(response.grupo, response.invitados);
+            } else if (response.result === 'not_found') {
+                $('#alert-wrapper').html(alert_markup('warning', response.message));
+            } else {
+                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
+            }
+        })
+        .fail(function(err) {
+            console.error('Search error:', err);
+            $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
+        })
+        .always(function() {
+            $btn.prop('disabled', false);
+        });
+    });
+
+    // Mostrar lista de invitados
+    function displayGuestList(groupName, guests) {
+        $('#alert-wrapper').html('');
+        $('#rsvp-search-container').hide();
+        $('#rsvp-guest-list').show();
+        $('#group-name').text(groupName);
+        
+        var guestsHtml = '';
+        guests.forEach(function(guest, index) {
+            var currentState = guest.estado || 'Pendiente';
+            guestsHtml += `
+                <div class="guest-item" data-row-index="${guest.rowIndex}">
+                    <div class="guest-name">
+                        <i class="fa fa-user"></i>
+                        ${guest.nombre} ${guest.apellido}
+                    </div>
+                    <div class="attendance-options">
+                        <div class="attendance-option confirmed">
+                            <label>
+                                <input type="radio" name="guest_${index}" value="Confirmado" ${currentState === 'Confirmado' ? 'checked' : ''}>
+                                <span><i class="fa fa-check-circle"></i> Confirmar</span>
+                            </label>
+                        </div>
+                        <div class="attendance-option not-attending">
+                            <label>
+                                <input type="radio" name="guest_${index}" value="No Asiste" ${currentState === 'No Asiste' ? 'checked' : ''}>
+                                <span><i class="fa fa-times-circle"></i> No Asistirá</span>
+                            </label>
+                        </div>
+                        <div class="attendance-option pending">
+                            <label>
+                                <input type="radio" name="guest_${index}" value="Pendiente" ${currentState === 'Pendiente' ? 'checked' : ''}>
+                                <span><i class="fa fa-clock-o"></i> Pendiente</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        $('#guests-container').html(guestsHtml);
+    }
+
+    // Confirmar asistencias
+    $('#confirm-attendance-btn').on('click', function() {
+        var $btn = $(this);
+        var updates = [];
+        
+        $('.guest-item').each(function(index) {
+            var rowIndex = $(this).data('row-index');
+            var selectedState = $(this).find('input[type="radio"]:checked').val();
+            
+            updates.push({
+                rowIndex: rowIndex,
+                estado: selectedState
+            });
+        });
+        
+        $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
+        $btn.prop('disabled', true);
+        
+        $.ajax({
+            url: RSVP_ENDPOINT,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                action: 'updateAttendance',
+                updates: updates
+            })
+        })
+        .done(function(response) {
+            console.log('Update Response:', response);
+            
+            if (response.result === 'success') {
+                $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
+                
+                // Mostrar modal de confirmación
+                setTimeout(function() {
                     $('#rsvp-modal').modal('show');
                     
                     // Add calendar button
                     var calendarBtn = '<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda%20de%20Karla%20%26%20Jose&dates=20261218T180000/20261218T230000&location=Zapopan,%20Jalisco" target="_blank" class="btn btn-fill" style="background:#d4af37; color:#fff; padding:10px 20px; margin-top:10px; display:inline-block; text-decoration:none; border-radius:4px;">📅 Agregar al Calendario</a>';
                     $('#add-to-cal').html(calendarBtn);
-                }
-            })
-            .fail(function(err) {
-                console.error('RSVP error:', err);
-                $('#alert-wrapper').html(alert_markup('danger', '<strong>¡Lo sentimos!</strong> Hay un problema con el servidor. Por favor intenta más tarde.'));
-            })
-            .always(function() {
-                $btn.prop('disabled', false);
-            });
+                }, 1500);
+            } else {
+                $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
+            }
+        })
+        .fail(function(err) {
+            console.error('Update error:', err);
+            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
+        })
+        .always(function() {
+            $btn.prop('disabled', false);
+        });
+    });
+
+    // Volver a búsqueda
+    $('#back-to-search-btn').on('click', function() {
+        $('#rsvp-guest-list').hide();
+        $('#rsvp-search-container').show();
+        $('#rsvp-search-name').val('');
+        $('#alert-wrapper').html('');
+        $('#confirm-alert-wrapper').html('');
     });
      
-     // Helper function for alert markup (Rampatra style)
+    // Helper function for alert markup (Rampatra style)
+    function alert_markup(type, message) {
+        var alertClass = 'alert-info';
+        if (type === 'success') alertClass = 'alert-success';
+        if (type === 'danger') alertClass = 'alert-danger';
+        if (type === 'warning') alertClass = 'alert-warning';
+        
+        return '<div class="alert ' + alertClass + '" style="margin-top: 15px;">' + message + '</div>';
+    }
+    
+    // Helper function for alert markup (Rampatra style)
      function alert_markup(alert_type, msg) {
          return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">' 
                 + msg + 
@@ -334,7 +463,7 @@ function cerrarModalCalendario() {
     }
 }
 
-// Leaflet Map Integration
+// Google Map Integration
 function initMap() {
     // Check if map element exists
     if (!document.getElementById('map-canvas')) {
@@ -342,75 +471,104 @@ function initMap() {
         return;
     }
 
-    // Check if Leaflet is available
-    if (typeof L === 'undefined') {
-        console.warn('Leaflet library not loaded');
+    // Check if Google Maps is available
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.warn('Google Maps library not loaded');
         return;
     }
 
-    var zapopan = { lat: 20.7784148, lng: -103.4550886 };
+    // Center map between both venues
+    var centerLocation = {lat: 20.761404, lng: -103.4241881};
     
-    // Create Leaflet map
-    var map = L.map('map-canvas').setView([zapopan.lat, zapopan.lng], 13);
-
-    // Add OpenStreetMap tiles (free, no billing required)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
-
-    // Venue markers
-    var venues = [
-        {
-            name: 'Parroquia Nuestra Señora de Altagracia',
-            lat: 20.744395,
-            lng: -103.3928862,
-            info: 'Ceremonia - 6:00 PM',
-            color: '#d4af37' // Gold for ceremony
-        },
-        {
-            name: 'Salon Andira',
-            lat: 20.7784148,
-            lng: -103.4550886,
-            info: 'Recepción - 8:00 PM',
-            color: '#2E8B57' // Green for reception
-        }
-    ];
-
-    // Custom marker icons
-    function createCustomIcon(color) {
-        var html = '<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ' + color + '; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>';
-        return L.divIcon({
-            html: html,
-            className: 'custom-marker',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15],
-            popupAnchor: [0, -15]
-        });
-    }
-
-    venues.forEach(function(venue) {
-        var marker = L.marker(
-            [venue.lat, venue.lng],
-            { icon: createCustomIcon(venue.color) }
-        ).addTo(map);
-
-        var popupContent = '<div style="font-family: Montserrat, sans-serif; text-align: center;">' +
-                          '<strong style="color: #2E8B57; font-size: 14px;">' + venue.name + '</strong><br>' +
-                          '<span style="color: #666; font-size: 12px;">' + venue.info + '</span></div>';
-
-        marker.bindPopup(popupContent);
-        marker.on('click', function() {
-            marker.openPopup();
-        });
+    var map = new google.maps.Map(document.getElementById('map-canvas'), {
+        zoom: 12,
+        center: centerLocation,
+        scrollwheel: false,
+        styles: [
+            {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }]
+            }
+        ]
     });
-}
 
-// Initialize map on load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMap);
-} else {
-    initMap();
+    // Ceremony marker
+    var ceremonyMarker = new google.maps.Marker({
+        position: {lat: 20.744395, lng: -103.3928862},
+        map: map,
+        title: 'Ceremonia - Parroquia Nuestra Señora de Altagracia',
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#d4af37',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 3
+        }
+    });
+
+    // Reception marker
+    var receptionMarker = new google.maps.Marker({
+        position: {lat: 20.7784148, lng: -103.4550886},
+        map: map,
+        title: 'Recepción - Jardin de Eventos Andira',
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#2E8B57',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 3
+        }
+    });
+
+    // Info windows
+    var ceremonyInfo = new google.maps.InfoWindow({
+        content: '<div style="font-family: Montserrat, sans-serif; text-align: center; padding: 10px;">' +
+                '<strong style="color: #d4af37; font-size: 14px;">Ceremonia</strong><br>' +
+                '<span style="color: #666; font-size: 12px;">Parroquia Nuestra Señora de Altagracia</span><br>' +
+                '<span style="color: #666; font-size: 11px;">6:00 PM</span></div>'
+    });
+
+    var receptionInfo = new google.maps.InfoWindow({
+        content: '<div style="font-family: Montserrat, sans-serif; text-align: center; padding: 10px;">' +
+                '<strong style="color: #2E8B57; font-size: 14px;">Recepción</strong><br>' +
+                '<span style="color: #666; font-size: 12px;">Jardin de Eventos Andira</span><br>' +
+                '<span style="color: #666; font-size: 11px;">8:00 PM</span></div>'
+    });
+
+    ceremonyMarker.addListener('click', function() {
+        receptionInfo.close();
+        ceremonyInfo.open(map, ceremonyMarker);
+    });
+
+    receptionMarker.addListener('click', function() {
+        ceremonyInfo.close();
+        receptionInfo.open(map, receptionMarker);
+    });
+
+    // Toggle map content buttons
+    $('#btn-show-map-ceremony').click(function () {
+        $('#map-content').toggleClass('toggle-map-content');
+        $('#btn-show-content').toggleClass('toggle-map-content');
+        map.setCenter({lat: 20.744395, lng: -103.3928862});
+        map.setZoom(15);
+        ceremonyInfo.open(map, ceremonyMarker);
+    });
+
+    $('#btn-show-map-reception').click(function () {
+        $('#map-content').toggleClass('toggle-map-content');
+        $('#btn-show-content').toggleClass('toggle-map-content');
+        map.setCenter({lat: 20.7784148, lng: -103.4550886});
+        map.setZoom(15);
+        receptionInfo.open(map, receptionMarker);
+    });
+
+    $('#btn-show-content').click(function () {
+        $('#map-content').toggleClass('toggle-map-content');
+        $('#btn-show-content').toggleClass('toggle-map-content');
+    });
 }
 
 // Smooth Scroll Link Handler
@@ -436,3 +594,175 @@ $.fn.modal = function(action) {
     }
     return this;
 };
+
+/* ============================================
+   MUSIC PLAYER
+   ============================================ */
+
+// Lista de canciones - Agrega tus archivos MP3 aquí
+const playlist = [
+    {
+        title: "How Deep Is Your Love",
+        artist: "Bee Gees",
+        src: "mp3/How Deep Is Your Love - Bee Gees.mp3"
+    },
+    {
+        title: "Patadas de Ahogado",
+        artist: "LATIN MAFIA",
+        src: "mp3/Patadas de Ahogado - LATIN MAFIA.mp3"
+    },
+    {
+        title: "Del Altar a la Tumba",
+        artist: "José José",
+        src: "mp3/Del Altar a la Tumba - José José.mp3"
+    },
+    {
+        title: "Morfina",
+        artist: "HUMBE",
+        src: "mp3/Morfina - HUMBE.mp3"
+    },
+    {
+        title: "Sólo Tú y Yo",
+        artist: "José José",
+        src: "mp3/Sólo Tú y Yo - José José.mp3"
+    },
+    {
+        title: "Por Favor",
+        artist: "HUMBE",
+        src: "mp3/Por Favor - HUMBE.mp3"
+    },
+];
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+
+const audioPlayer = document.getElementById('audio-player');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const trackTitle = document.getElementById('track-title');
+const trackArtist = document.getElementById('track-artist');
+const progressFill = document.getElementById('progress-fill');
+const currentTimeEl = document.getElementById('current-time');
+const durationEl = document.getElementById('duration');
+const progressBar = document.querySelector('.progress-bar');
+
+// Función para cargar una canción
+function loadTrack(index) {
+    if (playlist.length === 0) {
+        trackTitle.textContent = "Sin canciones";
+        trackArtist.textContent = "Agrega archivos MP3 a la carpeta 'mp3'";
+        return;
+    }
+    
+    const track = playlist[index];
+    audioPlayer.src = track.src;
+    trackTitle.textContent = track.title;
+    trackArtist.textContent = track.artist;
+    
+    // Reset progress
+    progressFill.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
+}
+
+// Función para reproducir/pausar
+function togglePlayPause() {
+    if (playlist.length === 0) return;
+    
+    if (isPlaying) {
+        audioPlayer.pause();
+        playPauseBtn.querySelector('i').classList.remove('fa-pause');
+        playPauseBtn.querySelector('i').classList.add('fa-play');
+    } else {
+        audioPlayer.play();
+        playPauseBtn.querySelector('i').classList.remove('fa-play');
+        playPauseBtn.querySelector('i').classList.add('fa-pause');
+    }
+    isPlaying = !isPlaying;
+}
+
+// Función para canción anterior
+function previousTrack() {
+    if (playlist.length === 0) return;
+    
+    currentTrackIndex--;
+    if (currentTrackIndex < 0) {
+        currentTrackIndex = playlist.length - 1;
+    }
+    loadTrack(currentTrackIndex);
+    if (isPlaying) {
+        audioPlayer.play();
+    }
+}
+
+// Función para siguiente canción
+function nextTrack() {
+    if (playlist.length === 0) return;
+    
+    currentTrackIndex++;
+    if (currentTrackIndex >= playlist.length) {
+        currentTrackIndex = 0;
+    }
+    loadTrack(currentTrackIndex);
+    if (isPlaying) {
+        audioPlayer.play();
+    }
+}
+
+// Función para formatear tiempo
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+// Event Listeners
+if (audioPlayer) {
+    // Cuando se puede reproducir
+    audioPlayer.addEventListener('loadedmetadata', function() {
+        durationEl.textContent = formatTime(audioPlayer.duration);
+    });
+
+    // Actualizar progreso
+    audioPlayer.addEventListener('timeupdate', function() {
+        const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        progressFill.style.width = progress + '%';
+        currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+    });
+
+    // Cuando termina la canción
+    audioPlayer.addEventListener('ended', function() {
+        nextTrack();
+    });
+
+    // Click en barra de progreso
+    if (progressBar) {
+        progressBar.addEventListener('click', function(e) {
+            if (playlist.length === 0) return;
+            
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const percentage = clickX / width;
+            audioPlayer.currentTime = percentage * audioPlayer.duration;
+        });
+    }
+}
+
+// Botones de control
+if (playPauseBtn) {
+    playPauseBtn.addEventListener('click', togglePlayPause);
+}
+
+if (prevBtn) {
+    prevBtn.addEventListener('click', previousTrack);
+}
+
+if (nextBtn) {
+    nextBtn.addEventListener('click', nextTrack);
+}
+
+// Cargar primera canción al inicio
+if (playlist.length > 0) {
+    loadTrack(currentTrackIndex);
+}

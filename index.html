@@ -14,16 +14,15 @@
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/logo.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
-    <!-- Fonts -->
+    <!-- Fonts and Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Didot&family=Karla:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <script>
         function loadJsFromCDN(js) {
@@ -182,12 +181,15 @@
                             El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.
                         </p>
                         <div class="event-buttons">
-                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia" class="btn btn-small btn-accent">
+                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia" class="btn btn-small btn-fill">
                                 <i class="fa fa-taxi"></i> Reservar Uber
                             </a>
-                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')" class="btn btn-small btn-accent">
-                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')" class="btn btn-small btn-fill">
+                                <i class="fas fa-calendar-alt"></i> Añadir al Calendario
                             </button>
+                            <a href="#map" class="btn btn-small btn-fill">
+                                <i class="fas fa-map-marked-alt"></i> Ver en el Mapa
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -205,12 +207,15 @@
                             Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.
                         </p>
                         <div class="event-buttons">
-                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira" class="btn btn-small btn-accent">
+                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira" class="btn btn-small btn-fill">
                                 <i class="fa fa-taxi"></i> Reservar Uber
                             </a>
-                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')" class="btn btn-small btn-accent">
-                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')" class="btn btn-small btn-fill">
+                                <i class="fas fa-calendar-alt"></i> Añadir al Calendario
                             </button>
+                            <a href="#map" class="btn btn-small btn-fill">
+                                <i class="fas fa-map-marked-alt"></i> Ver en el Mapa
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -265,6 +270,37 @@
                     <h3 class="header">Momentos Especiales</h3>
                 </div>
             </div>
+            
+            <!-- Music Player -->
+            <div class="row" style="margin-bottom: 40px;">
+                <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+                    <div class="music-player">
+                        <div class="track-info">
+                            <p class="track-title" id="track-title">Sin canción</p>
+                            <p class="track-artist" id="track-artist">Selecciona una canción</p>
+                        </div>
+                        <div class="player-controls">
+                            <button class="control-btn" id="prev-btn" title="Anterior">
+                                <i class="fa fa-step-backward"></i>
+                            </button>
+                            <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir">
+                                <i class="fa fa-play"></i>
+                            </button>
+                            <button class="control-btn" id="next-btn" title="Siguiente">
+                                <i class="fa fa-step-forward"></i>
+                            </button>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="time-info">
+                            <span id="current-time">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-md-6">
                     <a href="img/3.jpg" class="gallery-item">
@@ -288,27 +324,49 @@
                 </div>
             </div>
         </div>
+        <audio id="audio-player" preload="metadata"></audio>
     </section>
 
-    <!-- Venue / Map -->
-    <section id="venue" class="venue section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header">¿Cómo llego?</h3>
-                    <p>Es más fácil de lo que crees</p>
-                </div>
-            </div>
+    <!-- Venue Map -->
+    <section id="map" class="section-padding">
+        <div class="text-center">
+            <h3 class="header">¿Cómo llegar?</h3>
+            <p style="padding-bottom: 20px;">Es más fácil de lo que crees</p>
         </div>
-        <div id="map-canvas" style="height: 500px; width: 100%; margin-top: 40px;"></div>
-        <div id="map-content-wrapper" class="container" style="margin-top: 30px;">
+        <div id="map-canvas"></div>
+        <div id="map-content-wrapper" class="container pointer-events-none">
             <div class="row">
-                <div class="col-md-6 col-md-offset-3">
-                    <div class="map-info-box">
-                        <h5><i class="fa fa-map-marker"></i> Receptor Principal</h5>
-                        <p><strong>Salon Andira</strong></p>
-                        <p>Calandrias, Zapopan<br>Jalisco, México</p>
-                        <p><i class="fa fa-phone"></i> <a href="tel:">Contactar</a></p>
+                <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+                    <div class="text-center">
+                        <div id="btn-show-content" class="toggle-map-content pointer-events-auto">
+                            <i class="fa fa-info-circle"></i>&nbsp;&nbsp; Mostrar información
+                        </div>
+                    </div>
+                    <div id="map-content" class="pointer-events-auto">
+                        <div class="row map-row-equal-height">
+                            <!-- Ceremonia -->
+                            <div class="col-md-6 map-location-column">
+                                <div class="map-location-content">
+                                    <h5><i class="fas fa-church"></i> Ceremonia</h5>
+                                    <p>Esquina con De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.</p>
+                                </div>
+                                <div class="map-location-buttons text-center">
+                                    <a class="btn btn-accent btn-small" id="btn-show-map-ceremony"
+                                       style="display: inline-block; width: 90%;"><i class="fas fa-map-marked-alt"></i>&nbsp;&nbsp;Ver en mapa</a>
+                                </div>
+                            </div>
+                            <!-- Recepción -->
+                            <div class="col-md-6 map-location-column">
+                                <div class="map-location-content">
+                                    <h5><i class="fa fa-glass"></i> Recepción</h5>
+                                    <p>Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.</p>
+                                </div>
+                                <div class="map-location-buttons text-center">
+                                    <a class="btn btn-accent btn-small" id="btn-show-map-reception"
+                                       style="display: inline-block; width: 90%;"><i class="fas fa-map-marked-alt"></i>&nbsp;&nbsp;Ver en mapa</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -386,68 +444,48 @@
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
                     <h3>Confirma tu asistencia</h3>
-                    <p>Por favor completa el formulario para confirmar tu asistencia y número de invitados.</p>
+                    <p>Ingresa tu nombre para buscar tu invitación.</p>
 
-                    <!-- RSVP form inspired by Rampatra (will POST to a Google Apps Script endpoint) -->
-                    <form id="rsvp-form" class="rsvp-form" novalidate>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-input-group">
-                                    <i class="fa fa-user"></i>
-                                    <input type="text" name="name" id="rsvp-name" placeholder="Tu nombre completo" required>
+                    <!-- RSVP Search Form -->
+                    <div id="rsvp-search-container">
+                        <form id="rsvp-search-form" class="rsvp-form" novalidate>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-input-group">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" name="name" id="rsvp-search-name" placeholder="Escribe tu nombre o apellido" required>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-input-group">
-                                    <i class="fa fa-envelope"></i>
-                                    <input type="email" name="email" id="rsvp-email" placeholder="Correo electrónico" required>
-                                </div>
+
+                            <div class="row">
+                                <div class="col-md-12" id="alert-wrapper"></div>
                             </div>
+
+                            <button type="submit" class="btn btn-fill btn-large rsvp-btn">Buscar mi Invitación</button>
+                        </form>
+                    </div>
+
+                    <!-- Guest List (hidden initially) -->
+                    <div id="rsvp-guest-list" style="display: none;">
+                        <div class="guest-list-header">
+                            <h4>Invitados en tu grupo: <span id="group-name"></span></h4>
+                            <p style="color: #666; font-size: 14px;">Marca la asistencia de cada invitado:</p>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                            <div class="col-md-6">
-                                <div class="form-input-group">
-                                    <i class="fa fa-key"></i>
-                                    <input type="text" name="invite_code" id="rsvp-invite-code" placeholder="Código de invitación" required>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                            <div class="col-md-6">
-                                <div class="form-input-group">
-                                    <i class="fa fa-users"></i>
-                                    <input type="number" name="extras" id="rsvp-guests" placeholder="Invitados adicionales" min="0" max="4" required>
-                                </div>
-                            </div>
+                        <div id="guests-container" class="guests-container">
+                            <!-- Los invitados se cargarán aquí dinámicamente -->
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-12" style="margin-top:12px;">
-                                <label style="margin-right:12px;">¿Asistirás?</label>
-                                <label style="margin-right:8px;"><input type="radio" name="attending" value="Sí" checked> Sí</label>
-                                <label><input type="radio" name="attending" value="No"> No</label>
-                            </div>
+                        <div class="row" style="margin-top: 30px;">
+                            <div class="col-md-12" id="confirm-alert-wrapper"></div>
                         </div>
 
-                        <div class="row" style="margin-top:12px;">
-                            <div class="col-md-12">
-                                <div class="form-input-group">
-                                    <i class="fa fa-comment"></i>
-                                    <input type="text" name="message" id="rsvp-message" placeholder="Mensaje (opcional)">
-                                </div>
-                            </div>
+                        <div style="margin-top: 20px;">
+                            <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencias</button>
+                            <button id="back-to-search-btn" class="btn btn-accent btn-large" style="margin-left: 10px;">Buscar Otra Invitación</button>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-12" id="alert-wrapper"></div>
-                        </div>
-
-                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">Enviar RSVP</button>
-                    </form>
-
-                    <div id="rsvp-results" style="margin-top:20px;"></div>
-                    
+                    </div>
                 </div>
             </div>
         </div>
@@ -461,7 +499,7 @@
                     <span class="to-top-wrapper"><a href="#top" class="to-top"><i class="fa fa-angle-up"></i></a></span>
                     <br>
                     <img src="img/logo2-blanco.png" alt="Karla & Jose" id="logo2-blanco">
-                    <p style="margin-top: 30px; font-size: 13px; color: #999;">
+                    <p style="margin-top: 15px; font-size: 13px; color: #999;">
                         Hecho con <span class="fa fa-heart" style="color: #d4af37;"></span> para Karla, de Jose.
                     </p>
                 </div>
@@ -474,9 +512,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <!-- Waypoints JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Google Maps API -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlPw3GQYI3faa_9mRE6plWuM7xNEmrwH0&callback=initMap"></script>
     <script src="js/scripts.js"></script>
 </body>
 </html>
-
