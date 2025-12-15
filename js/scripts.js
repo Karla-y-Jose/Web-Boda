@@ -112,7 +112,7 @@ $(document).ready(function() {
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
     // IMPORTANTE: Reemplaza esta URL con la URL de tu Apps Script desplegado
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw01xJ0LhxySesqIzJgKgL4kcAz46AxuiVbKCspIsqpQtHt-vXE0dbkFmSuPmvrFUgaDA/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwjN_i0RLYp-nuhFrLUNKEWcyn8P-xSxEfDUh_jEEChcL-UUdn7mHz_2m-6sKvQGIaOtA/exec';
     
     var currentGuests = [];
 
@@ -130,14 +130,11 @@ $(document).ready(function() {
         $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
+        // Usar GET con parámetros en la URL para evitar problemas de CORS
         $.ajax({
-            url: RSVP_ENDPOINT,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                action: 'searchGuest',
-                name: searchName
-            })
+            url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName),
+            method: 'GET',
+            dataType: 'json'
         })
         .done(function(response) {
             console.log('Search Response:', response);
@@ -221,14 +218,13 @@ $(document).ready(function() {
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
+        // Convertir updates a string JSON y codificarlo para URL
+        var updatesJson = encodeURIComponent(JSON.stringify(updates));
+        
         $.ajax({
-            url: RSVP_ENDPOINT,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                action: 'updateAttendance',
-                updates: updates
-            })
+            url: RSVP_ENDPOINT + '?action=updateAttendance&updates=' + updatesJson,
+            method: 'GET',
+            dataType: 'json'
         })
         .done(function(response) {
             console.log('Update Response:', response);
