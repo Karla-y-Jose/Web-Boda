@@ -79,7 +79,7 @@
             <div class="row">
                 <div class="col-sm-4 hidden-xs"></div>
                 <div class="col-sm-4 hidden-xs text-center">
-                    <a href="#rsvp" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencia</a>
+                    <a href="#rsvp" class="btn btn-fill btn-large rsvp-btn">Confirma Tu Asistencia</a>
                 </div>
                 <div class="col-sm-4 hidden-xs"></div>
             </div>
@@ -251,10 +251,11 @@
                             Aunque amamos a los pequeños, nuestro gran día será una celebración sin niños (Salvo contados casos). 
                             Apreciamos mucho su cariño y comprensión.
                         </p>
-                        <h4 style="margin-top: 20px;"><i class="fa fa-glass"></i> Sobre el alchohol</h4>
+                        <h4 style="margin-top: 20px;"><i class="fa fa-glass"></i> Sobre el alcohol</h4>
                         <p>
-                            Les invitamos a disfrutar con nosotros una noche especial y auténtica. 
-                            El evento será libre de alcohol. Gracias por su comprensión.
+                            Les invitamos a disfrutar con nosotros una noche especial y auténtica.
+                            Para que disfruten de su bebida favorita, les informamos que el evento no contará con barra de alcohol. 
+                            Por lo tanto, siéntanse libres de traer su propio alcohol para acompañar sus alimentos.
                         </p>
                     </div>
                 </div>
@@ -324,7 +325,7 @@
                 </div>
             </div>
         </div>
-        <audio id="audio-player" preload="metadata"></audio>
+        <audio id="audio-player" preload="metadata" autoplay></audio>
     </section>
 
     <!-- Venue Map -->
@@ -428,12 +429,10 @@
                     <div class="modal-body">
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         <div class="section-padding">
+                            <img src="img/logo2.png" alt="Karla & Jose" style="margin-top: 20px; max-width: 150px;">
                             <h3>¡Gracias!</h3>
                             <p>Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
-                                                        <div id="add-to-cal" style="margin-top: 20px;"></div>
-                            <p style="margin-top: 20px; color: #2E8B57;">
-                                <i class="fa fa-heart"></i> Karla & Jose
-                            </p>
+                                <div id="add-to-cal" style="margin-top: 20px;"></div>
                         </div>
                     </div>
                 </div>
@@ -443,11 +442,12 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                    <h3>Confirma tu asistencia</h3>
-                    <p>Ingresa tu nombre para buscar tu invitación.</p>
+                    <h3 class="header">Confirma tu asistencia</h3>
 
                     <!-- RSVP Search Form -->
                     <div id="rsvp-search-container">
+                        <p>Ingresa tu nombre para buscar tu invitación.</p>
+                        <p><strong>FAVOR DE CONFIRMAR SU ASISTENCIA A MAS TARDAR EL 1° DE OCTUBRE</strong></p>
                         <form id="rsvp-search-form" class="rsvp-form" novalidate>
                             <div class="row">
                                 <div class="col-md-12">
@@ -469,7 +469,7 @@
                     <!-- Guest List (hidden initially) -->
                     <div id="rsvp-guest-list" style="display: none;">
                         <div class="guest-list-header">
-                            <h4>Invitados en tu grupo: <span id="group-name"></span></h4>
+                            <h4>Grupo de Invitados: <span id="group-name"></span></h4>
                             <p style="color: #666; font-size: 14px;">Marca la asistencia de cada invitado:</p>
                         </div>
 
@@ -483,7 +483,7 @@
 
                         <div style="margin-top: 20px;">
                             <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencias</button>
-                            <button id="back-to-search-btn" class="btn btn-accent btn-large" style="margin-left: 10px;">Buscar Otra Invitación</button>
+                            <button id="back-to-search-btn" class="btn btn-green btn-large" style="margin-top: 15px;">Buscar Otra Invitación</button>
                         </div>
                     </div>
                 </div>

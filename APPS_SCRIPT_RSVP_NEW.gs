@@ -1,0 +1,323 @@
+const SPREADSHEET_ID = '1tFt-UjwaQS80uM1ECrMxnLJGU-MWO9lWnxZyPnYV530';
+const SHEET_NAME = 'RSVP-Boda-KarlaJose';
+
+const EMAIL_DESTINATARIO = 'karla.y.jose.18.12.26@gmail.com'; 
+
+/**
+ * Función principal que maneja las solicitudes GET
+ */
+function doGet(e) {
+  try {
+    // Obtener parámetros de la URL
+    const params = e.parameter;
+    const action = params.action;
+    
+    if (!action) {
+      return ContentService.createTextOutput('RSVP API funcionando correctamente');
+    }
+    
+    if (action === 'searchGuest') {
+      return searchGuestByName(params.name);
+    } else if (action === 'updateAttendance') {
+      // Decodificar el JSON de updates
+      const updates = JSON.parse(params.updates);
+      return updateGuestAttendance(updates);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Acción no válida'
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error en el servidor: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Función para manejar solicitudes POST (por compatibilidad)
+ */
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action;
+    
+    if (action === 'searchGuest') {
+      return searchGuestByName(params.name);
+    } else if (action === 'updateAttendance') {
+      return updateGuestAttendance(params.updates);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Acción no válida'
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error en el servidor: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Buscar invitado por nombre y retornar su grupo
+ */
+function searchGuestByName(searchName) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    
+    // Asumiendo que la primera fila contiene los encabezados
+    const headers = data[0];
+    const idNombreCol = headers.indexOf('ID_NOMBRE');
+    // Buscar ID_APELLIDOS (plural) o ID_APELLIDO (singular)
+    let idApellidoCol = headers.indexOf('ID_APELLIDOS');
+    if (idApellidoCol === -1) {
+      idApellidoCol = headers.indexOf('ID_APELLIDO');
+    }
+    const idGrupoCol = headers.indexOf('ID_GRUPO');
+    const estadoCol = headers.indexOf('ID_ESTADO');
+    
+    if (idNombreCol === -1 || idApellidoCol === -1 || idGrupoCol === -1) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'No se encontraron las columnas necesarias. Columnas encontradas: ' + headers.join(', ')
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Buscar el invitado
+    let foundGroup = null;
+    const normalizedSearch = normalizeText(searchName);
+    
+    for (let i = 1; i < data.length; i++) {
+      const nombre = normalizeText(data[i][idNombreCol]);
+      const apellido = normalizeText(data[i][idApellidoCol]);
+      const nombreCompleto = nombre + ' ' + apellido;
+      
+      if (nombreCompleto.includes(normalizedSearch) || 
+          normalizedSearch.includes(nombreCompleto) ||
+          nombre.includes(normalizedSearch) ||
+          apellido.includes(normalizedSearch)) {
+        foundGroup = data[i][idGrupoCol];
+        break;
+      }
+    }
+    
+    if (!foundGroup) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'not_found',
+        message: 'No encontramos tu nombre en la lista de invitados. Por favor verifica la escritura.'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Obtener todos los invitados del mismo grupo
+    const groupGuests = [];
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][idGrupoCol] === foundGroup) {
+        const row = {
+          rowIndex: i + 1, // +1 porque las filas de Sheets empiezan en 1
+          nombre: data[i][idNombreCol],
+          apellido: data[i][idApellidoCol],
+          estado: estadoCol !== -1 ? data[i][estadoCol] : 'Pendiente',
+          grupo: data[i][idGrupoCol]
+        };
+        groupGuests.push(row);
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      grupo: foundGroup,
+      invitados: groupGuests
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error al buscar invitado: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Actualizar estado de asistencia de invitados
+ */
+function updateGuestAttendance(updates) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const estadoCol = headers.indexOf('ID_ESTADO') + 1; // +1 porque getRange usa 1-index
+    const nombreCol = headers.indexOf('ID_NOMBRE') + 1;
+    const apellidoCol = headers.indexOf('ID_APELLIDO') + 1;
+    const grupoCol = headers.indexOf('ID_GRUPO') + 1;
+    
+    if (estadoCol === 0) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'No se encontró la columna ID_ESTADO'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Array para almacenar los cambios realizados
+    const cambios = [];
+    let grupoNombre = '';
+    
+    // Actualizar cada invitado y guardar información del cambio
+    updates.forEach(function(update) {
+      const rowData = sheet.getRange(update.rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const estadoAnterior = rowData[estadoCol - 1];
+      const nombre = rowData[nombreCol - 1];
+      const apellido = rowData[apellidoCol - 1];
+      const grupo = rowData[grupoCol - 1];
+      
+      // Guardar el nombre del grupo (será el mismo para todos)
+      if (!grupoNombre) {
+        grupoNombre = grupo;
+      }
+      
+      // Actualizar el estado
+      sheet.getRange(update.rowIndex, estadoCol).setValue(update.estado);
+      
+      // Guardar información del cambio
+      cambios.push({
+        nombre: nombre + ' ' + apellido,
+        estadoAnterior: estadoAnterior || 'Sin estado',
+        estadoNuevo: update.estado
+      });
+    });
+    
+    // Enviar correo electrónico con los cambios
+    enviarCorreoConfirmacion(grupoNombre, cambios);
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      message: '¡Confirmación guardada exitosamente!'
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error al actualizar asistencia: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Enviar correo electrónico con los cambios de confirmación
+ */
+function enviarCorreoConfirmacion(grupoNombre, cambios) {
+  try {
+    const fecha = new Date();
+    const fechaFormateada = Utilities.formatDate(fecha, 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
+    
+    // Construir el cuerpo del mensaje
+    let mensaje = `
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; }
+    .header { background-color: #2E8B57; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; }
+    .grupo { background-color: #f9f9f9; padding: 15px; border-left: 4px solid #d4af37; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th { background-color: #2E8B57; color: white; padding: 12px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #ddd; }
+    tr:hover { background-color: #f5f5f5; }
+    .confirmado { color: #2E8B57; font-weight: bold; }
+    .no-asiste { color: #dc3545; font-weight: bold; }
+    .pendiente { color: #ffc107; font-weight: bold; }
+    .footer { background-color: #f9f9f9; padding: 15px; text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>💒 Nueva Confirmación de Asistencia</h2>
+    <p>Boda Karla & Jose</p>
+  </div>
+  
+  <div class="content">
+    <p><strong>Fecha y hora:</strong> ${fechaFormateada}</p>
+    
+    <div class="grupo">
+      <h3>📋 Grupo: ${grupoNombre}</h3>
+      <p>Se han actualizado ${cambios.length} invitado(s)</p>
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Invitado</th>
+          <th>Estado Anterior</th>
+          <th>Estado Nuevo</th>
+        </tr>
+      </thead>
+      <tbody>
+`;
+    
+    // Agregar cada cambio a la tabla
+    cambios.forEach(function(cambio) {
+      let claseEstado = 'pendiente';
+      if (cambio.estadoNuevo === 'Confirmado') claseEstado = 'confirmado';
+      else if (cambio.estadoNuevo === 'No Asiste') claseEstado = 'no-asiste';
+      
+      mensaje += `
+        <tr>
+          <td>${cambio.nombre}</td>
+          <td>${cambio.estadoAnterior}</td>
+          <td class="${claseEstado}">${cambio.estadoNuevo}</td>
+        </tr>
+      `;
+    });
+    
+    mensaje += `
+      </tbody>
+    </table>
+    
+    <p style="margin-top: 20px;">
+      <a href="https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}" 
+         style="background-color: #2E8B57; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+        Ver Google Sheet
+      </a>
+    </p>
+  </div>
+  
+  <div class="footer">
+    <p>Este correo se generó automáticamente desde el sistema RSVP de la boda.</p>
+    <p>No responder a este mensaje.</p>
+  </div>
+</body>
+</html>
+`;
+    
+    // Enviar el correo
+    MailApp.sendEmail({
+      to: EMAIL_DESTINATARIO,
+      subject: `✅ Confirmación RSVP: ${grupoNombre}`,
+      htmlBody: mensaje
+    });
+    
+  } catch (error) {
+    Logger.log('Error al enviar correo: ' + error.toString());
+    // No interrumpimos el proceso si falla el correo
+  }
+}
+
+/**
+ * Normalizar texto para comparación (sin acentos, minúsculas, sin espacios extra)
+ */
+function normalizeText(text) {
+  if (!text) return '';
+  return text.toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ');
+}

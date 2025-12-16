@@ -112,7 +112,7 @@ $(document).ready(function() {
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
     // IMPORTANTE: Reemplaza esta URL con la URL de tu Apps Script desplegado
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwjN_i0RLYp-nuhFrLUNKEWcyn8P-xSxEfDUh_jEEChcL-UUdn7mHz_2m-6sKvQGIaOtA/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbziecc4wpBgW48ozxnbT29bJT-Qu1IKnbjKuRzmBb0WYGEuCvzk0wCJjAYlUI4aI6ZQMg/exec';
     
     var currentGuests = [];
 
@@ -236,9 +236,17 @@ $(document).ready(function() {
                 setTimeout(function() {
                     $('#rsvp-modal').modal('show');
                     
-                    // Add calendar button
-                    var calendarBtn = '<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda%20de%20Karla%20%26%20Jose&dates=20261218T180000/20261218T230000&location=Zapopan,%20Jalisco" target="_blank" class="btn btn-fill" style="background:#d4af37; color:#fff; padding:10px 20px; margin-top:10px; display:inline-block; text-decoration:none; border-radius:4px;">📅 Agregar al Calendario</a>';
-                    $('#add-to-cal').html(calendarBtn);
+                    // Agregar botones de calendario con la misma funcionalidad de la sección de eventos
+                    var calendarButtons = `
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                            <button onclick="agregarAlCalendario('Boda Karla & Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
+                                    class="btn btn-small btn-fill" 
+                                    style="background:#d4af37; color:#fff; padding:12px 20px; border:none; cursor:pointer; width: 100%;">
+                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                            </button>
+                        </div>
+                    `;
+                    $('#add-to-cal').html(calendarButtons);
                 }, 1500);
             } else {
                 $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
@@ -408,7 +416,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                            border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
                            transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
                            justify-content: center; letter-spacing: 0.3px;">
-                       <i class="fa fa-google calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Google Calendar
+                       <i class="fab fa-google calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Google Calendar
                     </a>
                     <a href="${icsUrl}" download="evento-boda.ics"
                        class="calendar-modal-btn-gold"
@@ -416,7 +424,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                            border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
                            transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
                            justify-content: center; letter-spacing: 0.3px;">
-                       <i class="fa fa-apple calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Apple Calendar
+                       <i class="fab fa-apple calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Apple Calendar
                     </a>
                     <button onclick="cerrarModalCalendario()" class="calendar-modal-btn-green"
                             style="padding: 14px 24px; background: #2E8B57; color: #fff; 
@@ -758,7 +766,41 @@ if (nextBtn) {
     nextBtn.addEventListener('click', nextTrack);
 }
 
-// Cargar primera canción al inicio
+// Cargar primera canción al inicio y reproducir automáticamente
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
+    
+    // Función para iniciar reproducción
+    function startAutoplay() {
+        const playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                // Reproducción exitosa
+                isPlaying = true;
+                playPauseBtn.querySelector('i').classList.remove('fa-play');
+                playPauseBtn.querySelector('i').classList.add('fa-pause');
+            }).catch(function(error) {
+                // Si falla, intentar con la primera interacción del usuario
+                console.log('Autoplay bloqueado, esperando interacción del usuario');
+                
+                function playOnInteraction() {
+                    audioPlayer.play().then(function() {
+                        isPlaying = true;
+                        playPauseBtn.querySelector('i').classList.remove('fa-play');
+                        playPauseBtn.querySelector('i').classList.add('fa-pause');
+                    }).catch(function(err) {
+                        console.log('Error al reproducir:', err);
+                    });
+                }
+                
+                // Agregar listeners para primera interacción
+                document.addEventListener('click', playOnInteraction, { once: true });
+                document.addEventListener('scroll', playOnInteraction, { once: true });
+                document.addEventListener('touchstart', playOnInteraction, { once: true });
+            });
+        }
+    }
+    
+    // Intentar reproducir después de un breve delay
+    setTimeout(startAutoplay, 1000);
 }
