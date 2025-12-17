@@ -28,7 +28,7 @@
         function loadJsFromCDN(js) {
             if (js === 'jquery.js') {
                 document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
-            }
+            } 
         }
     </script>
 </head>
@@ -46,8 +46,8 @@
                             <ul class="primary-nav">
                                 <li><a href="#intro">Nuestra Historia</a></li>
                                 <li><a href="#events">Eventos & Protocolos</a></li>
-                                <li><a href="#gallery">Galería</a></li>
                                 <li><a href="#venue">Ubicación</a></li>
+                                <li><a href="#gallery">Galería</a></li>
                             </ul>
                             <ul class="member-actions">
                                 <li><a href="#gifts">Mesa de regalos</a></li>
@@ -263,71 +263,6 @@
         </div>
     </section>
 
-    <!-- Gallery -->
-    <section id="gallery" class="gallery section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header">Momentos Especiales</h3>
-                </div>
-            </div>
-            
-            <!-- Music Player -->
-            <div class="row" style="margin-bottom: 40px;">
-                <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                    <div class="music-player">
-                        <div class="track-info">
-                            <p class="track-title" id="track-title">Sin canción</p>
-                            <p class="track-artist" id="track-artist">Selecciona una canción</p>
-                        </div>
-                        <div class="player-controls">
-                            <button class="control-btn" id="prev-btn" title="Anterior">
-                                <i class="fa fa-step-backward"></i>
-                            </button>
-                            <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir">
-                                <i class="fa fa-play"></i>
-                            </button>
-                            <button class="control-btn" id="next-btn" title="Siguiente">
-                                <i class="fa fa-step-forward"></i>
-                            </button>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-fill"></div>
-                        </div>
-                        <div class="time-info">
-                            <span id="current-time">0:00</span>
-                            <span id="duration">0:00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <a href="img/3.jpg" class="gallery-item">
-                        <div class="img-wrap">
-                            <img src="img/3.jpg" alt="Karla y Jose">
-                            <div class="overlay">
-                                <i class="fa fa-search"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <a href="img/4.jpg" class="gallery-item">
-                        <div class="img-wrap">
-                            <img src="img/4.jpg" alt="Karla y Jose">
-                            <div class="overlay">
-                                <i class="fa fa-search"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <audio id="audio-player" preload="metadata" autoplay></audio>
-    </section>
-
     <!-- Venue Map -->
     <section id="map" class="section-padding">
         <div class="text-center">
@@ -395,6 +330,249 @@
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="gallery section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3 class="header">Nuestra Galería</h3>
+                    <p class="gallery-subtitle">Momentos que atesoramos</p>
+                </div>
+            </div>
+            
+            <!-- Subsección 1: Pedida de Mano -->
+            <div class="gallery-subsection">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h4 class="gallery-subsection-title">
+                            <i class="fa fa-heart"></i> La Pedida de Mano
+                        </h4>
+                        <p class="gallery-subsection-desc">El momento en que nuestro sueño comenzó</p>
+                    </div>
+                </div>
+                <div class="row gallery-grid">
+                    <div class="col-md-4 col-sm-6">
+                        <a href="img/pedida1.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/pedida1.jpg" alt="Pedida de mano 1">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <a href="img/pedida2.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/pedida2.jpg" alt="Pedida de mano 2">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <a href="img/pedida3.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/pedida3.jpg" alt="Pedida de mano 3">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subsección 2: Save the Date -->
+            <div class="gallery-subsection">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h4 class="gallery-subsection-title">
+                            <i class="fa fa-calendar-check-o"></i> Save the Date
+                        </h4>
+                        <p class="gallery-subsection-desc">Contando los días para nuestro gran día</p>
+                    </div>
+                </div>
+                <div class="row gallery-grid">
+                    <div class="col-md-3 col-sm-6">
+                        <a href="img/savedate1.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/savedate1.jpg" alt="Save the date 1">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <a href="img/savedate2.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/savedate2.jpg" alt="Save the date 2">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <a href="img/savedate3.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/savedate3.jpg" alt="Save the date 3">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <a href="img/savedate4.jpg" class="gallery-item">
+                            <div class="img-wrap">
+                                <img src="img/savedate4.jpg" alt="Save the date 4">
+                                <div class="overlay">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reproductor de Música (Centrado) -->
+            <div class="gallery-subsection music-subsection">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h4 class="gallery-subsection-title">
+                            <i class="fa fa-music"></i> Nuestra Música
+                        </h4>
+                        <p class="gallery-subsection-desc">Las canciones que nos enamoran</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+                        <div class="music-player">
+                            <div class="track-info">
+                                <p class="track-title" id="track-title">Sin canción</p>
+                                <p class="track-artist" id="track-artist">Selecciona una canción</p>
+                            </div>
+                            <div class="player-controls">
+                                <button class="control-btn" id="prev-btn" title="Anterior">
+                                    <i class="fa fa-step-backward"></i>
+                                </button>
+                                <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir">
+                                    <i class="fa fa-play"></i>
+                                </button>
+                                <button class="control-btn" id="next-btn" title="Siguiente">
+                                    <i class="fa fa-step-forward"></i>
+                                </button>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="time-info">
+                                <span id="current-time">0:00</span>
+                                <span id="duration">0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subsección 3: El Día de Nuestra Boda -->
+            <div class="gallery-subsection">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h4 class="gallery-subsection-title">
+                            <i class="fa fa-camera"></i> El Día de Nuestra Boda
+                        </h4>
+                        <p class="gallery-subsection-desc">Pronto compartiremos los mejores momentos de nuestra celebración</p>
+                    </div>
+                </div>
+                <div class="row gallery-grid">
+                    <div class="col-md-12 text-center">
+                        <div class="coming-soon-box">
+                            <i class="fa fa-image"></i>
+                            <p>Las fotos de nuestro gran día estarán disponibles próximamente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subsección 4: Sube tus Fotos -->
+            <div class="gallery-subsection upload-subsection">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h4 class="gallery-subsection-title">
+                            <i class="fa fa-upload"></i> Comparte tus Momentos
+                        </h4>
+                        <p class="gallery-subsection-desc">¿Capturaste un momento especial? ¡Compártelo con nosotros!</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="upload-box">
+                            <div class="upload-icon">
+                                <i class="fa fa-cloud-upload"></i>
+                            </div>
+                            <h5>Sube tus fotos aquí</h5>
+                            <p>Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
+                            <form id="photo-upload-form" class="upload-form">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="guest-name" placeholder="Tu nombre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="photo-file" class="file-upload-label">
+                                        <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
+                                        <input type="file" id="photo-file" accept="image/*" multiple>
+                                    </label>
+                                    <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
+                                </div>
+                                <button type="submit" class="btn btn-fill btn-large">
+                                    <i class="fa fa-upload"></i> Subir Fotos
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Carrusel para mostrar fotos subidas por invitados -->
+                <div class="row" style="margin-top: 40px;">
+                    <div class="col-md-12 text-center">
+                        <h5 class="guest-photos-title">Fotos de nuestros invitados</h5>
+                        <p style="color: #777; font-size: 14px; margin-bottom: 30px;">Desliza para ver todas las fotos compartidas</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <!-- Carrusel de fotos -->
+                        <div class="guest-photos-carousel" id="guest-photos-carousel">
+                            <!-- Las fotos subidas aparecerán aquí dinámicamente -->
+                            <div class="carousel-track" id="carousel-track">
+                                <div class="no-photos-carousel">
+                                    <i class="fa fa-camera" style="font-size: 60px; color: #d4af37; margin-bottom: 20px;"></i>
+                                    <p>Aún no hay fotos subidas. ¡Sé el primero en compartir!</p>
+                                </div>
+                            </div>
+                            <!-- Controles del carrusel -->
+                            <button class="carousel-control prev" id="carousel-prev" style="display: none;">
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-control next" id="carousel-next" style="display: none;">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <!-- Contador de fotos -->
+                        <div class="carousel-counter" id="carousel-counter" style="display: none;">
+                            <span id="current-photo">1</span> / <span id="total-photos">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <audio id="audio-player" preload="metadata"></audio>
     </section>
 
     <!-- Gift Registry -->

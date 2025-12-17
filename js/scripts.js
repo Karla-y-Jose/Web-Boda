@@ -8,7 +8,7 @@ $(document).ready(function() {
         $('.wp1').addClass('animated fadeInLeft');
     }, {
         offset: '75%'
-    });
+    }); 
     $('.wp2').waypoint(function () {
         $('.wp2').addClass('animated fadeInRight');
     }, {
@@ -770,37 +770,462 @@ if (nextBtn) {
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
     
-    // Función para iniciar reproducción
-    function startAutoplay() {
+    let musicStarted = false;
+    let scrollDetected = false;
+    
+    // Crear overlay invisible y notificación
+    const musicOverlay = document.createElement('div');
+    musicOverlay.id = 'music-overlay';
+    musicOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: 999999;
+        cursor: pointer;
+        display: none;
+    `;
+    
+    const musicNotification = document.createElement('div');
+    musicNotification.id = 'music-notification';
+    musicNotification.innerHTML = `
+        <div style="
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 59, 46, 0.95);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: 'Karla', sans-serif;
+            font-size: 14px;
+            z-index: 1000000;
+            cursor: pointer;
+            animation: fadeInUp 0.5s ease;
+            display: none;
+        " id="music-notif-content">
+            <i class="fa fa-music" style="margin-right: 10px;"></i>
+            Toca la pantalla para activar música
+        </div>
+        <style>
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+    `;
+    
+    document.body.appendChild(musicOverlay);
+    document.body.appendChild(musicNotification);
+    
+    // Función para reproducir la música
+    function startMusic() {
+        if (musicStarted) return;
+        
+        console.log('🎵 Iniciando música...');
+        
         const playPromise = audioPlayer.play();
+        
         if (playPromise !== undefined) {
             playPromise.then(function() {
                 // Reproducción exitosa
+                musicStarted = true;
                 isPlaying = true;
-                playPauseBtn.querySelector('i').classList.remove('fa-play');
-                playPauseBtn.querySelector('i').classList.add('fa-pause');
-            }).catch(function(error) {
-                // Si falla, intentar con la primera interacción del usuario
-                console.log('Autoplay bloqueado, esperando interacción del usuario');
-                
-                function playOnInteraction() {
-                    audioPlayer.play().then(function() {
-                        isPlaying = true;
-                        playPauseBtn.querySelector('i').classList.remove('fa-play');
-                        playPauseBtn.querySelector('i').classList.add('fa-pause');
-                    }).catch(function(err) {
-                        console.log('Error al reproducir:', err);
-                    });
+                if (playPauseBtn && playPauseBtn.querySelector('i')) {
+                    playPauseBtn.querySelector('i').classList.remove('fa-play');
+                    playPauseBtn.querySelector('i').classList.add('fa-pause');
                 }
+                console.log('✅ Música reproduciéndose');
                 
-                // Agregar listeners para primera interacción
-                document.addEventListener('click', playOnInteraction, { once: true });
-                document.addEventListener('scroll', playOnInteraction, { once: true });
-                document.addEventListener('touchstart', playOnInteraction, { once: true });
+                // Ocultar overlay y notificación
+                musicOverlay.style.display = 'none';
+                document.getElementById('music-notif-content').style.display = 'none';
+                
+                // Remover event listeners
+                window.removeEventListener('scroll', scrollHandler);
+                musicOverlay.removeEventListener('click', startMusic);
+                musicOverlay.removeEventListener('touchstart', startMusic);
+            }).catch(function(error) {
+                console.log('⚠️ No se pudo reproducir:', error.message);
             });
         }
     }
     
-    // Intentar reproducir después de un breve delay
-    setTimeout(startAutoplay, 1000);
+    // Handler para scroll - muestra la notificación
+    function scrollHandler() {
+        if (musicStarted || scrollDetected) return;
+        
+        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrolled > 50) {
+            scrollDetected = true;
+            console.log('📜 Scroll detectado - mostrando notificación');
+            
+            // Mostrar overlay y notificación
+            musicOverlay.style.display = 'block';
+            document.getElementById('music-notif-content').style.display = 'block';
+            
+            // El overlay captura el click en toda la página
+            musicOverlay.addEventListener('click', startMusic);
+            musicOverlay.addEventListener('touchstart', startMusic, { passive: true });
+        }
+    }
+    
+    // Event listener para scroll
+    window.addEventListener('scroll', scrollHandler, { passive: true });
 }
+/* ============================================
+   FUNCIONALIDAD DE SUBIDA DE FOTOS - GOOGLE APPS SCRIPT
+   ============================================ */
+
+// ⚠️ IMPORTANTE: Reemplaza esta URL con la URL de tu Google Apps Script
+const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpDRH3XHlD29XuLAjU6N_8BVso02PnYhyIhFCSlysJpQPKZMIhglesHvUGj83sOKI_/exec';
+
+// Mostrar nombre de archivos seleccionados
+const photoFileInput = document.getElementById('photo-file');
+const fileInfo = document.getElementById('file-info');
+
+if (photoFileInput && fileInfo) {
+    photoFileInput.addEventListener('change', function() {
+        const files = this.files;
+        if (files.length > 0) {
+            if (files.length === 1) {
+                fileInfo.textContent = `${files[0].name}`;
+            } else {
+                fileInfo.textContent = `${files.length} archivos seleccionados`;
+            }
+            fileInfo.style.color = '#2E8B57';
+        } else {
+            fileInfo.textContent = 'Ningún archivo seleccionado';
+            fileInfo.style.color = '#999';
+        }
+    });
+}
+
+// Manejar el formulario de subida de fotos
+const photoUploadForm = document.getElementById('photo-upload-form');
+
+if (photoUploadForm) {
+    photoUploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const guestName = document.getElementById('guest-name').value.trim();
+        const files = photoFileInput.files;
+        
+        if (!guestName || files.length === 0) {
+            alert('Por favor, completa todos los campos');
+            return;
+        }
+        
+        // Validar tamaño de archivos (máximo 5MB por foto)
+        for (let file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
+                return;
+            }
+        }
+        
+        // Subir fotos a Google Apps Script
+        uploadPhotosToGoogleDrive(guestName, files);
+    });
+}
+
+/**
+ * Subir fotos a Google Drive a través de Google Apps Script
+ */
+async function uploadPhotosToGoogleDrive(guestName, files) {
+    const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
+    const originalBtnText = uploadBtn.innerHTML;
+    
+    uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Subiendo...';
+    uploadBtn.disabled = true;
+    
+    let uploadedCount = 0;
+    let failedCount = 0;
+    
+    // Procesar cada archivo
+    for (let file of files) {
+        if (!file.type.startsWith('image/')) {
+            console.log(`Archivo ${file.name} no es una imagen, se omite`);
+            continue;
+        }
+        
+        try {
+            // Convertir archivo a base64
+            const base64Data = await fileToBase64(file);
+            
+            // Enviar a Google Apps Script
+            const response = await fetch(GALLERY_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Importante para Google Apps Script
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'uploadPhoto',
+                    guestName: guestName,
+                    photoData: base64Data,
+                    fileName: file.name,
+                    section: 'invitados'
+                })
+            });
+            
+            // Nota: Con mode: 'no-cors', no podemos leer la respuesta
+            // Asumimos que fue exitoso si no hubo error
+            uploadedCount++;
+            console.log(`✅ Foto ${file.name} subida exitosamente`);
+            
+        } catch (error) {
+            console.error(`❌ Error subiendo ${file.name}:`, error);
+            failedCount++;
+        }
+    }
+    
+    // Restaurar botón
+    uploadBtn.innerHTML = originalBtnText;
+    uploadBtn.disabled = false;
+    
+    // Resetear formulario
+    photoUploadForm.reset();
+    fileInfo.textContent = 'Ningún archivo seleccionado';
+    fileInfo.style.color = '#999';
+    
+    // Mostrar resultado
+    if (uploadedCount > 0) {
+        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) subida(s) exitosamente.`);
+        
+        // Recargar galería después de 2 segundos
+        setTimeout(() => {
+            loadGuestPhotos();
+        }, 2000);
+    }
+    
+    if (failedCount > 0) {
+        alert(`Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.`);
+    }
+}
+
+/**
+ * Convertir archivo a base64
+ */
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+/**
+ * Cargar fotos de invitados desde Google Drive y mostrar en carrusel
+ */
+async function loadGuestPhotos() {
+    const carouselTrack = document.getElementById('carousel-track');
+    
+    if (!carouselTrack) return;
+    
+    try {
+        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados`);
+        const data = await response.json();
+        
+        if (data.success && data.photos && data.photos.length > 0) {
+            // Limpiar mensaje de "no hay fotos"
+            const noPhotosMsg = carouselTrack.querySelector('.no-photos-carousel');
+            if (noPhotosMsg) {
+                noPhotosMsg.remove();
+            }
+            
+            // Limpiar fotos existentes
+            carouselTrack.innerHTML = '';
+            
+            // Agregar cada foto al carrusel
+            data.photos.forEach((photo, index) => {
+                // Convertir URL a formato que funcione en img tag
+                const imageUrl = convertDriveUrl(photo.url);
+                
+                // Formatear fecha
+                const photoDate = new Date(photo.timestamp);
+                const dateStr = photoDate.toLocaleDateString('es-MX', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const slideHtml = `
+                    <div class="carousel-slide" data-index="${index}">
+                        <img src="${imageUrl}" 
+                             alt="Foto de ${photo.guestName}" 
+                             loading="lazy"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<p style=color:#999>Error al cargar la imagen</p>';">
+                        <div class="photo-info">
+                            <p class="photo-author">
+                                <i class="fa fa-user"></i> ${photo.guestName}
+                            </p>
+                            <p class="photo-date">
+                                <i class="fa fa-clock-o"></i> ${dateStr}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                carouselTrack.insertAdjacentHTML('beforeend', slideHtml);
+            });
+            
+            // Actualizar contador
+            document.getElementById('total-photos').textContent = data.photos.length;
+            document.getElementById('carousel-counter').style.display = 'block';
+            
+            // Mostrar controles si hay más de una foto
+            if (data.photos.length > 1) {
+                document.getElementById('carousel-prev').style.display = 'flex';
+                document.getElementById('carousel-next').style.display = 'flex';
+            }
+            
+            // Inicializar carrusel
+            initializeCarousel(data.photos.length);
+            
+            console.log(`✅ ${data.photos.length} fotos cargadas en el carrusel`);
+        }
+    } catch (error) {
+        console.error('Error cargando fotos:', error);
+    }
+}
+
+/**
+ * Inicializar funcionalidad del carrusel
+ */
+let currentSlide = 0;
+let totalSlides = 0;
+
+function initializeCarousel(total) {
+    totalSlides = total;
+    currentSlide = 0;
+    updateCarousel();
+    
+    // Event listeners para los controles
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+    
+    if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateCarousel();
+            }
+        };
+        
+        nextBtn.onclick = () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateCarousel();
+            }
+        };
+    }
+    
+    // Soporte para gestos táctiles (swipe)
+    const carousel = document.getElementById('guest-photos-carousel');
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    carousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50 && currentSlide < totalSlides - 1) {
+            // Swipe left - siguiente
+            currentSlide++;
+            updateCarousel();
+        }
+        if (touchEndX > touchStartX + 50 && currentSlide > 0) {
+            // Swipe right - anterior
+            currentSlide--;
+            updateCarousel();
+        }
+    }
+    
+    // Soporte para teclado (flechas)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && currentSlide > 0) {
+            currentSlide--;
+            updateCarousel();
+        } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateCarousel();
+        }
+    });
+}
+
+function updateCarousel() {
+    const track = document.getElementById('carousel-track');
+    const offset = -currentSlide * 100;
+    track.style.transform = `translateX(${offset}%)`;
+    
+    // Actualizar contador
+    document.getElementById('current-photo').textContent = currentSlide + 1;
+    
+    // Actualizar estado de botones
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+    
+    if (prevBtn) {
+        prevBtn.style.opacity = currentSlide === 0 ? '0.3' : '1';
+        prevBtn.style.cursor = currentSlide === 0 ? 'not-allowed' : 'pointer';
+    }
+    
+    if (nextBtn) {
+        nextBtn.style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
+        nextBtn.style.cursor = currentSlide === totalSlides - 1 ? 'not-allowed' : 'pointer';
+    }
+}
+
+/**
+ * Convertir URL de Google Drive al formato correcto para mostrar en img
+ */
+function convertDriveUrl(url) {
+    // Si ya está en el formato correcto, devolverla
+    if (url.includes('googleusercontent.com')) {
+        return url;
+    }
+    
+    // Extraer el file ID de diferentes formatos de URL de Drive
+    let fileId = null;
+    
+    // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
+    if (url.includes('drive.google.com/uc')) {
+        const match = url.match(/[?&]id=([^&]+)/);
+        if (match) fileId = match[1];
+    }
+    
+    // Formato: https://drive.google.com/file/d/FILE_ID/view
+    if (url.includes('drive.google.com/file/d/')) {
+        const match = url.match(/\/file\/d\/([^\/]+)/);
+        if (match) fileId = match[1];
+    }
+    
+    // Si encontramos el ID, convertir a formato que funcione en img
+    if (fileId) {
+        return `https://lh3.googleusercontent.com/d/${fileId}=s4000?authuser=0`;
+    }
+    
+    // Si no pudimos convertir, devolver la URL original
+    return url;
+}
+
+// Cargar fotos al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Esperar 1 segundo antes de cargar fotos
+    setTimeout(() => {
+        loadGuestPhotos();
+    }, 1000);
+});

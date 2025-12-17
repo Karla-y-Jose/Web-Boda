@@ -6,7 +6,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
+} 
 
 html {
     scroll-behavior: smooth;
@@ -757,18 +757,91 @@ section {
     background: #f9f9f9;
 }
 
+.gallery-subtitle {
+    font-size: 16px;
+    color: #777;
+    font-style: italic;
+    margin-bottom: 40px;
+}
+
+/* Subsecciones de la galería */
+.gallery-subsection {
+    margin-bottom: 60px;
+    padding: 40px 0;
+    position: relative;
+}
+
+.gallery-subsection:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+}
+
+.gallery-subsection-title {
+    font-size: 28px;
+    color: #2E8B57;
+    margin-bottom: 10px;
+    font-weight: 400;
+}
+
+.gallery-subsection-title i {
+    margin-right: 10px;
+    color: #d4af37;
+}
+
+.gallery-subsection-desc {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+.gallery-grid {
+    margin-top: 30px;
+}
+
+/* Subsección de música destacada */
+.music-subsection {
+    background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+    padding: 50px 0;
+    border-radius: 12px;
+    margin: 60px 0;
+}
+
 .img-wrap {
     position: relative;
     overflow: hidden;
     border-radius: 8px;
     margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    /* Asegurar proporción y altura mínima */
+    min-height: 200px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-wrap:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .img-wrap img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     transition: all 0.3s ease;
     display: block;
+    /* Asegurar que la imagen se muestre */
+    min-height: 200px;
+    max-height: 400px;
 }
 
 .img-wrap:hover img {
@@ -781,7 +854,7 @@ section {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(46, 139, 87, 0.85);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -795,7 +868,261 @@ section {
 
 .overlay i {
     font-size: 40px;
+    color: #fff;
+}
+
+/* Caja de "Próximamente" */
+.coming-soon-box {
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    border-radius: 12px;
+    border: 2px dashed #d4af37;
+    text-align: center;
+}
+
+.coming-soon-box i {
+    font-size: 80px;
+    color: #d4af37;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.coming-soon-box p {
+    font-size: 16px;
+    color: #777;
+    margin: 0;
+}
+
+/* Subsección de subida de fotos */
+.upload-subsection {
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    padding: 50px 0;
+    border-radius: 12px;
+}
+
+.upload-box {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.upload-icon {
+    margin-bottom: 20px;
+}
+
+.upload-icon i {
+    font-size: 70px;
     color: #2E8B57;
+    opacity: 0.8;
+}
+
+.upload-box h5 {
+    font-size: 24px;
+    color: #2E8B57;
+    margin-bottom: 15px;
+}
+
+.upload-box p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.upload-form .form-group {
+    margin-bottom: 20px;
+}
+
+.upload-form .form-control {
+    padding: 12px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.upload-form .form-control:focus {
+    border-color: #2E8B57;
+    box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.1);
+}
+
+.file-upload-label {
+    display: inline-block;
+    padding: 15px 30px;
+    background: #f9f9f9;
+    border: 2px dashed #d4af37;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.file-upload-label:hover {
+    background: #fff;
+    border-color: #2E8B57;
+    color: #2E8B57;
+}
+
+.file-upload-label i {
+    margin-right: 8px;
+}
+
+.file-upload-label input[type="file"] {
+    display: none;
+}
+
+.file-info {
+    font-size: 13px;
+    color: #999;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.guest-photos-title {
+    font-size: 22px;
+    color: #2E8B57;
+    margin-bottom: 20px;
+}
+
+.no-photos-yet {
+    padding: 40px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Carrusel de fotos de invitados */
+.guest-photos-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-height: 400px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    align-items: center;
+    min-height: 400px;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.carousel-slide img {
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-slide .photo-info {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.carousel-slide .photo-author {
+    font-size: 16px;
+    color: #2E8B57;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.carousel-slide .photo-date {
+    font-size: 13px;
+    color: #999;
+}
+
+.no-photos-carousel {
+    width: 100%;
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.no-photos-carousel p {
+    font-size: 16px;
+    font-style: italic;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(46, 139, 87, 0.9);
+    color: #fff;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.carousel-control:hover {
+    background: #236A45;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-control.prev {
+    left: 10px;
+}
+
+.carousel-control.next {
+    right: 10px;
+}
+
+.carousel-counter {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+}
+
+.carousel-counter span {
+    color: #2E8B57;
+    font-weight: 600;
+}
+
+/* Grid responsivo para fotos de invitados (legacy - por si se necesita) */
+#guest-photos-grid .img-wrap {
+    margin-bottom: 20px;
+}
+
+/* Animaciones para la galería */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gallery-subsection {
+    animation: fadeInUp 0.6s ease-out;
 }
 
 /* ============================================
@@ -2179,4 +2506,267 @@ footer p {
     border-color: #2E8B57 !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(46, 139, 87, 0.2);
+}
+/* ============================================
+   ESTILOS RESPONSIVE PARA LA GALERÍA
+   ============================================ */
+
+@media (max-width: 991px) {
+    .gallery-subsection-title {
+        font-size: 24px;
+    }
+    
+    .gallery-subsection {
+        margin-bottom: 50px;
+        padding: 30px 0;
+    }
+    
+    .music-subsection,
+    .upload-subsection {
+        padding: 40px 15px;
+        margin: 50px 0;
+    }
+    
+    .upload-box {
+        padding: 30px 20px;
+    }
+    
+    /* Carrusel responsive */
+    .guest-photos-carousel {
+        min-height: 350px;
+        padding: 15px;
+    }
+    
+    .carousel-track {
+        min-height: 350px;
+    }
+    
+    .carousel-slide img {
+        max-height: 400px;
+    }
+    
+    .carousel-control {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery-subtitle {
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+    
+    .gallery-subsection-title {
+        font-size: 22px;
+    }
+    
+    .gallery-subsection-desc {
+        font-size: 14px;
+    }
+    
+    .gallery-subsection {
+        margin-bottom: 40px;
+        padding: 25px 0;
+    }
+    
+    .coming-soon-box {
+        padding: 40px 20px;
+    }
+    
+    .coming-soon-box i {
+        font-size: 60px;
+    }
+    
+    .upload-box h5 {
+        font-size: 20px;
+    }
+    
+    .upload-icon i {
+        font-size: 50px;
+    }
+    
+    .guest-photos-title {
+        font-size: 20px;
+    }
+    
+    /* Carrusel responsive tablet */
+    .guest-photos-carousel {
+        min-height: 320px;
+        padding: 15px;
+    }
+    
+    .carousel-track {
+        min-height: 320px;
+    }
+    
+    .carousel-slide {
+        padding: 15px;
+    }
+    
+    .carousel-slide img {
+        max-height: 350px;
+    }
+    
+    .carousel-control {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .carousel-control.prev {
+        left: 5px;
+    }
+    
+    .carousel-control.next {
+        right: 5px;
+    }
+    
+    .carousel-counter {
+        font-size: 14px;
+        margin-top: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-subtitle {
+        font-size: 13px;
+    }
+    
+    .gallery-subsection-title {
+        font-size: 20px;
+    }
+    
+    .gallery-subsection-title i {
+        display: block;
+        margin: 0 0 10px 0;
+        font-size: 24px;
+    }
+    
+    .gallery-subsection-desc {
+        font-size: 13px;
+        padding: 0 15px;
+    }
+    
+    .gallery-subsection {
+        margin-bottom: 35px;
+        padding: 20px 0;
+    }
+    
+    .music-subsection,
+    .upload-subsection {
+        padding: 30px 10px;
+        margin: 40px 0;
+        border-radius: 8px;
+    }
+    
+    .coming-soon-box {
+        padding: 30px 15px;
+    }
+    
+    .coming-soon-box i {
+        font-size: 50px;
+    }
+    
+    .coming-soon-box p {
+        font-size: 14px;
+    }
+    
+    .upload-box {
+        padding: 25px 15px;
+    }
+    
+    .upload-box h5 {
+        font-size: 18px;
+    }
+    
+    .upload-box p {
+        font-size: 14px;
+    }
+    
+    .upload-icon i {
+        font-size: 45px;
+    }
+    
+    .file-upload-label {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .guest-photos-title {
+        font-size: 18px;
+    }
+    
+    /* Carrusel responsive móvil */
+    .guest-photos-carousel {
+        min-height: 280px;
+        padding: 10px;
+    }
+    
+    .carousel-track {
+        min-height: 280px;
+    }
+    
+    .carousel-slide {
+        padding: 10px;
+    }
+    
+    .carousel-slide img {
+        max-height: 300px;
+    }
+    
+    .carousel-slide .photo-info {
+        margin-top: 15px;
+    }
+    
+    .carousel-slide .photo-author {
+        font-size: 14px;
+    }
+    
+    .carousel-slide .photo-date {
+        font-size: 12px;
+    }
+    
+    .carousel-control {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .carousel-control.prev {
+        left: 5px;
+    }
+    
+    .carousel-control.next {
+        right: 5px;
+    }
+    
+    .carousel-counter {
+        font-size: 13px;
+        margin-top: 10px;
+    }
+    
+    .no-photos-carousel {
+        padding: 40px 15px;
+    }
+    
+    .no-photos-carousel i {
+        font-size: 50px;
+    }
+    
+    .no-photos-carousel p {
+        font-size: 14px;
+    }
+    
+    /* Ajustar grid de fotos en móvil (legacy) */
+    #guest-photos-grid .col-xs-6 {
+        width: 50%;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    #guest-photos-grid .img-wrap {
+        margin-bottom: 10px;
+    }
 }
