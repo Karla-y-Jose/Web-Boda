@@ -234,15 +234,15 @@ $(document).ready(function() {
                 
                 // Mostrar modal de confirmación
                 setTimeout(function() {
-                    $('#rsvp-modal').modal('show');
+                    $('#rsvp-modal').addClass('active');
                     
                     // Agregar botones de calendario con la misma funcionalidad de la sección de eventos
                     var calendarButtons = `
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
                             <button onclick="agregarAlCalendario('Boda Karla & Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
-                                    class="btn btn-small btn-fill" 
-                                    style="background:#d4af37; color:#fff; padding:12px 20px; border:none; cursor:pointer; width: 100%;">
-                                <i class="fa fa-calendar"></i> Añadir al Calendario
+                                    class="btn btn-fill calendar-btn-modal" 
+                                    style="width: 100%;">
+                                <i class="fa fa-calendar" style="margin-right: 8px;"></i> Añadir al Calendario
                             </button>
                         </div>
                     `;
@@ -393,58 +393,46 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     var icsUrl = URL.createObjectURL(icsBlob);
 
     var opciones = `
-        <div id="calendar-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                                             background: rgba(0,0,0,0.6); z-index: 9998; cursor: pointer; 
-                                             backdrop-filter: blur(2px); animation: fadeIn 0.3s ease;">
-            <div onclick="event.stopPropagation()" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 40px; border-radius: 16px; 
-                        box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05); z-index: 9999; text-align: center; 
-                        min-width: 340px; max-width: 420px; animation: slideIn 0.3s ease;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.08);">
-                    <div style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); 
-                                border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; 
-                                justify-content: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); flex-shrink: 0;">
-                        <i class="fa fa-calendar" style="color: #fff; font-size: 24px;"></i>
+        <div id="calendar-modal-overlay" class="gifts-modal active" style="z-index: 9998;">
+            <div onclick="event.stopPropagation()" class="gifts-modal-content calendar-modal-content">
+                <button onclick="cerrarModalCalendario()" class="gifts-modal-close">
+                    <i class="fa fa-times"></i>
+                </button>
+                <h3 class="gifts-modal-title">
+                    <i class="fa fa-calendar"></i> Agregar al Calendario
+                </h3>
+                <p class="gifts-modal-subtitle">Selecciona tu aplicación de calendario preferida</p>
+                
+                <div class="gifts-options calendar-options">
+                    <!-- Opción Google Calendar -->
+                    <div class="gift-option calendar-option">
+                        <div class="gift-option-icon google-color">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <h4>Google Calendar</h4>
+                        <p>Sincroniza con todos tus dispositivos</p>
+                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
+                           target="_blank"
+                           class="btn-gift-option google-btn">
+                            <i class="fa fa-external-link"></i> Ir a Google
+                        </a>
                     </div>
-                    <h2 style="margin: 0; color: #2c3e50; font-family: 'Didot', serif; font-size: 24px; font-weight: 400; letter-spacing: 0.5px;">Agregar al Calendario</h2>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 14px;">
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
-                       target="_blank" 
-                       class="calendar-modal-btn-gold"
-                       style="padding: 16px 24px; background: #d4af37; color: #2E8B57; text-decoration: none; 
-                           border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
-                           transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
-                           justify-content: center; letter-spacing: 0.3px;">
-                       <i class="fab fa-google calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Google Calendar
-                    </a>
-                    <a href="${icsUrl}" download="evento-boda.ics"
-                       class="calendar-modal-btn-gold"
-                       style="padding: 16px 24px; background: #d4af37; color: #2E8B57; text-decoration: none; 
-                           border: 2px solid #d4af37; border-radius: 8px; font-weight: 600; cursor: pointer; 
-                           transition: all 0.3s ease; font-size: 15px; display: flex; align-items: center; 
-                           justify-content: center; letter-spacing: 0.3px;">
-                       <i class="fab fa-apple calendar-icon" style="color: #2E8B57; margin-right: 10px; font-size: 18px; transition: all 0.3s ease;"></i>Apple Calendar
-                    </a>
-                    <button onclick="cerrarModalCalendario()" class="calendar-modal-btn-green"
-                            style="padding: 14px 24px; background: #2E8B57; color: #fff; 
-                            border: 2px solid #2E8B57; border-radius: 8px; font-weight: 600; cursor: pointer; 
-                            transition: all 0.3s ease; font-size: 14px; margin-top: 10px; letter-spacing: 0.3px;">
-                       Cerrar
-                    </button>
+
+                    <!-- Opción Apple Calendar -->
+                    <div class="gift-option calendar-option">
+                        <div class="gift-option-icon apple-color">
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <h4>Apple Calendar</h4>
+                        <p>Para iPhone, iPad y Mac</p>
+                        <a href="${icsUrl}" download="evento-boda.ics"
+                           class="btn-gift-option apple-btn">
+                            <i class="fa fa-download"></i> Descargar ICS
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        <style>
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes slideIn {
-                from { opacity: 0; transform: translate(-50%, -45%); }
-                to { opacity: 1; transform: translate(-50%, -50%); }
-            }
-        </style>
     `;
 
     var modal = document.createElement('div');
@@ -793,27 +781,46 @@ if (playlist.length > 0) {
     musicNotification.innerHTML = `
         <div style="
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(15, 59, 46, 0.95);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0F3B2E 0%, #2E8B57 100%);
             color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            padding: 25px 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             font-family: 'Karla', sans-serif;
-            font-size: 14px;
-            z-index: 1000000;
+            font-size: 18px;
+            z-index: 1000001;
             cursor: pointer;
-            animation: fadeInUp 0.5s ease;
+            animation: fadeInScale 0.5s ease, pulse 2s infinite;
             display: none;
+            text-align: center;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            max-width: 90%;
         " id="music-notif-content">
-            <i class="fa fa-music" style="margin-right: 10px;"></i>
-            Toca la pantalla para activar música
+            <i class="fa fa-music" style="margin-right: 10px; font-size: 22px;"></i>
+            <div style="margin-top: 10px; font-weight: 600; font-size: 20px;">Toca aquí para activar la música</div>
+            <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">🎵 Disfruta de nuestra selección musical</div>
         </div>
         <style>
-            @keyframes fadeInUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+            @keyframes fadeInScale {
+                from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+            @keyframes pulse {
+                0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+                50% { box-shadow: 0 10px 40px rgba(212, 175, 55, 0.6); }
+            }
+            @media (max-width: 480px) {
+                #music-notif-content {
+                    padding: 30px 25px !important;
+                    font-size: 16px !important;
+                    border-radius: 16px !important;
+                }
+                #music-notif-content > div:first-of-type {
+                    font-size: 18px !important;
+                }
             }
         </style>
     `;
@@ -848,6 +855,8 @@ if (playlist.length > 0) {
                 window.removeEventListener('scroll', scrollHandler);
                 musicOverlay.removeEventListener('click', startMusic);
                 musicOverlay.removeEventListener('touchstart', startMusic);
+                document.getElementById('music-notif-content').removeEventListener('click', startMusic);
+                document.getElementById('music-notif-content').removeEventListener('touchstart', startMusic);
             }).catch(function(error) {
                 console.log('⚠️ No se pudo reproducir:', error.message);
             });
@@ -868,7 +877,12 @@ if (playlist.length > 0) {
             musicOverlay.style.display = 'block';
             document.getElementById('music-notif-content').style.display = 'block';
             
-            // El overlay captura el click en toda la página
+            // Hacer la notificación clickeable directamente
+            const notifContent = document.getElementById('music-notif-content');
+            notifContent.addEventListener('click', startMusic);
+            notifContent.addEventListener('touchstart', startMusic, { passive: true });
+            
+            // El overlay también captura clicks fuera de la notificación
             musicOverlay.addEventListener('click', startMusic);
             musicOverlay.addEventListener('touchstart', startMusic, { passive: true });
         }
@@ -1228,4 +1242,61 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadGuestPhotos();
     }, 1000);
+});
+
+/* ============================================
+   MODAL DE MESAS DE REGALOS
+   ============================================ */
+
+function openGiftsModal() {
+    const modal = document.getElementById('gifts-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+    }
+}
+
+function closeGiftsModal() {
+    const modal = document.getElementById('gifts-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restaurar scroll
+    }
+}
+
+function closeRsvpModal() {
+    const modal = document.getElementById('rsvp-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restaurar scroll
+    }
+}
+
+// Cerrar modal al hacer click fuera del contenido
+document.addEventListener('DOMContentLoaded', function() {
+    const giftsModal = document.getElementById('gifts-modal');
+    if (giftsModal) {
+        giftsModal.addEventListener('click', function(e) {
+            if (e.target === giftsModal) {
+                closeGiftsModal();
+            }
+        });
+    }
+    
+    const rsvpModal = document.getElementById('rsvp-modal');
+    if (rsvpModal) {
+        rsvpModal.addEventListener('click', function(e) {
+            if (e.target === rsvpModal) {
+                closeRsvpModal();
+            }
+        });
+    }
+    
+    // Cerrar modales con tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeGiftsModal();
+            closeRsvpModal();
+        }
+    });
 });

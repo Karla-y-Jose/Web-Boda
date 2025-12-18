@@ -92,7 +92,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header">Nuestra Historia</h3>
+                    <h3 class="header"><i class="fa fa-heart"></i>Nuestra Historia</h3>
                 </div>
             </div>
             <div class="row">
@@ -126,7 +126,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header">Nuestras Familias</h3>
+                    <h3 class="header"><i class="fa fa-users"></i>Nuestras Familias</h3>
                 </div>
             </div>
             <div class="row">
@@ -164,7 +164,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h3 class="header text-center">Eventos</h3>
+                    <h3 class="header text-center"><i class="fa fa-calendar-check-o"></i>Eventos</h3>
                 </div>
             </div>
             <div class="row">
@@ -227,7 +227,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h3 class="header text-center">Protocolos</h3>
+                    <h3 class="header text-center"><i class="fa fa-info-circle"></i>Protocolos</h3>
                 </div>
             </div>
             <div class="row">
@@ -266,7 +266,7 @@
     <!-- Venue Map -->
     <section id="map" class="section-padding">
         <div class="text-center">
-            <h3 class="header">¿Cómo llegar?</h3>
+            <h3 class="header"><i class="fa fa-map-marker"></i>¿Cómo llegar?</h3>
             <p style="padding-bottom: 20px;">Es más fácil de lo que crees</p>
         </div>
         <div id="map-canvas"></div>
@@ -314,8 +314,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header">¿Vienes de otro estado?<br>
-                        ¿Te gustaría quedarte cerca?
+                    <h3 class="header"><i class="fa fa-bed"></i>¿Vienes de otro estado?<br>
+                        <span style="font-size: 0.8em; display: inline-block; margin-top: 10px;">¿Te gustaría quedarte cerca?</span>
                     </h3>
                     <p>
                         Encuentra hospedaje en Tesistán a través de Airbnb
@@ -337,7 +337,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header">Nuestra Galería</h3>
+                    <h3 class="header"><i class="fa fa-camera"></i>Nuestra Galería</h3>
                     <p class="gallery-subtitle">Momentos que atesoramos</p>
                 </div>
             </div>
@@ -347,7 +347,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <h4 class="gallery-subsection-title">
-                            <i class="fa fa-heart"></i> La Pedida de Mano
+                            La Pedida de Mano
                         </h4>
                         <p class="gallery-subsection-desc">El momento en que nuestro sueño comenzó</p>
                     </div>
@@ -391,7 +391,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <h4 class="gallery-subsection-title">
-                            <i class="fa fa-calendar-check-o"></i> Save the Date
+                            Save the Date
                         </h4>
                         <p class="gallery-subsection-desc">Contando los días para nuestro gran día</p>
                     </div>
@@ -445,7 +445,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <h4 class="gallery-subsection-title">
-                            <i class="fa fa-music"></i> Nuestra Música
+                            Nuestra Música
                         </h4>
                         <p class="gallery-subsection-desc">Las canciones que nos enamoran</p>
                     </div>
@@ -485,7 +485,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <h4 class="gallery-subsection-title">
-                            <i class="fa fa-camera"></i> El Día de Nuestra Boda
+                            El Día de Nuestra Boda
                         </h4>
                         <p class="gallery-subsection-desc">Pronto compartiremos los mejores momentos de nuestra celebración</p>
                     </div>
@@ -501,23 +501,14 @@
             </div>
 
             <!-- Subsección 4: Sube tus Fotos -->
-            <div class="gallery-subsection upload-subsection">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h4 class="gallery-subsection-title">
-                            <i class="fa fa-upload"></i> Comparte tus Momentos
-                        </h4>
-                        <p class="gallery-subsection-desc">¿Capturaste un momento especial? ¡Compártelo con nosotros!</p>
-                    </div>
-                </div>
+            <div class="gallery-subsection upload-subsection" style="margin: 10px 0; padding-bottom: 0;">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="upload-box">
-                            <div class="upload-icon">
-                                <i class="fa fa-cloud-upload"></i>
-                            </div>
-                            <h5>Sube tus fotos aquí</h5>
-                            <p>Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
+                            <h4 class="gallery-subsection-title">
+                                <i class="fa fa-upload"></i> Comparte tus Momentos
+                            </h4>
+                            <p class="gallery-subsection-desc">Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
                             <form id="photo-upload-form" class="upload-form">
                                 <div class="form-group">
                                     <input type="text" class="form-control" id="guest-name" placeholder="Tu nombre" required>
@@ -551,8 +542,8 @@
                             <!-- Las fotos subidas aparecerán aquí dinámicamente -->
                             <div class="carousel-track" id="carousel-track">
                                 <div class="no-photos-carousel">
-                                    <i class="fa fa-camera" style="font-size: 60px; color: #d4af37; margin-bottom: 20px;"></i>
-                                    <p>Aún no hay fotos subidas. ¡Sé el primero en compartir!</p>
+                                    <i class="fa fa-image" style="font-size: 60px; color: #d4af37; margin-bottom: 20px;"></i>
+                                    <p>Aun no hay fotos subidas ¡Ayúdanos a llenar este álbum de memorias!</p>
                                 </div>
                             </div>
                             <!-- Controles del carrusel -->
@@ -580,47 +571,85 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header">Mesa de Regalos</h3>
+                    <h3 class="header"><i class="fa fa-gift"></i>Mesa de Regalos</h3>
                     <p>Tu presencia es el mejor regalo, pero si deseas ayudarnos...</p>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center">
                     <p>
-                        Encontraste la mesa de regalos en Liverpool donde podrás ayudarnos a 
-                        decorar nuestro hogar.
+                        Hemos creado mesas de regalos para que nos ayudes a decorar nuestro hogar.
                     </p>
-                    <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771" target="_blank" class="btn btn-fill btn-large">
-                        <i class="fa fa-gift"></i> Ver Mesa de Regalos
-                    </a>
-                    <p style="margin-top: 15px; font-size: 14px; color: #666;">Número de evento: 51898771</p>
+                    <button class="circular-gift-btn" onclick="openGiftsModal()" title="Ver Mesas de Regalos">
+                        <i class="fa fa-gift"></i>
+                    </button>
+                    <p style="margin-top: 15px; color: #666; font-size: 14px;">Haz click en el regalo</p>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Modal de Mesas de Regalos -->
+    <div id="gifts-modal" class="gifts-modal">
+        <div class="gifts-modal-content">
+            <button class="gifts-modal-close" onclick="closeGiftsModal()">
+                <i class="fa fa-times"></i>
+            </button>
+            <h3 class="gifts-modal-title">
+                <i class="fa fa-gift"></i> Elige tu Mesa de Regalos
+            </h3>
+            <p class="gifts-modal-subtitle">Selecciona la tienda de tu preferencia</p>
+            
+            <div class="gifts-options">
+                <!-- Opción 1: Liverpool -->
+                <div class="gift-option">
+                    <div class="gift-option-icon liverpool-color">
+                        <i class="fa fa-shopping-bag"></i>
+                    </div>
+                    <h4>Liverpool</h4>
+                    <p>Número de evento: <strong>51898771</strong></p>
+                    <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771" 
+                       target="_blank" 
+                       class="btn-gift-option liverpool-btn">
+                        <i class="fa fa-external-link"></i> Ir a Liverpool
+                    </a>
+                </div>
+
+                <!-- Opción 2: Amazon -->
+                <div class="gift-option">
+                    <div class="gift-option-icon amazon-color">
+                        <i class="fab fa-amazon"></i>
+                    </div>
+                    <h4>Amazon</h4>
+                    <p>Lista de bodas</p>
+                    <a href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT" 
+                       target="_blank" 
+                       class="btn-gift-option amazon-btn">
+                        <i class="fa fa-external-link"></i> Ir a Amazon
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- RSVP Section -->
     <section id="rsvp" class="rsvp text-center section-padding">
-        <div id="rsvp-modal" class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                        <div class="section-padding">
-                            <img src="img/logo2.png" alt="Karla & Jose" style="margin-top: 20px; max-width: 150px;">
-                            <h3>¡Gracias!</h3>
-                            <p>Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
-                                <div id="add-to-cal" style="margin-top: 20px;"></div>
-                        </div>
-                    </div>
-                </div>
+        <div id="rsvp-modal" class="gifts-modal" tabindex="-1" role="dialog">
+            <div class="gifts-modal-content rsvp-modal-content">
+                <button type="button" class="gifts-modal-close" onclick="closeRsvpModal();">
+                    <i class="fa fa-times"></i>
+                </button>
+                <img src="img/logo2.png" alt="Karla & Jose" style="margin: 0 auto 20px; max-width: 150px; display: block;">
+                <h3 class="gifts-modal-title">¡Gracias!</h3>
+                <p class="gifts-modal-subtitle">Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
+                <div id="add-to-cal" style="margin-top: 20px;"></div>
             </div>
         </div>
 
         <div class="container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                    <h3 class="header">Confirma tu asistencia</h3>
+                    <h3 class="header"><i class="fa fa-envelope"></i>Confirma tu asistencia</h3>
 
                     <!-- RSVP Search Form -->
                     <div id="rsvp-search-container">

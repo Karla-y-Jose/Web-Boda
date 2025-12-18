@@ -445,23 +445,25 @@ header nav ul.member-actions li:first-child a:hover:after {
 /* Buttons in Hero */
 .hero .row .btn {
     animation: fadeInUp 1s ease-out 0.8s backwards;
-    background-color: transparent;
-    color: #fff;
-    border: 2px solid #fff;
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
 }
 
 .hero .row .btn:hover {
-    background-color: #d4af37;
-    color: #2E8B57;
-    border: 2px solid #2E8B57;
+    background-color: #d4af37 !important;
+    background: #d4af37 !important;
+    color: #2E8B57 !important;
+    border: 2px solid #d4af37 !important;
     transform: translateY(-3px);
     box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
 .btn.btn-fill {
-    background-color: #d4af37;
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
     color: #fff;
-    border: 2px solid #d4af37;
+    border: 2px solid #fff;
     padding: 15px 50px;
     border-radius: 30px;
     text-transform: uppercase;
@@ -470,7 +472,7 @@ header nav ul.member-actions li:first-child a:hover:after {
     display: inline-block;
     cursor: pointer;
     letter-spacing: 1px;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s ease;
     position: relative;
 }
 
@@ -486,7 +488,7 @@ header nav ul.member-actions li:first-child a:hover:after {
 }
 
 .btn.btn-fill:hover {
-    background-color: #fff;
+    background: #fff;
     color: #d4af37;
     border: 2px solid #d4af37;
     transform: translateY(-3px);
@@ -495,9 +497,9 @@ header nav ul.member-actions li:first-child a:hover:after {
 
 /* Botón verde (para buscar otra invitación) */
 .btn.btn-green {
-    background-color: #2E8B57;
+    background: linear-gradient(135deg, #2E8B57 0%, #3cb371 100%);
     color: #fff;
-    border: 2px solid #2E8B57;
+    border: 2px solid #fff;
     padding: 15px 50px;
     border-radius: 30px;
     text-transform: uppercase;
@@ -506,12 +508,12 @@ header nav ul.member-actions li:first-child a:hover:after {
     display: inline-block;
     cursor: pointer;
     letter-spacing: 1px;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s ease;
     position: relative;
 }
 
 .btn.btn-green:hover {
-    background-color: #fff;
+    background: #fff;
     color: #2E8B57;
     border: 2px solid #2E8B57;
     transform: translateY(-3px);
@@ -597,11 +599,36 @@ section {
 
 .header {
     font-size: 42px;
-    color: #4a4a4a;
+    color: #2E8B57;
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 40px;
     font-family: 'Didot', serif;
     font-weight: 400;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    margin: 15px auto 0;
+}
+
+.header i {
+    color: #d4af37;
+    margin-right: 15px;
+    font-size: 38px;
+}
+
+.header.no-icon {
+    padding-bottom: 20px;
+}
+
+.header.no-icon::after {
+    margin-top: 15px;
 }
 
 /* Alternating Sections */
@@ -1050,13 +1077,21 @@ section {
 .no-photos-carousel {
     width: 100%;
     text-align: center;
-    padding: 60px 20px;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    border-radius: 12px;
+    border: 2px dashed #d4af37;
     color: #999;
+}
+
+.no-photos-carousel i {
+    opacity: 0.6;
 }
 
 .no-photos-carousel p {
     font-size: 16px;
-    font-style: italic;
+    color: #777;
+    margin: 0;
 }
 
 .carousel-control {
@@ -1463,13 +1498,15 @@ section {
 }
 
 .btn-accent {
-    background-color: #d4af37;
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
     color: #fff;
+    border: 2px solid #fff;
 }
 
 .btn-accent:hover {
-    background-color: #c29d2c;
-    color: #fff;
+    background: #fff;
+    color: #d4af37;
+    border: 2px solid #d4af37;
 }
 
 .btn-small {
@@ -1592,10 +1629,256 @@ section {
 
 .gifts {
     background: #f9f9f9;
+    padding-bottom: 5px;
 }
 
 .gifts p {
     margin-bottom: 15px;
+}
+
+/* ============================================
+   BOTÓN CIRCULAR DE REGALO EN SECCIÓN
+   ============================================ */
+
+.circular-gift-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+    color: #fff;
+    border: 3px solid #fff;
+    box-shadow: none;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    margin: 20px auto;
+    position: relative;
+}
+
+.circular-gift-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 40px rgba(212, 175, 55, 0.6);
+    background: #fff;
+    border-color: #d4af37;
+    color: #d4af37;
+}
+
+/* ============================================
+   MODAL DE MESAS DE REGALOS
+   ============================================ */
+
+.gifts-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.gifts-modal.active {
+    display: flex;
+}
+
+.gifts-modal-content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 50px 40px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.gifts-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.gifts-modal-close:hover {
+    background: #f0f0f0;
+    color: #2E8B57;
+    transform: rotate(90deg);
+}
+
+.gifts-modal-title {
+    font-size: 32px;
+    color: #2E8B57;
+    margin-bottom: 10px;
+    text-align: center;
+    font-family: 'Didot', serif;
+}
+
+.gifts-modal-title i {
+    color: #d4af37;
+    margin-right: 10px;
+}
+
+.gifts-modal-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+.gifts-options {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.gift-option {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.gift-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #d4af37;
+}
+
+.gift-option-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+    color: #fff;
+}
+
+.liverpool-color {
+    background: linear-gradient(135deg, #e31e24 0%, #ff4444 100%);
+}
+
+.amazon-color {
+    background: linear-gradient(135deg, #ff9900 0%, #ffb84d 100%);
+}
+
+.google-color {
+    background: linear-gradient(135deg, #4285f4 0%, #669df6 100%);
+}
+
+.apple-color {
+    background: linear-gradient(135deg, #555555 0%, #888888 100%);
+}
+
+.gift-option h4 {
+    font-size: 24px;
+    color: #2E8B57;
+    margin-bottom: 10px;
+}
+
+.gift-option p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.btn-gift-option {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.liverpool-btn {
+    background: linear-gradient(135deg, #e31e24 0%, #ff4444 100%);
+}
+
+.liverpool-btn:hover {
+    background: linear-gradient(135deg, #c71a1f 0%, #e31e24 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(227, 30, 36, 0.3);
+    color: #fff;
+}
+
+.amazon-btn {
+    background: linear-gradient(135deg, #ff9900 0%, #ffb84d 100%);
+}
+
+.amazon-btn:hover {
+    background: linear-gradient(135deg, #e68a00 0%, #ff9900 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+    color: #fff;
+}
+
+.google-btn {
+    background: linear-gradient(135deg, #4285f4 0%, #669df6 100%);
+}
+
+.google-btn:hover {
+    background: linear-gradient(135deg, #3367d6 0%, #4285f4 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+    color: #fff;
+}
+
+.apple-btn {
+    background: linear-gradient(135deg, #555555 0%, #888888 100%);
+}
+
+.apple-btn:hover {
+    background: linear-gradient(135deg, #333333 0%, #555555 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(85, 85, 85, 0.3);
+    color: #fff;
 }
 
 /* ============================================
@@ -2321,8 +2604,20 @@ footer p {
     }
 
     .header {
-        font-size: 32px;
+        font-size: 36px;
         margin-bottom: 30px;
+        padding-bottom: 18px;
+    }
+
+    .header i {
+        font-size: 32px;
+        margin-right: 12px;
+    }
+
+    .header::after {
+        width: 70px;
+        height: 2.5px;
+        margin-top: 13px;
     }
 
     .section-padding {
@@ -2347,6 +2642,13 @@ footer p {
 
     .family-box {
         margin-bottom: 20px;
+    }
+    
+    /* Botón circular de regalos responsive */
+    .circular-gift-btn {
+        width: 100px;
+        height: 100px;
+        font-size: 42px;
     }
 }
 
@@ -2374,6 +2676,22 @@ footer p {
 
     .countdown-hero div {
         flex: 0 0 calc(50% - 5px);
+    }
+
+    .header {
+        font-size: 32px;
+        padding-bottom: 15px;
+    }
+
+    .header i {
+        font-size: 28px;
+        margin-right: 10px;
+    }
+
+    .header::after {
+        width: 60px;
+        height: 2px;
+        margin-top: 12px;
     }
 
     .countdown-hero span {
@@ -2460,24 +2778,35 @@ footer p {
 /* Modal Styles */
 .modal-content {
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    background: #fff;
 }
 
 .modal-body {
-    padding: 30px;
+    padding: 50px 40px;
 }
 
 .modal-body .close {
-    font-size: 24px;
-    color: #333;
-    opacity: 0.7;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px;
+    color: #666;
+    opacity: 1;
     transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .modal-body .close:hover {
-    opacity: 1;
+    background: #f0f0f0;
     color: #2E8B57;
+    transform: rotate(90deg);
 }
 
 /* ============================================
@@ -2506,6 +2835,24 @@ footer p {
     border-color: #2E8B57 !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(46, 139, 87, 0.2);
+}
+
+.calendar-btn-modal {
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%) !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.calendar-btn-modal:hover {
+    background: #fff !important;
+    color: #d4af37 !important;
+    border-color: #d4af37 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
 }
 /* ============================================
    ESTILOS RESPONSIVE PARA LA GALERÍA
@@ -2757,6 +3104,52 @@ footer p {
     
     .no-photos-carousel p {
         font-size: 14px;
+    }
+    
+    /* Botón circular de regalos responsive móvil */
+    .circular-gift-btn {
+        width: 90px;
+        height: 90px;
+        font-size: 38px;
+    }
+    
+    /* Modal de regalos responsive móvil */
+    .gifts-modal-content {
+        padding: 30px 20px;
+        width: 95%;
+    }
+    
+    .modal-body {
+        padding: 30px 20px;
+    }
+    
+    .gifts-modal-title {
+        font-size: 22px;
+    }
+    
+    .gifts-modal-subtitle {
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+    
+    .gifts-options {
+        gap: 20px;
+        flex-direction: column;
+    }
+    
+    .gift-option {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .gift-option-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 35px;
+    }
+    
+    .gift-option h4 {
+        font-size: 20px;
     }
     
     /* Ajustar grid de fotos en móvil (legacy) */
