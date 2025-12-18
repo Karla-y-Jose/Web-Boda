@@ -137,8 +137,6 @@ $(document).ready(function() {
             dataType: 'json'
         })
         .done(function(response) {
-            console.log('Search Response:', response);
-            
             if (response.result === 'success') {
                 currentGuests = response.invitados;
                 displayGuestList(response.grupo, response.invitados);
@@ -227,8 +225,6 @@ $(document).ready(function() {
             dataType: 'json'
         })
         .done(function(response) {
-            console.log('Update Response:', response);
-            
             if (response.result === 'success') {
                 $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
                 
@@ -714,7 +710,6 @@ const playlist = [
 ];
 
 let currentTrackIndex = 0;
-let isPlaying = false;
 
 const audioPlayer = document.getElementById('audio-player');
 const playPauseBtn = document.getElementById('play-pause-btn');
@@ -737,7 +732,6 @@ function syncPlayPauseUI() {
     if (!icon) return;
 
     const playingNow = isAudioPlaying();
-    isPlaying = playingNow;
     icon.classList.toggle('fa-play', !playingNow);
     icon.classList.toggle('fa-pause', playingNow);
     playPauseBtn.setAttribute('title', playingNow ? 'Pausar' : 'Reproducir');
@@ -960,8 +954,6 @@ if (playlist.length > 0) {
     function startMusic() {
         if (musicStarted) return;
         
-        console.log('🎵 Iniciando música...');
-        
         const playPromise = audioPlayer.play();
         
         if (playPromise !== undefined) {
@@ -969,7 +961,6 @@ if (playlist.length > 0) {
                 // Reproducción exitosa
                 musicStarted = true;
                 syncPlayPauseUI();
-                console.log('✅ Música reproduciéndose');
                 
                 // Ocultar overlay y notificación
                 musicOverlay.style.display = 'none';
@@ -982,7 +973,6 @@ if (playlist.length > 0) {
                 document.getElementById('music-notif-content').removeEventListener('click', startMusic);
                 document.getElementById('music-notif-content').removeEventListener('touchstart', startMusic);
             }).catch(function(error) {
-                console.log('⚠️ No se pudo reproducir:', error.message);
                 syncPlayPauseUI();
             });
         }
@@ -996,7 +986,6 @@ if (playlist.length > 0) {
         
         if (scrolled > 50) {
             scrollDetected = true;
-            console.log('📜 Scroll detectado - mostrando notificación');
             
             // Mostrar overlay y notificación
             musicOverlay.style.display = 'block';
@@ -1172,7 +1161,6 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
         // Defensa extra (ya se validó antes del submit)
         const ext = getFileExtensionLower(file.name);
         if (ext === 'svg' || String(file.type || '').toLowerCase() === 'image/svg+xml') {
-            console.log(`Archivo ${file.name} es SVG, se omite`);
             failedCount++;
             continue;
         }
@@ -1200,7 +1188,6 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
             // Nota: Con mode: 'no-cors', no podemos leer la respuesta
             // Asumimos que fue exitoso si no hubo error
             uploadedCount++;
-            console.log(`✅ Foto ${file.name} subida exitosamente`);
             
         } catch (error) {
             console.error(`❌ Error subiendo ${file.name}:`, error);
@@ -1312,8 +1299,6 @@ async function loadGuestPhotos() {
             
             // Inicializar carrusel
             initializeCarousel(data.photos.length);
-            
-            console.log(`✅ ${data.photos.length} fotos cargadas en el carrusel`);
         }
     } catch (error) {
         console.error('Error cargando fotos:', error);
