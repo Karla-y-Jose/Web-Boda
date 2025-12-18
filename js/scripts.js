@@ -72,10 +72,10 @@ $(document).ready(function() {
 
     // ========== Nav Transformicon ==================
     /* When user clicks the Icon */
-    $('.nav-toggle').click(function () {
+    $('.nav-toggle').click(function (e) {
         $(this).toggleClass('active');
         $('.header-nav').toggleClass('open');
-        event.preventDefault();
+        e.preventDefault();
     });
     
     /* When user clicks a link */
@@ -111,12 +111,12 @@ $(document).ready(function() {
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
-    // IMPORTANTE: Reemplaza esta URL con la URL de tu Apps Script desplegado
+    // IMPORTANT: Replace this URL with your deployed Apps Script URL
     var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbziecc4wpBgW48ozxnbT29bJT-Qu1IKnbjKuRzmBb0WYGEuCvzk0wCJjAYlUI4aI6ZQMg/exec';
     
     var currentGuests = [];
 
-    // Buscar invitado por nombre
+    // Search guest by name
     $('#rsvp-search-form').on('submit', function(e) {
         e.preventDefault();
         var searchName = $('#rsvp-search-name').val().trim();
@@ -130,7 +130,7 @@ $(document).ready(function() {
         $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
-        // Usar GET con parámetros en la URL para evitar problemas de CORS
+        // Use GET with URL params to avoid CORS issues
         $.ajax({
             url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName),
             method: 'GET',
@@ -155,7 +155,7 @@ $(document).ready(function() {
         });
     });
 
-    // Mostrar lista de invitados
+    // Show guest list
     function displayGuestList(groupName, guests) {
         $('#alert-wrapper').html('');
         $('#rsvp-search-container').hide();
@@ -198,7 +198,7 @@ $(document).ready(function() {
         $('#guests-container').html(guestsHtml);
     }
 
-    // Confirmar asistencias
+    // Confirm attendance
     $('#confirm-attendance-btn').on('click', function() {
         var $btn = $(this);
         var updates = [];
@@ -216,7 +216,7 @@ $(document).ready(function() {
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
-        // Convertir updates a string JSON y codificarlo para URL
+        // Serialize updates to JSON and URL-encode for the query string
         var updatesJson = encodeURIComponent(JSON.stringify(updates));
         
         $.ajax({
@@ -228,11 +228,11 @@ $(document).ready(function() {
             if (response.result === 'success') {
                 $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
                 
-                // Mostrar modal de confirmación
+                // Show confirmation modal
                 setTimeout(function() {
                     $('#rsvp-modal').addClass('active');
                     
-                    // Agregar botones de calendario con la misma funcionalidad de la sección de eventos
+                    // Add calendar buttons with the same behavior as the events section
                     var calendarButtons = `
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
                             <button onclick="agregarAlCalendario('Boda Karla & Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
@@ -257,7 +257,7 @@ $(document).ready(function() {
         });
     });
 
-    // Volver a búsqueda
+    // Back to search
     $('#back-to-search-btn').on('click', function() {
         $('#rsvp-guest-list').hide();
         $('#rsvp-search-container').show();
@@ -266,81 +266,13 @@ $(document).ready(function() {
         $('#confirm-alert-wrapper').html('');
     });
      
-    // Helper function for alert markup (Rampatra style)
-    function alert_markup(type, message) {
-        var alertClass = 'alert-info';
-        if (type === 'success') alertClass = 'alert-success';
-        if (type === 'danger') alertClass = 'alert-danger';
-        if (type === 'warning') alertClass = 'alert-warning';
-        
-        return '<div class="alert ' + alertClass + '" style="margin-top: 15px;">' + message + '</div>';
-    }
-    
-    // Helper function for alert markup (Rampatra style)
+    // Helper function for alert markup
      function alert_markup(alert_type, msg) {
          return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">' 
                 + msg + 
                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
      }
-
-    // ========== Bootstrap Modal Plugin ==========
-    $(document).on('click', '[data-dismiss="modal"]', function() {
-        var modal = $(this).closest('.modal');
-        modal.fadeOut(300, function() {
-            modal.removeClass('in show');
-        });
-    });
-
-    $(document).on('click', '.modal', function(e) {
-        if (e.target === this) {
-            $(this).fadeOut(300, function() {
-                $(this).removeClass('in show');
-            });
-        }
-    });
 });
-
-// Show Custom Alert Messages
-function showAlert(type, message) {
-    var alertClass = 'alert alert-' + type;
-    var alertHTML = '<div class="' + alertClass + '" style="padding: 15px; margin-bottom: 20px; border-radius: 4px; display: none;">';
-    
-    if (type === 'success') {
-        alertHTML += '<i class="fa fa-check"></i> ' + message;
-        alertHTML += '</div>';
-        var $alert = $(alertHTML);
-        $alert.css({
-            'background-color': '#d4f1d4',
-            'color': '#155724',
-            'border': '1px solid #c3e6c3'
-        });
-    } else if (type === 'warning') {
-        alertHTML += '<i class="fa fa-exclamation-triangle"></i> ' + message;
-        alertHTML += '</div>';
-        var $alert = $(alertHTML);
-        $alert.css({
-            'background-color': '#fff3cd',
-            'color': '#856404',
-            'border': '1px solid #ffeaa7'
-        });
-    } else {
-        alertHTML += '<i class="fa fa-times-circle"></i> ' + message;
-        alertHTML += '</div>';
-        var $alert = $(alertHTML);
-        $alert.css({
-            'background-color': '#f8d7da',
-            'color': '#721c24',
-            'border': '1px solid #f5c6cb'
-        });
-    }
-
-    $('#alert-wrapper').html($alert);
-    $alert.slideDown(300);
-
-    setTimeout(function() {
-        $alert.slideUp(300, function() { $alert.remove(); });
-    }, 4000);
-}
 
 // Update Countdown Timer
 function updateCountdown() {
@@ -369,7 +301,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     var encodedTitulo = encodeURIComponent(titulo);
     var encodedUbicacion = encodeURIComponent(ubicacion);
     
-    // Generar archivo ICS para Apple Calendar
+    // Generate an ICS file for Apple Calendar
     var icsContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
@@ -400,7 +332,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                 <p class="gifts-modal-subtitle">Selecciona tu aplicación de calendario preferida</p>
                 
                 <div class="gifts-options calendar-options">
-                    <!-- Opción Google Calendar -->
+                    <!-- Google Calendar option -->
                     <div class="gift-option calendar-option">
                         <div class="gift-option-icon google-color">
                             <i class="fab fa-google"></i>
@@ -414,7 +346,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                         </a>
                     </div>
 
-                    <!-- Opción Apple Calendar -->
+                    <!-- Apple Calendar option -->
                     <div class="gift-option calendar-option">
                         <div class="gift-option-icon apple-color">
                             <i class="fab fa-apple"></i>
@@ -436,7 +368,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     modal.innerHTML = opciones;
     document.body.appendChild(modal);
     
-    // Cerrar al hacer clic en el overlay
+    // Close when clicking on the overlay
     document.getElementById('calendar-modal-overlay').onclick = function(e) {
         if (e.target.id === 'calendar-modal-overlay') {
             cerrarModalCalendario();
@@ -473,7 +405,7 @@ function initMap() {
     var receptionLatLng = [20.7784148, -103.4550886];
     var centerLatLng = [20.761404, -103.4241881];
 
-    // Track last selected destination for the "Cómo llegar" button
+    // Track last selected destination for the directions button
     var currentDestinationLatLng = ceremonyLatLng;
 
     var map = L.map(mapEl, {
@@ -562,9 +494,8 @@ function initMap() {
         var dest = Array.isArray(destLatLng) ? destLatLng : ceremonyLatLng;
         var destinationParam = encodeURIComponent(dest[0] + ',' + dest[1]);
 
-        // IMPORTANT: You asked to request location permission first, then open Google Maps.
-        // Browsers may block opening a *new tab* after the permission prompt (not a direct user gesture),
-        // so we navigate in the same tab for reliable one-click behavior.
+        // Note: Browsers may block opening a *new tab* after the permission prompt (not a direct user gesture),
+        // so we navigate in the same tab for reliable behavior.
         var destinationOnlyUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + destinationParam + '&travelmode=driving';
 
         if (navigator.geolocation && typeof navigator.geolocation.getCurrentPosition === 'function') {
@@ -658,24 +589,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Bootstrap Modal Support
-$.fn.modal = function(action) {
-    if (action === 'show') {
-        this.fadeIn(300);
-        this.addClass('in show');
-    } else if (action === 'hide') {
-        this.fadeOut(300, function() {
-            $(this).removeClass('in show');
-        });
-    }
-    return this;
-};
-
 /* ============================================
    MUSIC PLAYER
    ============================================ */
 
-// Lista de canciones - Agrega tus archivos MP3 aquí
+// Playlist - add your MP3 files here
 const playlist = [
     {
         title: "How Deep Is Your Love",
@@ -738,7 +656,7 @@ function syncPlayPauseUI() {
     playPauseBtn.setAttribute('aria-label', playingNow ? 'Pausar' : 'Reproducir');
 }
 
-// Función para cargar una canción
+// Load a track
 function loadTrack(index) {
     if (playlist.length === 0) {
         trackTitle.textContent = "Sin canciones";
@@ -756,7 +674,7 @@ function loadTrack(index) {
     currentTimeEl.textContent = '0:00';
 }
 
-// Función para reproducir/pausar
+// Play/pause toggle
 function togglePlayPause() {
     if (playlist.length === 0) return;
 
@@ -776,7 +694,7 @@ function togglePlayPause() {
     }
 }
 
-// Función para canción anterior
+// Previous track
 function previousTrack(autoplay) {
     if (playlist.length === 0) return;
     
@@ -793,7 +711,7 @@ function previousTrack(autoplay) {
     }
 }
 
-// Función para siguiente canción
+// Next track
 function nextTrack(autoplay) {
     if (playlist.length === 0) return;
     
@@ -810,7 +728,7 @@ function nextTrack(autoplay) {
     }
 }
 
-// Función para formatear tiempo
+// Format time
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -819,12 +737,12 @@ function formatTime(seconds) {
 
 // Event Listeners
 if (audioPlayer) {
-    // Cuando se puede reproducir
+    // When metadata is available
     audioPlayer.addEventListener('loadedmetadata', function() {
         durationEl.textContent = formatTime(audioPlayer.duration);
     });
 
-    // Actualizar progreso
+    // Update progress
     audioPlayer.addEventListener('timeupdate', function() {
         if (!isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
         const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
@@ -832,7 +750,7 @@ if (audioPlayer) {
         currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
     });
 
-    // Cuando termina la canción
+    // When the track ends
     audioPlayer.addEventListener('ended', function() {
         // Auto-advance and keep playing when a track ends naturally.
         nextTrack(true);
@@ -845,7 +763,7 @@ if (audioPlayer) {
     audioPlayer.addEventListener('playing', syncPlayPauseUI);
     audioPlayer.addEventListener('emptied', syncPlayPauseUI);
 
-    // Click en barra de progreso
+    // Click on the progress bar
     if (progressBar) {
         progressBar.addEventListener('click', function(e) {
             if (playlist.length === 0) return;
@@ -859,7 +777,7 @@ if (audioPlayer) {
     }
 }
 
-// Botones de control
+// Control buttons
 if (playPauseBtn) {
     playPauseBtn.addEventListener('click', togglePlayPause);
 }
@@ -876,14 +794,14 @@ if (nextBtn) {
     });
 }
 
-// Cargar primera canción al inicio y reproducir automáticamente
+// Load the first track on startup and autoplay
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
     
     let musicStarted = false;
     let scrollDetected = false;
     
-    // Crear overlay invisible y notificación
+    // Create an invisible overlay and a notification
     const musicOverlay = document.createElement('div');
     musicOverlay.id = 'music-overlay';
     musicOverlay.style.cssText = `
@@ -950,7 +868,7 @@ if (playlist.length > 0) {
     document.body.appendChild(musicOverlay);
     document.body.appendChild(musicNotification);
     
-    // Función para reproducir la música
+    // Start music
     function startMusic() {
         if (musicStarted) return;
         
@@ -958,15 +876,15 @@ if (playlist.length > 0) {
         
         if (playPromise !== undefined) {
             playPromise.then(function() {
-                // Reproducción exitosa
+                // Playback started successfully
                 musicStarted = true;
                 syncPlayPauseUI();
                 
-                // Ocultar overlay y notificación
+                // Hide overlay and notification
                 musicOverlay.style.display = 'none';
                 document.getElementById('music-notif-content').style.display = 'none';
                 
-                // Remover event listeners
+                // Remove event listeners
                 window.removeEventListener('scroll', scrollHandler);
                 musicOverlay.removeEventListener('click', startMusic);
                 musicOverlay.removeEventListener('touchstart', startMusic);
@@ -978,7 +896,7 @@ if (playlist.length > 0) {
         }
     }
     
-    // Handler para scroll - muestra la notificación
+    // Scroll handler - shows the notification
     function scrollHandler() {
         if (musicStarted || scrollDetected) return;
         
@@ -987,22 +905,22 @@ if (playlist.length > 0) {
         if (scrolled > 50) {
             scrollDetected = true;
             
-            // Mostrar overlay y notificación
+            // Show overlay and notification
             musicOverlay.style.display = 'block';
             document.getElementById('music-notif-content').style.display = 'block';
             
-            // Hacer la notificación clickeable directamente
+            // Make the notification directly clickable
             const notifContent = document.getElementById('music-notif-content');
             notifContent.addEventListener('click', startMusic);
             notifContent.addEventListener('touchstart', startMusic, { passive: true });
             
-            // El overlay también captura clicks fuera de la notificación
+            // The overlay also captures clicks outside the notification
             musicOverlay.addEventListener('click', startMusic);
             musicOverlay.addEventListener('touchstart', startMusic, { passive: true });
         }
     }
     
-    // Event listener para scroll
+    // Scroll event listener
     window.addEventListener('scroll', scrollHandler, { passive: true });
 }
 
@@ -1011,13 +929,13 @@ document.addEventListener('visibilitychange', syncPlayPauseUI);
 window.addEventListener('pageshow', syncPlayPauseUI);
 window.addEventListener('focus', syncPlayPauseUI);
 /* ============================================
-   FUNCIONALIDAD DE SUBIDA DE FOTOS - GOOGLE APPS SCRIPT
+    PHOTO UPLOAD FUNCTIONALITY - GOOGLE APPS SCRIPT
    ============================================ */
 
-// ⚠️ IMPORTANTE: Reemplaza esta URL con la URL de tu Google Apps Script
+// ⚠️ IMPORTANT: Replace this URL with your Google Apps Script URL
 const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpDRH3XHlD29XuLAjU6N_8BVso02PnYhyIhFCSlysJpQPKZMIhglesHvUGj83sOKI_/exec';
 
-// Mostrar nombre de archivos seleccionados
+// Show selected file names
 const photoFileInput = document.getElementById('photo-file');
 const fileInfo = document.getElementById('file-info');
 
@@ -1038,11 +956,11 @@ if (photoFileInput && fileInfo) {
     });
 }
 
-// Manejar el formulario de subida de fotos
+// Handle the photo upload form
 const photoUploadForm = document.getElementById('photo-upload-form');
 
-// Validación estricta (cliente) para reducir uploads no-imagen.
-// Nota: la validación real también ocurre en Apps Script.
+// Strict client-side validation to reduce non-image uploads.
+// Note: real validation also happens in Apps Script.
 const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const DISALLOWED_EXTENSIONS = new Set(['svg']);
 
@@ -1088,7 +1006,7 @@ async function validateImageFile(file) {
         return { ok: false, reason: 'No se permiten archivos SVG.' };
     }
 
-    // Algunos navegadores pueden mandar type vacío; validamos por firma (magic bytes).
+    // Some browsers may send an empty type; validate via magic bytes.
     const mime = String(file.type || '').toLowerCase();
     if (mime && !ALLOWED_IMAGE_MIME_TYPES.has(mime)) {
         return { ok: false, reason: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.' };
@@ -1115,7 +1033,7 @@ if (photoUploadForm) {
             return;
         }
         
-        // Validar tamaño de archivos (máximo 5MB por foto)
+        // Validate file size (max 5MB per photo)
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
                 alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
@@ -1123,7 +1041,7 @@ if (photoUploadForm) {
             }
         }
 
-        // Validación estricta (MIME/extensión/firma)
+        // Strict validation (MIME/extension/magic bytes)
         for (let file of files) {
             try {
                 const result = await validateImageFile(file);
@@ -1138,13 +1056,13 @@ if (photoUploadForm) {
             }
         }
         
-        // Subir fotos a Google Apps Script
+        // Upload photos to Google Apps Script
         uploadPhotosToGoogleDrive(guestName, files);
     });
 }
 
 /**
- * Subir fotos a Google Drive a través de Google Apps Script
+ * Upload photos to Google Drive via Google Apps Script
  */
 async function uploadPhotosToGoogleDrive(guestName, files) {
     const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
@@ -1156,9 +1074,9 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
     let uploadedCount = 0;
     let failedCount = 0;
     
-    // Procesar cada archivo
+    // Process each file
     for (let file of files) {
-        // Defensa extra (ya se validó antes del submit)
+        // Extra defense (already validated before submit)
         const ext = getFileExtensionLower(file.name);
         if (ext === 'svg' || String(file.type || '').toLowerCase() === 'image/svg+xml') {
             failedCount++;
@@ -1166,13 +1084,13 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
         }
         
         try {
-            // Convertir archivo a base64
+            // Convert file to base64
             const base64Data = await fileToBase64(file);
             
-            // Enviar a Google Apps Script
+            // Send to Google Apps Script
             const response = await fetch(GALLERY_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Importante para Google Apps Script
+                mode: 'no-cors', // Important for Google Apps Script
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -1185,8 +1103,8 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
                 })
             });
             
-            // Nota: Con mode: 'no-cors', no podemos leer la respuesta
-            // Asumimos que fue exitoso si no hubo error
+            // Note: with mode: 'no-cors', we cannot read the response
+            // Assume it succeeded if there was no error
             uploadedCount++;
             
         } catch (error) {
@@ -1195,20 +1113,20 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
         }
     }
     
-    // Restaurar botón
+    // Restore button
     uploadBtn.innerHTML = originalBtnText;
     uploadBtn.disabled = false;
     
-    // Resetear formulario
+    // Reset form
     photoUploadForm.reset();
     fileInfo.textContent = 'Ningún archivo seleccionado';
     fileInfo.style.color = '#999';
     
-    // Mostrar resultado
+    // Show result
     if (uploadedCount > 0) {
         alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarán en la galería después de ser aprobadas.`);
         
-        // Recargar galería después de 2 segundos
+        // Reload gallery after 2 seconds
         setTimeout(() => {
             loadGuestPhotos();
         }, 2000);
@@ -1220,7 +1138,7 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
 }
 
 /**
- * Convertir archivo a base64
+ * Convert file to base64
  */
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -1232,7 +1150,7 @@ function fileToBase64(file) {
 }
 
 /**
- * Cargar fotos de invitados desde Google Drive y mostrar en carrusel
+ * Load guest photos from Google Drive and display in the carousel
  */
 async function loadGuestPhotos() {
     const carouselTrack = document.getElementById('carousel-track');
@@ -1244,21 +1162,21 @@ async function loadGuestPhotos() {
         const data = await response.json();
         
         if (data.success && data.photos && data.photos.length > 0) {
-            // Limpiar mensaje de "no hay fotos"
+            // Remove "no photos" message
             const noPhotosMsg = carouselTrack.querySelector('.no-photos-carousel');
             if (noPhotosMsg) {
                 noPhotosMsg.remove();
             }
             
-            // Limpiar fotos existentes
+            // Clear existing photos
             carouselTrack.innerHTML = '';
             
-            // Agregar cada foto al carrusel
+            // Add each photo to the carousel
             data.photos.forEach((photo, index) => {
-                // Convertir URL a formato que funcione en img tag
+                // Convert URL to a format that works in an <img> tag
                 const imageUrl = convertDriveUrl(photo.url);
                 
-                // Formatear fecha
+                // Format date
                 const photoDate = new Date(photo.timestamp);
                 const dateStr = photoDate.toLocaleDateString('es-MX', { 
                     year: 'numeric', 
@@ -1287,17 +1205,17 @@ async function loadGuestPhotos() {
                 carouselTrack.insertAdjacentHTML('beforeend', slideHtml);
             });
             
-            // Actualizar contador
+            // Update counter
             document.getElementById('total-photos').textContent = data.photos.length;
             document.getElementById('carousel-counter').style.display = 'block';
             
-            // Mostrar controles si hay más de una foto
+            // Show controls if there is more than one photo
             if (data.photos.length > 1) {
                 document.getElementById('carousel-prev').style.display = 'flex';
                 document.getElementById('carousel-next').style.display = 'flex';
             }
             
-            // Inicializar carrusel
+            // Initialize carousel
             initializeCarousel(data.photos.length);
         }
     } catch (error) {
@@ -1306,7 +1224,7 @@ async function loadGuestPhotos() {
 }
 
 /**
- * Inicializar funcionalidad del carrusel
+ * Initialize carousel functionality
  */
 let currentSlide = 0;
 let totalSlides = 0;
@@ -1316,7 +1234,7 @@ function initializeCarousel(total) {
     currentSlide = 0;
     updateCarousel();
     
-    // Event listeners para los controles
+    // Event listeners for the controls
     const prevBtn = document.getElementById('carousel-prev');
     const nextBtn = document.getElementById('carousel-next');
     
@@ -1336,7 +1254,7 @@ function initializeCarousel(total) {
         };
     }
     
-    // Soporte para gestos táctiles (swipe)
+    // Touch gesture support (swipe)
     const carousel = document.getElementById('guest-photos-carousel');
     let touchStartX = 0;
     let touchEndX = 0;
@@ -1352,18 +1270,18 @@ function initializeCarousel(total) {
     
     function handleSwipe() {
         if (touchEndX < touchStartX - 50 && currentSlide < totalSlides - 1) {
-            // Swipe left - siguiente
+            // Swipe left - next
             currentSlide++;
             updateCarousel();
         }
         if (touchEndX > touchStartX + 50 && currentSlide > 0) {
-            // Swipe right - anterior
+            // Swipe right - previous
             currentSlide--;
             updateCarousel();
         }
     }
     
-    // Soporte para teclado (flechas)
+    // Keyboard support (arrow keys)
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' && currentSlide > 0) {
             currentSlide--;
@@ -1399,15 +1317,15 @@ function updateCarousel() {
 }
 
 /**
- * Convertir URL de Google Drive al formato correcto para mostrar en img
+ * Convert a Google Drive URL to the correct format for displaying in an <img>
  */
 function convertDriveUrl(url) {
-    // Si ya está en el formato correcto, devolverla
+    // If it's already in the correct format, return as-is
     if (url.includes('googleusercontent.com')) {
         return url;
     }
     
-    // Extraer el file ID de diferentes formatos de URL de Drive
+    // Extract the file ID from different Drive URL formats
     let fileId = null;
     
     // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
@@ -1422,32 +1340,32 @@ function convertDriveUrl(url) {
         if (match) fileId = match[1];
     }
     
-    // Si encontramos el ID, convertir a formato que funcione en img
+    // If we found the ID, convert to an <img>-friendly format
     if (fileId) {
         return `https://lh3.googleusercontent.com/d/${fileId}=s4000?authuser=0`;
     }
     
-    // Si no pudimos convertir, devolver la URL original
+    // If we couldn't convert it, return the original URL
     return url;
 }
 
-// Cargar fotos al cargar la página
+// Load photos when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Esperar 1 segundo antes de cargar fotos
+    // Wait 1 second before loading photos
     setTimeout(() => {
         loadGuestPhotos();
     }, 1000);
 });
 
 /* ============================================
-   MODAL DE MESAS DE REGALOS
+    GIFT REGISTRY MODAL
    ============================================ */
 
 function openGiftsModal() {
     const modal = document.getElementById('gifts-modal');
     if (modal) {
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        document.body.style.overflow = 'hidden'; // Prevent body scroll
     }
 }
 
@@ -1455,7 +1373,7 @@ function closeGiftsModal() {
     const modal = document.getElementById('gifts-modal');
     if (modal) {
         modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restaurar scroll
+        document.body.style.overflow = ''; // Restore scroll
     }
 }
 
@@ -1463,11 +1381,11 @@ function closeRsvpModal() {
     const modal = document.getElementById('rsvp-modal');
     if (modal) {
         modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restaurar scroll
+        document.body.style.overflow = ''; // Restore scroll
     }
 }
 
-// Cerrar modal al hacer click fuera del contenido
+// Close modal when clicking outside the content
 document.addEventListener('DOMContentLoaded', function() {
     const giftsModal = document.getElementById('gifts-modal');
     if (giftsModal) {
@@ -1487,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Cerrar modales con tecla Escape
+    // Close modals with the Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeGiftsModal();

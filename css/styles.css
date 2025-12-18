@@ -385,10 +385,6 @@ header nav ul.member-actions li:first-child a:hover:after {
 .countdown-hero div {
     text-align: center;
     padding: 10px 5px;
-    /*background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);*/
     transition: all 300ms ease-in-out;
     min-width: 90px;
 }
@@ -448,13 +444,13 @@ header nav ul.member-actions li:first-child a:hover:after {
     position: relative;
 }
 
-/* Mantener sizing de botones pequeños cuando usan el estilo unificado btn-fill */
+/* Keep sizing for small buttons when using the unified btn-fill style */
 .btn.btn-fill.btn-small {
     padding: 10px 20px;
     font-size: 12px;
 }
 
-/* En la sección de eventos, los iconos no deben forzarse a verde dentro de botones */
+/* In the events section, icons should not be forced to green inside buttons */
 .events .event-buttons .btn.btn-fill i {
     color: inherit;
 }
@@ -467,7 +463,7 @@ header nav ul.member-actions li:first-child a:hover:after {
     box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
-/* Botón verde (para buscar otra invitación) */
+/* Green button (for searching another invitation) */
 .btn.btn-green {
     background: linear-gradient(135deg, #2E8B57 0%, #3cb371 100%);
     color: #fff;
@@ -636,7 +632,7 @@ section {
     height: 472px;
 }
 
-/* Contenedor para imágenes móviles superpuestas */
+/* Container for overlapping mobile intro images */
 .intro-images-mobile {
     position: relative;
     display: inline-block;
@@ -761,7 +757,7 @@ section {
     margin-bottom: 40px;
 }
 
-/* Subsecciones de la galería */
+/* Gallery subsections */
 .gallery-subsection {
     margin-bottom: 60px;
     padding: 40px 0;
@@ -802,7 +798,7 @@ section {
     margin-top: 30px;
 }
 
-/* Subsección de música destacada */
+/* Featured music subsection */
 .music-subsection {
     background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
     padding: 50px 0;
@@ -817,7 +813,7 @@ section {
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    /* Asegurar proporción y altura mínima */
+    /* Ensure aspect ratio and minimum height */
     min-height: 200px;
     background: #f0f0f0;
     display: flex;
@@ -836,7 +832,7 @@ section {
     object-position: center;
     transition: all 0.3s ease;
     display: block;
-    /* Asegurar que la imagen se muestre */
+    /* Ensure the image is visible */
     min-height: 200px;
     max-height: 400px;
 }
@@ -868,7 +864,7 @@ section {
     color: #fff;
 }
 
-/* Caja de "Próximamente" */
+/* "Coming soon" box */
 .coming-soon-box {
     padding: 60px 40px;
     background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
@@ -890,7 +886,7 @@ section {
     margin: 0;
 }
 
-/* Subsección de subida de fotos */
+/* Photo upload subsection */
 .upload-subsection {
     background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
     padding: 50px 0;
@@ -973,7 +969,7 @@ section {
     margin-bottom: 20px;
 }
 
-/* Carrusel de fotos de invitados */
+/* Guest photos carousel */
 .guest-photos-carousel {
     position: relative;
     width: 100%;
@@ -1093,18 +1089,14 @@ section {
     font-weight: 600;
 }
 
-/* Animaciones para la galería (usar fadeInUp global) */
+/* Gallery animations (use global fadeInUp) */
 .gallery-subsection {
     animation: fadeInUp 0.75s var(--motion-ease);
 }
 
 /* ============================================
-   VENUE / MAP SECTION
-   ============================================ */
-
-/* ============================================
-   MAP SECTION (Rampatra Design)
-   ============================================ */
+    MAP SECTION
+    ============================================ */
 
 #map {
     background: #fff;
@@ -1295,7 +1287,7 @@ section {
     -webkit-transition: all 0.3s ease;
     transition: all 0.3s ease;
     margin-top: 18px;
- }
+}
 
 #btn-show-content:hover {
     background: #d4af37;
@@ -1357,10 +1349,6 @@ section {
 }
 
 @media (max-width: 768px) {
-    #map-canvas {
-        height: 700px;
-    }
-    
     #map-content-wrapper {
         margin-top: -660px;
         margin-bottom: 60px;
@@ -1369,15 +1357,6 @@ section {
     #map-content {
         margin-top: 10px;
         padding: 35px 30px;
-    }
-    
-    .map-location-column:first-child {
-        border-right: 2px solid #2E8B57;
-        padding-right: 30px;
-    }
-    
-    .map-location-column:last-child {
-        padding-left: 30px;
     }
     
     #map-content h5 {
@@ -1467,9 +1446,6 @@ section {
         margin-bottom: 25px;
     }
     
-    .map-location-column:last-child {
-        padding-left: 20px;
-    }
 }
 
 /* ============================================
@@ -1677,7 +1653,7 @@ section {
 }
 
 /* ============================================
-   BOTÓN CIRCULAR DE REGALO EN SECCIÓN
+    CIRCULAR GIFT BUTTON (SECTION)
    ============================================ */
 
 .circular-gift-btn {
@@ -1707,7 +1683,7 @@ section {
 }
 
 /* ============================================
-   MODAL DE MESAS DE REGALOS
+    GIFT REGISTRY MODAL
    ============================================ */
 
 .gifts-modal {
@@ -2090,7 +2066,7 @@ footer p {
     opacity: 0.9;
 }
 
-/* Asegurar que el contenedor del reproductor esté centrado en pantallas pequeñas */
+/* Ensure the player container is centered on small screens */
 @media screen and (max-width: 991px) {
     #gallery .row > [class*="col-"] {
         float: none;
@@ -2409,14 +2385,6 @@ footer p {
         pointer-events: auto;
     }
 
-    .hero h1 {
-        font-size: 48px;
-    }
-
-    .hero p.intro {
-        font-size: 22px;
-    }
-
     .countdown-hero {
         gap: 15px;
     }
@@ -2493,9 +2461,6 @@ footer p {
         pointer-events: none;
     }
 
-    .header-nav.open {
-        pointer-events: auto;
-    }
 
     header nav {
         position: static;
@@ -2505,14 +2470,6 @@ footer p {
 
     header nav ul li {
         display: block;
-    }
-
-    header nav ul.primary-nav li a {
-        color: #fff;
-        font-size: 22px;
-        margin: 0;
-        display: block;
-        padding: 20px 0;
     }
 
     header nav ul.member-actions {
@@ -2564,10 +2521,6 @@ footer p {
         display: none;
     }
 
-    header nav ul.primary-nav li a:hover {
-        color: #d4af37;
-    }
-
     header nav ul.member-actions {
         margin-left: 0;
         margin-top: 30px;
@@ -2592,9 +2545,6 @@ footer p {
         padding-top: 80px;
     }
 
-    .countdown-hero {
-        gap: 15px;
-    }
 
     .countdown-hero div {
         padding: 20px 15px;
@@ -2608,19 +2558,7 @@ footer p {
         font-size: 11px;
     }
 
-    .events .leftcol {
-        padding-right: 0;
-        padding-bottom: 30px;
-        border-right: none;
-        border-bottom: 2px solid #2E8B57;
-        margin-bottom: 30px;
-    }
-
-    .events .rightcol {
-        padding-left: 0;
-    }
-
-    /* Centrar imágenes de intro en pantallas pequeñas */
+    /* Center intro images on small screens */
     #intro .hidden-md.hidden-lg {
         text-align: center;
     }
@@ -2661,14 +2599,6 @@ footer p {
     .btn-fill {
         padding: 12px 30px;
         font-size: 11px;
-    }
-
-    .hero h1 {
-        font-size: 40px;
-    }
-
-    .hero p.intro {
-        font-size: 18px;
     }
 
     .header {
@@ -2712,7 +2642,7 @@ footer p {
         margin-bottom: 20px;
     }
     
-    /* Botón circular de regalos responsive */
+    /* Responsive circular gift button */
     .circular-gift-btn {
         width: 100px;
         height: 100px;
@@ -2723,10 +2653,6 @@ footer p {
 @media screen and (max-width: 480px) {
     .hero {
         min-height: 500px;
-    }
-
-    .hero h1 {
-        font-size: 32px;
     }
 
     .countdown-hero {
@@ -2762,17 +2688,12 @@ footer p {
         font-size: 24px;
     }
 
-    .header-content {
-        width: 95%;
-    }
 
     header nav ul.primary-nav li a {
         font-size: 18px;
     }
 
-    .section-padding {
-        padding: 30px 0;
-    }
+    
 
     .event-item {
         padding: 15px;
@@ -2853,7 +2774,7 @@ footer p {
     box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
 }
 /* ============================================
-   ESTILOS RESPONSIVE PARA LA GALERÍA
+    RESPONSIVE STYLES FOR THE GALLERY
    ============================================ */
 
 @media (max-width: 991px) {
@@ -2876,7 +2797,7 @@ footer p {
         padding: 30px 20px;
     }
     
-    /* Carrusel responsive */
+    /* Responsive carousel */
     .guest-photos-carousel {
         min-height: 350px;
         padding: 15px;
@@ -2932,7 +2853,7 @@ footer p {
         font-size: 20px;
     }
     
-    /* Carrusel responsive tablet */
+    /* Responsive carousel (tablet) */
     .guest-photos-carousel {
         min-height: 320px;
         padding: 15px;
@@ -3035,7 +2956,7 @@ footer p {
         font-size: 18px;
     }
     
-    /* Carrusel responsive móvil */
+    /* Responsive carousel (mobile) */
     .guest-photos-carousel {
         min-height: 280px;
         padding: 10px;
@@ -3071,14 +2992,6 @@ footer p {
         font-size: 14px;
     }
     
-    .carousel-control.prev {
-        left: 5px;
-    }
-    
-    .carousel-control.next {
-        right: 5px;
-    }
-    
     .carousel-counter {
         font-size: 13px;
         margin-top: 10px;
@@ -3096,14 +3009,14 @@ footer p {
         font-size: 14px;
     }
     
-    /* Botón circular de regalos responsive móvil */
+    /* Responsive circular gift button (mobile) */
     .circular-gift-btn {
         width: 90px;
         height: 90px;
         font-size: 38px;
     }
     
-    /* Modal de regalos responsive móvil */
+    /* Responsive gift modal (mobile) */
     .gifts-modal-content {
         padding: 30px 20px;
         width: 95%;
