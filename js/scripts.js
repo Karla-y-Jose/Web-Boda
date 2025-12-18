@@ -112,7 +112,10 @@ $(document).ready(function() {
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
     // IMPORTANT: Replace this URL with your deployed Apps Script URL
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbziecc4wpBgW48ozxnbT29bJT-Qu1IKnbjKuRzmBb0WYGEuCvzk0wCJjAYlUI4aI6ZQMg/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzFsEGBNL13uK9-NkhhEsp6OMIHr9BOpFdRIaoZaMuJX2Kg5083PYYwg2Zo8eTuNO5JJQ/exec';
+
+    // Expose for global helpers (ticket QR generation lives outside document.ready)
+    window.__RSVP_ENDPOINT = RSVP_ENDPOINT;
     
     var currentGuests = [];
 
@@ -202,16 +205,31 @@ $(document).ready(function() {
     $('#confirm-attendance-btn').on('click', function() {
         var $btn = $(this);
         var updates = [];
+        var confirmedGuestNames = [];
+        var groupName = String($('#group-name').text() || '').trim();
         
         $('.guest-item').each(function(index) {
             var rowIndex = $(this).data('row-index');
             var selectedState = $(this).find('input[type="radio"]:checked').val();
+
+            if (selectedState === 'Confirmado' && Array.isArray(currentGuests) && currentGuests[index]) {
+                var g = currentGuests[index];
+                confirmedGuestNames.push(String((g.nombre || '') + ' ' + (g.apellido || '')).trim());
+            }
             
             updates.push({
                 rowIndex: rowIndex,
                 estado: selectedState
             });
         });
+
+        // Store ticket payload for the confirmation modal.
+        window.__rsvpTicketPayload = {
+            groupName: groupName,
+            confirmedGuests: confirmedGuestNames.filter(Boolean),
+            generatedAt: Date.now(),
+            ticketId: ''
+        };
         
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
@@ -226,6 +244,10 @@ $(document).ready(function() {
         })
         .done(function(response) {
             if (response.result === 'success') {
+                // Attach server-issued ticket code (verifiable against the sheet)
+                if (response.ticketId && window.__rsvpTicketPayload) {
+                    window.__rsvpTicketPayload.ticketId = String(response.ticketId || '').trim();
+                }
                 $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
                 
                 // Show confirmation modal
@@ -233,6 +255,22 @@ $(document).ready(function() {
                     $('#rsvp-modal').addClass('active');
                     
                     // Add calendar buttons with the same behavior as the events section
+                    var tickets = (window.__rsvpTicketPayload && Array.isArray(window.__rsvpTicketPayload.confirmedGuests))
+                        ? window.__rsvpTicketPayload.confirmedGuests
+                        : [];
+                    var ticketButtonHtml = '';
+                    if (tickets.length > 0) {
+                        var label = tickets.length === 1 ? 'Descargar boleto' : 'Descargar boletos';
+                        ticketButtonHtml = `
+                            <button type="button"
+                                    onclick="downloadRsvpTickets()"
+                                    class="btn btn-fill calendar-btn-modal"
+                                    style="width: 100%;">
+                                <i class="fa fa-ticket" style="margin-right: 8px;"></i> ${label}
+                            </button>
+                        `;
+                    }
+
                     var calendarButtons = `
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
                             <button onclick="agregarAlCalendario('Boda Karla & Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
@@ -240,6 +278,7 @@ $(document).ready(function() {
                                     style="width: 100%;">
                                 <i class="fa fa-calendar" style="margin-right: 8px;"></i> Añadir al Calendario
                             </button>
+                            ${ticketButtonHtml}
                         </div>
                     `;
                     $('#add-to-cal').html(calendarButtons);
@@ -273,6 +312,389 @@ $(document).ready(function() {
                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
      }
 });
+
+function downloadRsvpTickets() {
+    var payload = window.__rsvpTicketPayload || null;
+    var guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
+    var groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
+    var ticketId = payload && typeof payload.ticketId === 'string' ? payload.ticketId : '';
+
+    if (!guests.length) {
+        alert('No hay boletos disponibles para descargar.');
+        return;
+    }
+
+    var safeGroup = String(groupName || 'grupo')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+        .toLowerCase();
+    var filename = guests.length === 1
+        ? ('boleto-' + safeGroup + '.png')
+        : ('boletos-' + safeGroup + '.png');
+
+    // Canvas drawing needs assets loaded, so ticket generation is async.
+    var qrPromise = Promise.resolve('');
+    if (ticketId) {
+        qrPromise = fetchTicketQrDataUrl(ticketId).catch(function () { return ''; });
+    }
+
+    qrPromise
+        .then(function (qrDataUrl) {
+            return generateRsvpTicketPng({ groupName: groupName, guests: guests, ticketId: ticketId, qrDataUrl: qrDataUrl });
+        })
+        .then(function (dataUrl) {
+            downloadDataUrl(dataUrl, filename);
+        })
+        .catch(function (e) {
+            console.error('Ticket generation failed:', e);
+            alert('No se pudo generar el boleto. Intenta de nuevo.');
+        });
+}
+
+function fetchTicketQrDataUrl(ticketId) {
+    var endpoint = window.__RSVP_ENDPOINT || '';
+    if (!endpoint) return Promise.reject(new Error('RSVP endpoint not available'));
+
+    var url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
+
+    // Prefer jQuery Ajax (already used elsewhere in this site) for consistent behavior.
+    if (typeof window.$ === 'function' && $.ajax) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json'
+            })
+                .done(function (json) {
+                    if (!json || json.result !== 'success' || !json.qrDataUrl) {
+                        reject(new Error((json && json.message) ? json.message : 'QR unavailable'));
+                        return;
+                    }
+                    resolve(String(json.qrDataUrl));
+                })
+                .fail(function (_xhr, _status, err) {
+                    reject(err || new Error('QR request failed'));
+                });
+        });
+    }
+
+    // Fallback: fetch
+    return fetch(url, { method: 'GET' })
+        .then(function (resp) { return resp.json(); })
+        .then(function (json) {
+            if (!json || json.result !== 'success' || !json.qrDataUrl) {
+                throw new Error((json && json.message) ? json.message : 'QR unavailable');
+            }
+            return String(json.qrDataUrl);
+        });
+}
+
+function resolveAssetUrl(path) {
+    try {
+        return new URL(String(path || ''), document.baseURI || window.location.href).href;
+    } catch (_e) {
+        return String(path || '');
+    }
+}
+
+function loadImageForCanvas(src) {
+    return new Promise(function (resolve, reject) {
+        var img = new Image();
+        // Do not force crossOrigin here; it can break loads in some local hosting setups.
+        img.onload = function () { resolve(img); };
+        img.onerror = function () { reject(new Error('Failed to load image: ' + src)); };
+        img.src = resolveAssetUrl(src);
+    });
+}
+
+function loadImageForCanvasUntainted(src) {
+    var resolved = resolveAssetUrl(src);
+
+    // Data/blob URLs are safe to draw.
+    if (/^(data:|blob:)/i.test(resolved)) {
+        return loadImageForCanvas(resolved);
+    }
+
+    // Best effort: fetch as a blob and draw from a same-origin blob: URL.
+    // This avoids canvas tainting when the image would otherwise be treated as cross-origin.
+    if (typeof fetch === 'function') {
+        return fetch(resolved, { cache: 'no-store' })
+            .then(function (resp) {
+                if (!resp.ok) throw new Error('Image fetch failed: ' + resp.status);
+                return resp.blob();
+            })
+            .then(function (blob) {
+                var objUrl = URL.createObjectURL(blob);
+                return loadImageForCanvas(objUrl)
+                    .then(function (img) {
+                        try { URL.revokeObjectURL(objUrl); } catch (_e) {}
+                        return img;
+                    })
+                    .catch(function (e) {
+                        try { URL.revokeObjectURL(objUrl); } catch (_e) {}
+                        throw e;
+                    });
+            })
+            .catch(function () {
+                // Fallback to direct load
+                return loadImageForCanvas(resolved);
+            });
+    }
+
+    return loadImageForCanvas(resolved);
+}
+
+function getTicketLogoUrl() {
+    // Reuse the same logo URL that is already working in the page.
+    var el = document.querySelector('img[src*="logo2.png"]');
+    if (el && el.src) return el.src;
+    return 'img/logo2.png';
+}
+
+function drawImageContain(ctx, img, x, y, w, h) {
+    var iw = img.naturalWidth || img.width;
+    var ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return;
+    var scale = Math.min(w / iw, h / ih);
+    var dw = Math.round(iw * scale);
+    var dh = Math.round(ih * scale);
+    var dx = Math.round(x + (w - dw) / 2);
+    var dy = Math.round(y + (h - dh) / 2);
+    ctx.drawImage(img, dx, dy, dw, dh);
+}
+
+function generateRsvpTicketPng(opts) {
+    var groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
+    var guests = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
+    var ticketId = (opts && opts.ticketId) ? String(opts.ticketId).trim() : '';
+    var qrDataUrl = (opts && opts.qrDataUrl) ? String(opts.qrDataUrl) : '';
+
+    var canvas = document.createElement('canvas');
+    canvas.width = 1400;
+    canvas.height = 800;
+    var ctx = canvas.getContext('2d');
+
+    // Palette matches existing site colors.
+    var greenDark = '#0F3B2E';
+    var green = '#2E8B57';
+    var gold = '#d4af37';
+    var grayText = '#4a4a4a';
+
+    function drawTicket(logoImg, qrImg) {
+        // Background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header band
+        ctx.fillStyle = greenDark;
+        ctx.fillRect(0, 0, canvas.width, 140);
+
+        // Gold accent line
+        ctx.fillStyle = gold;
+        ctx.fillRect(0, 138, canvas.width, 6);
+
+        // Logo watermark (centered)
+        if (logoImg) {
+            ctx.save();
+            // Make it visible even if the logo is light.
+            ctx.globalAlpha = 0.30;
+            ctx.globalCompositeOperation = 'multiply';
+            if ('filter' in ctx) {
+                ctx.filter = 'grayscale(1) contrast(1.25) brightness(0.75)';
+            }
+            // Large watermark area in the body (under text)
+            drawImageContain(ctx, logoImg, 320, 190, 760, 500);
+            if ('filter' in ctx) {
+                ctx.filter = 'none';
+            }
+            ctx.restore();
+        }
+
+        // Title
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 54px Karla, Arial, sans-serif';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText('BOLETO', 70, 92);
+
+        // Event name
+        ctx.font = '500 30px Karla, Arial, sans-serif';
+        ctx.fillText('Karla & Jose', 70, 125);
+
+        // Body
+        ctx.fillStyle = grayText;
+        ctx.font = '600 30px Karla, Arial, sans-serif';
+        ctx.fillText('Confirmación de asistencia', 70, 210);
+
+        ctx.fillStyle = green;
+        ctx.font = '600 26px Karla, Arial, sans-serif';
+        ctx.fillText('Fecha:', 70, 265);
+        ctx.fillStyle = grayText;
+        ctx.font = '400 26px Karla, Arial, sans-serif';
+        ctx.fillText('18 de diciembre, 2026', 155, 265);
+
+        ctx.fillStyle = green;
+        ctx.font = '600 26px Karla, Arial, sans-serif';
+        ctx.fillText('Grupo:', 70, 310);
+        ctx.fillStyle = grayText;
+        ctx.font = '400 26px Karla, Arial, sans-serif';
+        ctx.fillText(groupName || '—', 160, 310);
+
+        ctx.fillStyle = green;
+        ctx.font = '600 26px Karla, Arial, sans-serif';
+        ctx.fillText('Invitados confirmados:', 70, 370);
+
+        // Guest list
+        ctx.fillStyle = grayText;
+        ctx.font = '400 26px Karla, Arial, sans-serif';
+        var startY = 415;
+        var lineHeight = 34;
+        var maxLines = 8;
+        for (var i = 0; i < Math.min(guests.length, maxLines); i++) {
+            ctx.fillText('• ' + guests[i], 90, startY + (i * lineHeight));
+        }
+        if (guests.length > maxLines) {
+            ctx.fillStyle = '#777';
+            ctx.fillText('…y ' + (guests.length - maxLines) + ' más', 90, startY + (maxLines * lineHeight));
+        }
+
+        // Footer note
+        ctx.fillStyle = '#777';
+        ctx.font = '400 22px Karla, Arial, sans-serif';
+        ctx.fillText('Presenta este boleto el día del evento.', 70, 730);
+
+        // Ticket code (verifiable)
+        if (ticketId) {
+            ctx.fillStyle = '#777';
+            ctx.font = '600 22px Karla, Arial, sans-serif';
+            ctx.fillText('Código: ' + ticketId, 70, 765);
+        }
+
+        // QR for quick verification
+        if (ticketId && qrImg) {
+            var qrSize = 220;
+            var qrX = canvas.width - (qrSize + 80);
+            var qrY = canvas.height - (qrSize + 110);
+
+            // White backing to keep QR readable
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+
+            drawImageContain(ctx, qrImg, qrX, qrY, qrSize, qrSize);
+
+            ctx.fillStyle = '#777';
+            ctx.font = '400 18px Karla, Arial, sans-serif';
+            ctx.fillText('Escanea para validar', qrX, qrY + qrSize + 28);
+        }
+
+        // Decorative border
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+
+        try {
+            return canvas.toDataURL('image/png');
+        } catch (e) {
+            // If the canvas got tainted by an image, re-render without images so the user can still download.
+            if (String(e && e.name) === 'SecurityError') {
+                console.warn('Ticket canvas was tainted; exporting without images.');
+                // Clear and draw again without logo/QR.
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalAlpha = 1;
+                ctx.globalCompositeOperation = 'source-over';
+                if ('filter' in ctx) ctx.filter = 'none';
+                // Redraw, but with null images
+                // (Call the same function body by recursion guard: inline a minimal redraw)
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = greenDark;
+                ctx.fillRect(0, 0, canvas.width, 140);
+                ctx.fillStyle = gold;
+                ctx.fillRect(0, 138, canvas.width, 6);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 54px Karla, Arial, sans-serif';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillText('BOLETO', 70, 92);
+                ctx.font = '500 30px Karla, Arial, sans-serif';
+                ctx.fillText('Karla & Jose', 70, 125);
+
+                ctx.fillStyle = grayText;
+                ctx.font = '600 30px Karla, Arial, sans-serif';
+                ctx.fillText('Confirmación de asistencia', 70, 210);
+
+                ctx.fillStyle = green;
+                ctx.font = '600 26px Karla, Arial, sans-serif';
+                ctx.fillText('Fecha:', 70, 265);
+                ctx.fillStyle = grayText;
+                ctx.font = '400 26px Karla, Arial, sans-serif';
+                ctx.fillText('18 de diciembre, 2026', 155, 265);
+
+                ctx.fillStyle = green;
+                ctx.font = '600 26px Karla, Arial, sans-serif';
+                ctx.fillText('Grupo:', 70, 310);
+                ctx.fillStyle = grayText;
+                ctx.font = '400 26px Karla, Arial, sans-serif';
+                ctx.fillText(groupName || '—', 160, 310);
+
+                ctx.fillStyle = green;
+                ctx.font = '600 26px Karla, Arial, sans-serif';
+                ctx.fillText('Invitados confirmados:', 70, 370);
+
+                ctx.fillStyle = grayText;
+                ctx.font = '400 26px Karla, Arial, sans-serif';
+                var startY2 = 415;
+                var lineHeight2 = 34;
+                var maxLines2 = 8;
+                for (var j = 0; j < Math.min(guests.length, maxLines2); j++) {
+                    ctx.fillText('• ' + guests[j], 90, startY2 + (j * lineHeight2));
+                }
+                if (guests.length > maxLines2) {
+                    ctx.fillStyle = '#777';
+                    ctx.fillText('…y ' + (guests.length - maxLines2) + ' más', 90, startY2 + (maxLines2 * lineHeight2));
+                }
+
+                ctx.fillStyle = '#777';
+                ctx.font = '400 22px Karla, Arial, sans-serif';
+                ctx.fillText('Presenta este boleto el día del evento.', 70, 730);
+                if (ticketId) {
+                    ctx.fillStyle = '#777';
+                    ctx.font = '600 22px Karla, Arial, sans-serif';
+                    ctx.fillText('Código: ' + ticketId, 70, 765);
+                }
+
+                ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+
+                return canvas.toDataURL('image/png');
+            }
+            throw e;
+        }
+    }
+
+    // Use the resolved DOM URL first to avoid path issues.
+    var logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
+        .catch(function () { return loadImageForCanvasUntainted('img/logo2.png'); })
+        .catch(function () { return loadImageForCanvasUntainted('./img/logo2.png'); })
+        .catch(function () { return null; });
+    var qrPromise = qrDataUrl ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; }) : Promise.resolve(null);
+
+    return Promise.all([logoPromise, qrPromise]).then(function (results) {
+        var logoImg = results[0] || null;
+        var qrImg = results[1] || null;
+        return drawTicket(logoImg, qrImg);
+    });
+}
+
+function downloadDataUrl(dataUrl, filename) {
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
 
 // Update Countdown Timer
 function updateCountdown() {

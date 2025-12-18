@@ -22,6 +22,10 @@ function doGet(e) {
       // Decodificar el JSON de updates
       const updates = JSON.parse(params.updates);
       return updateGuestAttendance(updates);
+    } else if (action === 'verifyTicket') {
+      return verifyTicket(params.ticketId);
+    } else if (action === 'getTicketQr') {
+      return getTicketQr(params.ticketId);
     }
     
     return ContentService.createTextOutput(JSON.stringify({
@@ -49,6 +53,10 @@ function doPost(e) {
       return searchGuestByName(params.name);
     } else if (action === 'updateAttendance') {
       return updateGuestAttendance(params.updates);
+    } else if (action === 'verifyTicket') {
+      return verifyTicket(params.ticketId);
+    } else if (action === 'getTicketQr') {
+      return getTicketQr(params.ticketId);
     }
     
     return ContentService.createTextOutput(JSON.stringify({
@@ -152,11 +160,23 @@ function updateGuestAttendance(updates) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName(SHEET_NAME);
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const estadoCol = headers.indexOf('ID_ESTADO') + 1; // +1 porque getRange usa 1-index
     const nombreCol = headers.indexOf('ID_NOMBRE') + 1;
-    const apellidoCol = headers.indexOf('ID_APELLIDO') + 1;
+    // Buscar ID_APELLIDOS (plural) o ID_APELLIDO (singular)
+    let apellidoCol = headers.indexOf('ID_APELLIDOS') + 1;
+    if (apellidoCol === 0) {
+      apellidoCol = headers.indexOf('ID_APELLIDO') + 1;
+    }
     const grupoCol = headers.indexOf('ID_GRUPO') + 1;
+
+    // Ensure a ticket column exists
+    let ticketIdCol = headers.indexOf('TICKET_ID') + 1;
+    if (ticketIdCol === 0) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue('TICKET_ID');
+      headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      ticketIdCol = headers.indexOf('TICKET_ID') + 1;
+    }
     
     if (estadoCol === 0) {
       return ContentService.createTextOutput(JSON.stringify({
@@ -164,10 +184,20 @@ function updateGuestAttendance(updates) {
         message: 'No se encontró la columna ID_ESTADO'
       })).setMimeType(ContentService.MimeType.JSON);
     }
+
+    if (nombreCol === 0 || apellidoCol === 0 || grupoCol === 0) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'No se encontraron las columnas necesarias (ID_NOMBRE, ID_APELLIDO(S), ID_GRUPO)'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
     
     // Array para almacenar los cambios realizados
     const cambios = [];
     let grupoNombre = '';
+
+    // Determine if we should generate a group ticket ID (only if there is at least one confirmed guest)
+    const confirmedRowIndexes = [];
     
     // Actualizar cada invitado y guardar información del cambio
     updates.forEach(function(update) {
@@ -184,6 +214,11 @@ function updateGuestAttendance(updates) {
       
       // Actualizar el estado
       sheet.getRange(update.rowIndex, estadoCol).setValue(update.estado);
+
+      // Track confirmed guests for ticket issuance
+      if (update.estado === 'Confirmado') {
+        confirmedRowIndexes.push(update.rowIndex);
+      }
       
       // Guardar información del cambio
       cambios.push({
@@ -192,19 +227,160 @@ function updateGuestAttendance(updates) {
         estadoNuevo: update.estado
       });
     });
+
+    // Issue (or revoke) ticket IDs
+    let ticketId = '';
+    if (confirmedRowIndexes.length > 0) {
+      const uuid = Utilities.getUuid().replace(/-/g, '').toUpperCase();
+      ticketId = uuid.slice(0, 12);
+    }
+
+    // Apply ticketId to confirmed rows and clear it for non-confirmed rows touched by this update
+    updates.forEach(function(update) {
+      if (ticketIdCol === 0) return;
+      const value = (update.estado === 'Confirmado') ? ticketId : '';
+      sheet.getRange(update.rowIndex, ticketIdCol).setValue(value);
+    });
     
     // Enviar correo electrónico con los cambios
     enviarCorreoConfirmacion(grupoNombre, cambios);
     
     return ContentService.createTextOutput(JSON.stringify({
       result: 'success',
-      message: '¡Confirmación guardada exitosamente!'
+      message: '¡Confirmación guardada exitosamente!',
+      ticketId: ticketId
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({
       result: 'error',
       message: 'Error al actualizar asistencia: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Verifica un boleto por su ticketId
+ */
+function verifyTicket(ticketId) {
+  try {
+    const id = String(ticketId || '').trim().toUpperCase();
+    if (!id) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'ticketId requerido'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    if (!data || data.length < 2) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'not_found',
+        valid: false,
+        message: 'No hay datos para verificar'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const headers = data[0].map(String);
+    const estadoCol = headers.indexOf('ID_ESTADO');
+    const nombreCol = headers.indexOf('ID_NOMBRE');
+    let apellidoCol = headers.indexOf('ID_APELLIDOS');
+    if (apellidoCol === -1) apellidoCol = headers.indexOf('ID_APELLIDO');
+    const grupoCol = headers.indexOf('ID_GRUPO');
+    const ticketCol = headers.indexOf('TICKET_ID');
+
+    if (ticketCol === -1) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'not_found',
+        valid: false,
+        message: 'No existe columna TICKET_ID'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const matches = [];
+    let groupName = '';
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowTicket = String(row[ticketCol] || '').trim().toUpperCase();
+      if (rowTicket !== id) continue;
+
+      const estado = estadoCol !== -1 ? String(row[estadoCol] || '') : '';
+      if (estado !== 'Confirmado') continue;
+
+      const nombre = nombreCol !== -1 ? String(row[nombreCol] || '') : '';
+      const apellido = apellidoCol !== -1 ? String(row[apellidoCol] || '') : '';
+      const fullName = (nombre + ' ' + apellido).trim();
+      if (fullName) matches.push(fullName);
+      if (!groupName && grupoCol !== -1) groupName = String(row[grupoCol] || '');
+    }
+
+    if (matches.length === 0) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'not_found',
+        valid: false,
+        message: 'Boleto no válido'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      valid: true,
+      ticketId: id,
+      grupo: groupName,
+      invitados: matches
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error al verificar boleto: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Genera un QR (PNG Data URL) para validar un ticket.
+ * Devuelve un data URL para que el frontend lo dibuje en canvas sin problemas de CORS/taint.
+ */
+function getTicketQr(ticketId) {
+  try {
+    const id = String(ticketId || '').trim().toUpperCase();
+    if (!id) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'ticketId requerido'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const baseUrl = ScriptApp.getService().getUrl();
+    const verifyUrl = baseUrl + '?action=verifyTicket&ticketId=' + encodeURIComponent(id);
+
+    // Use Google Chart API to render the QR server-side.
+    const qrUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=240x240&chld=M|1&chl=' + encodeURIComponent(verifyUrl);
+    const resp = UrlFetchApp.fetch(qrUrl, { muteHttpExceptions: true, followRedirects: true });
+    const code = resp.getResponseCode();
+    if (code < 200 || code >= 300) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        message: 'No se pudo generar el QR (HTTP ' + code + ')'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const bytes = resp.getContent();
+    const base64 = Utilities.base64Encode(bytes);
+    const dataUrl = 'data:image/png;base64,' + base64;
+
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      ticketId: id,
+      verifyUrl: verifyUrl,
+      qrDataUrl: dataUrl
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: 'Error al generar QR: ' + error.toString()
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }

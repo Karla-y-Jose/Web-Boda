@@ -2,11 +2,36 @@
    WEDDING WEBSITE STYLESHEET
    ============================================ */
 
+/*
+  TABLE OF CONTENTS
+  1) Base / Reset
+  2) Navigation / Header
+  3) Hero
+  4) Animations (Waypoints)
+  5) Global Section Styles
+  6) Intro / Story
+  7) Events
+  8) Accommodations
+  9) Gallery
+  10) Map
+  11) RSVP
+  12) Buttons
+  13) Family & Gifts
+  14) Footer
+  15) Music Player
+  16) Responsive
+  17) Utility Classes
+*/
+
+/* ============================================
+    BASE / RESET
+    ============================================ */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-} 
+}
 
 html {
     scroll-behavior: smooth;
@@ -131,8 +156,7 @@ header.scrolled::after {
     opacity: 0.9;
 }
 
-/* Logo styling */
-/* Header Navigation */
+/* Header navigation */
 .header-nav {
     display: inline-block;
 }
@@ -235,7 +259,9 @@ header nav ul.member-actions li:first-child a:hover:after {
     width: 100%;
 }
 
-/* Button Styles */
+/* ============================================
+    BUTTONS (HEADER CTA)
+    ============================================ */
 .btn-white {
     border: 2px solid #fff;
     color: #fff;
@@ -339,7 +365,6 @@ header nav ul.member-actions li:first-child a:hover:after {
     background-position: center 20%;
     display: flex;
     flex-direction: column;
-    /*align-items: center;*/
     justify-content: center;
     position: relative;
     color: #fff;
@@ -428,6 +453,10 @@ header nav ul.member-actions li:first-child a:hover:after {
     box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
+/* ============================================
+   BUTTONS (GLOBAL)
+   ============================================ */
+
 .btn.btn-fill {
     background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
     color: #fff;
@@ -508,6 +537,10 @@ header nav ul.member-actions li:first-child a:hover:after {
     color: #d4af37;
     transform: translateY(5px);
 }
+
+/* ============================================
+   ANIMATIONS (KEYFRAMES)
+   ============================================ */
 
 .floating-arrow {
     animation: float 3.6s ease-in-out infinite;
@@ -1491,8 +1524,8 @@ section {
 }
 
 /* ============================================
-   BUTTONS
-   ============================================ */
+    BUTTONS (SHARED)
+    ============================================ */
 
 .btn {
     display: inline-block;
@@ -2223,8 +2256,8 @@ footer p {
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
+    RESPONSIVE DESIGN
+    ============================================ */
 
 @media screen and (max-width: 991px) {
     header {
@@ -2407,8 +2440,8 @@ footer p {
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
+    RESPONSIVE DESIGN (CONTINUED)
+    ============================================ */
 
 @media screen and (max-width: 992px) {
     .logo {
