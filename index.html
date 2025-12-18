@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <!-- Leaflet (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -46,7 +48,7 @@
                             <ul class="primary-nav">
                                 <li><a href="#intro">Nuestra Historia</a></li>
                                 <li><a href="#events">Eventos & Protocolos</a></li>
-                                <li><a href="#venue">Ubicación</a></li>
+                                <li><a href="#map">Ubicación</a></li>
                                 <li><a href="#gallery">Galería</a></li>
                             </ul>
                             <ul class="member-actions">
@@ -304,6 +306,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="text-center">
+                        <div id="btn-directions" class="toggle-map-content pointer-events-auto">
+                            <i class="fa fa-location-arrow"></i>&nbsp;&nbsp; Cómo llegar
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -447,7 +454,7 @@
                         <h4 class="gallery-subsection-title">
                             Nuestra Música
                         </h4>
-                        <p class="gallery-subsection-desc">Las canciones que nos enamoran</p>
+                        <p class="gallery-subsection-desc">Asi suena nuestro Amor</p>
                     </div>
                 </div>
                 <div class="row">
@@ -719,9 +726,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <!-- Waypoints JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
-    <!-- Google Maps API -->
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlPw3GQYI3faa_9mRE6plWuM7xNEmrwH0&callback=initMap"></script>
+    <!-- Leaflet (OpenStreetMap) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="js/scripts.js"></script>
 </body>
 </html>

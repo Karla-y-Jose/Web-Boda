@@ -1170,17 +1170,102 @@ section {
 
 #map {
     background: #fff;
+    position: relative;
 }
 
 #map-canvas {
     height: 700px;
-    width: 100%;
+    width: calc(100% - 30px);
+    max-width: 1170px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* Leaflet base typography to match the site */
+#map-canvas.leaflet-container,
+#map-canvas .leaflet-container {
+    font-family: 'Karla', sans-serif;
+}
+
+/* Leaflet controls and attribution styled to blend in */
+#map-canvas .leaflet-control-zoom a {
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+#map-canvas .leaflet-control-zoom a:hover {
+    border-color: #d4af37;
+}
+
+#map-canvas .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.85);
+    color: #666;
+    font-size: 11px;
+}
+
+#map-canvas .leaflet-control-attribution a {
+    color: #2E8B57;
+}
+
+/* Popup styling consistent with the page */
+#map-canvas .leaflet-popup-content-wrapper {
+    border: 1px solid rgba(212, 175, 55, 0.30);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+#map-canvas .leaflet-popup-tip {
+    background: #fff;
+}
+
+.map-popup {
+    text-align: center;
+    padding: 6px 6px;
+}
+
+.map-popup-title {
+    font-family: 'Didot', serif;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+.map-popup-title--gold {
+    color: #d4af37;
+}
+
+.map-popup-title--green {
+    color: #2E8B57;
+}
+
+.map-popup-subtitle {
+    display: inline-block;
+    margin-top: 2px;
+    color: #666;
+    font-size: 12px;
+}
+
+.map-popup-meta {
+    display: inline-block;
+    margin-top: 2px;
+    color: #777;
+    font-size: 11px;
 }
 
 #map-content-wrapper {
     position: relative;
     margin-top: -660px;
     margin-bottom: 150px;
+    z-index: 2;
+}
+
+/* Keep section title above the map layers */
+#map > .text-center {
+    position: relative;
+    z-index: 5;
 }
 
 #map-content {
@@ -1264,7 +1349,28 @@ section {
     transition: all 0.3s ease;
 }
 
+#btn-directions {
+    padding: 20px;
+    background: #fff;
+    cursor: pointer;
+    display: inline-block;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    color: #2E8B57;
+    font-weight: 600;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    margin-top: 18px;
+ }
+
 #btn-show-content:hover {
+    background: #d4af37;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+#btn-directions:hover {
     background: #d4af37;
     color: #fff;
     transform: translateY(-2px);
@@ -2030,11 +2136,24 @@ footer p {
     max-width: 500px;
     width: 100%;
     margin: 0 auto;
-    padding: 25px;
-    background: #f9f9f9;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 28px;
+    background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.music-player::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    opacity: 0.9;
 }
 
 /* Asegurar que el contenedor del reproductor esté centrado en pantallas pequeñas */
@@ -2051,9 +2170,11 @@ footer p {
 }
 
 .track-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2E8B57;
+    font-family: 'Didot', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #0f3b2e;
+    letter-spacing: 0.3px;
     margin-bottom: 5px;
     white-space: nowrap;
     overflow: hidden;
@@ -2070,14 +2191,15 @@ footer p {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 20px;
 }
 
 .control-btn {
     background: #fff;
-    border: 2px solid #e0e0e0;
-    color: #555;
+    border: 2px solid rgba(15, 59, 46, 0.14);
+    color: #0f3b2e;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -2090,10 +2212,11 @@ footer p {
 }
 
 .control-btn:hover {
-    background: #f5f5f5;
+    background: #fff;
     border-color: #d4af37;
     color: #d4af37;
     transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.18);
 }
 
 .control-btn:active {
@@ -2103,23 +2226,23 @@ footer p {
 .play-btn {
     width: 60px;
     height: 60px;
-    background: #2E8B57;
-    border-color: #2E8B57;
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+    border-color: #d4af37;
     color: #fff;
     font-size: 20px;
 }
 
 .play-btn:hover {
-    background: #236A45;
-    border-color: #236A45;
-    color: #fff;
+    background: #fff;
+    border-color: #d4af37;
+    color: #d4af37;
 }
 
 .progress-bar {
     width: 100%;
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 3px;
+    height: 8px;
+    background: rgba(15, 59, 46, 0.10);
+    border-radius: 999px;
     overflow: hidden;
     cursor: pointer;
     margin-bottom: 10px;
@@ -2130,14 +2253,63 @@ footer p {
     background: linear-gradient(90deg, #2E8B57, #d4af37);
     width: 0%;
     transition: width 0.1s linear;
+    border-radius: 999px;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    transform: translate(50%, -50%);
+    background: #d4af37;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.25);
+    opacity: 0;
+}
+
+.progress-bar:hover .progress-fill::after {
+    opacity: 1;
 }
 
 .time-info {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    color: #666;
+    font-size: 12px;
+    color: #777;
     font-weight: 500;
+}
+
+@media screen and (max-width: 480px) {
+    .music-player {
+        padding: 22px;
+        border-radius: 14px;
+    }
+
+    .player-controls {
+        gap: 12px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .music-player {
+        padding: 18px;
+    }
+
+    .control-btn {
+        width: 46px;
+        height: 46px;
+        font-size: 15px;
+    }
+
+    .play-btn {
+        width: 54px;
+        height: 54px;
+        font-size: 18px;
+    }
 }
 
 /* ============================================

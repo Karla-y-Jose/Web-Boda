@@ -455,112 +455,200 @@ function cerrarModalCalendario() {
     }
 }
 
-// Google Map Integration
+// Map Integration (Leaflet + OpenStreetMap)
 function initMap() {
-    // Check if map element exists
-    if (!document.getElementById('map-canvas')) {
+    var mapEl = document.getElementById('map-canvas');
+    if (!mapEl) {
         console.warn('Map container element not found');
         return;
     }
 
-    // Check if Google Maps is available
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        console.warn('Google Maps library not loaded');
+    if (typeof L === 'undefined') {
+        console.warn('Leaflet library not loaded');
         return;
     }
 
-    // Center map between both venues
-    var centerLocation = {lat: 20.761404, lng: -103.4241881};
-    
-    var map = new google.maps.Map(document.getElementById('map-canvas'), {
-        zoom: 12,
-        center: centerLocation,
-        scrollwheel: false,
-        styles: [
-            {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }]
+    // Prevent re-initialization if initMap is called more than once
+    if (mapEl._leaflet_map) {
+        return;
+    }
+
+    var ceremonyLatLng = [20.744395, -103.3928862];
+    var receptionLatLng = [20.7784148, -103.4550886];
+    var centerLatLng = [20.761404, -103.4241881];
+
+    // Track last selected destination for the "Cómo llegar" button
+    var currentDestinationLatLng = ceremonyLatLng;
+
+    var map = L.map(mapEl, {
+        scrollWheelZoom: false,
+        zoomControl: true
+    }).setView(centerLatLng, 12);
+
+    // Store reference for later resize invalidation
+    mapEl._leaflet_map = map;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var ceremonyMarker = L.circleMarker(ceremonyLatLng, {
+        radius: 10,
+        color: '#ffffff',
+        weight: 3,
+        fillColor: '#d4af37',
+        fillOpacity: 1
+    }).addTo(map);
+
+    var receptionMarker = L.circleMarker(receptionLatLng, {
+        radius: 10,
+        color: '#ffffff',
+        weight: 3,
+        fillColor: '#2E8B57',
+        fillOpacity: 1
+    }).addTo(map);
+
+    var ceremonyPopupHtml = (
+        '<div class="map-popup">' +
+            '<strong class="map-popup-title map-popup-title--gold">Ceremonia</strong><br>' +
+            '<span class="map-popup-subtitle">Parroquia Nuestra Señora de Altagracia</span><br>' +
+            '<span class="map-popup-meta">6:00 PM</span>' +
+        '</div>'
+    );
+
+    var receptionPopupHtml = (
+        '<div class="map-popup">' +
+            '<strong class="map-popup-title map-popup-title--green">Recepción</strong><br>' +
+            '<span class="map-popup-subtitle">Jardin de Eventos Andira</span><br>' +
+            '<span class="map-popup-meta">8:00 PM</span>' +
+        '</div>'
+    );
+
+    // Disable auto-pan so opening the popup doesn't shove the marker to a corner.
+    ceremonyMarker.bindPopup(ceremonyPopupHtml, { closeButton: false, autoPan: false });
+    receptionMarker.bindPopup(receptionPopupHtml, { closeButton: false, autoPan: false });
+
+    function focusLocation(latLng, zoom, markerToOpen) {
+        // Make repeated focusing deterministic:
+        // - Stop any in-progress pan/zoom animation
+        // - Invalidate size *without* Leaflet auto-panning
+        // - Center without animation (avoids corner drift)
+        map.stop();
+        window.requestAnimationFrame(function () {
+            map.invalidateSize({ animate: false, pan: false });
+            map.setView(latLng, zoom, { animate: false });
+            if (markerToOpen) {
+                markerToOpen.openPopup();
             }
-        ]
+        });
+    }
+
+    function focusCeremony() {
+        currentDestinationLatLng = ceremonyLatLng;
+        focusLocation(ceremonyLatLng, 15, ceremonyMarker);
+    }
+
+    function focusReception() {
+        currentDestinationLatLng = receptionLatLng;
+        focusLocation(receptionLatLng, 15, receptionMarker);
+    }
+
+    ceremonyMarker.on('click', function () {
+        focusCeremony();
     });
 
-    // Ceremony marker
-    var ceremonyMarker = new google.maps.Marker({
-        position: {lat: 20.744395, lng: -103.3928862},
-        map: map,
-        title: 'Ceremonia - Parroquia Nuestra Señora de Altagracia',
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#d4af37',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3
+    receptionMarker.on('click', function () {
+        focusReception();
+    });
+
+    function openGoogleMapsDirectionsTo(destLatLng) {
+        var dest = Array.isArray(destLatLng) ? destLatLng : ceremonyLatLng;
+        var destinationParam = encodeURIComponent(dest[0] + ',' + dest[1]);
+
+        // IMPORTANT: You asked to request location permission first, then open Google Maps.
+        // Browsers may block opening a *new tab* after the permission prompt (not a direct user gesture),
+        // so we navigate in the same tab for reliable one-click behavior.
+        var destinationOnlyUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + destinationParam + '&travelmode=driving';
+
+        if (navigator.geolocation && typeof navigator.geolocation.getCurrentPosition === 'function') {
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    var originParam = encodeURIComponent(pos.coords.latitude + ',' + pos.coords.longitude);
+                    var fullUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + originParam + '&destination=' + destinationParam + '&travelmode=driving';
+                    window.location.href = fullUrl;
+                },
+                function () {
+                    // If user blocks location, still open Google Maps with destination.
+                    window.location.href = destinationOnlyUrl;
+                },
+                { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+            );
+        } else {
+            window.location.href = destinationOnlyUrl;
         }
-    });
+    }
 
-    // Reception marker
-    var receptionMarker = new google.maps.Marker({
-        position: {lat: 20.7784148, lng: -103.4550886},
-        map: map,
-        title: 'Recepción - Jardin de Eventos Andira',
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#2E8B57',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3
-        }
-    });
+    function invalidateSoon() {
+        // Leaflet needs this when the map is shown/overlays change
+        setTimeout(function () {
+            map.invalidateSize({ animate: false, pan: false });
+        }, 50);
+    }
 
-    // Info windows
-    var ceremonyInfo = new google.maps.InfoWindow({
-        content: '<div style="font-family: Montserrat, sans-serif; text-align: center; padding: 10px;">' +
-                '<strong style="color: #d4af37; font-size: 14px;">Ceremonia</strong><br>' +
-                '<span style="color: #666; font-size: 12px;">Parroquia Nuestra Señora de Altagracia</span><br>' +
-                '<span style="color: #666; font-size: 11px;">6:00 PM</span></div>'
-    });
+    // Keep map aligned on window resize/orientation changes
+    window.addEventListener('resize', invalidateSoon);
 
-    var receptionInfo = new google.maps.InfoWindow({
-        content: '<div style="font-family: Montserrat, sans-serif; text-align: center; padding: 10px;">' +
-                '<strong style="color: #2E8B57; font-size: 14px;">Recepción</strong><br>' +
-                '<span style="color: #666; font-size: 12px;">Jardin de Eventos Andira</span><br>' +
-                '<span style="color: #666; font-size: 11px;">8:00 PM</span></div>'
-    });
+    // Toggle map content buttons (preserve existing UX)
+    $('#btn-show-map-ceremony')
+        .off('click.map')
+        .on('click.map', function (e) {
+            e.preventDefault();
+            $('#map-content').toggleClass('toggle-map-content');
+            $('#btn-show-content').toggleClass('toggle-map-content');
+            $('#btn-directions').toggleClass('toggle-map-content');
+            // Wait for layout changes (opacity/visibility) before centering
+            setTimeout(function () {
+                focusCeremony();
+            }, 60);
+        });
 
-    ceremonyMarker.addListener('click', function() {
-        receptionInfo.close();
-        ceremonyInfo.open(map, ceremonyMarker);
-    });
+    $('#btn-show-map-reception')
+        .off('click.map')
+        .on('click.map', function (e) {
+            e.preventDefault();
+            $('#map-content').toggleClass('toggle-map-content');
+            $('#btn-show-content').toggleClass('toggle-map-content');
+            $('#btn-directions').toggleClass('toggle-map-content');
+            setTimeout(function () {
+                focusReception();
+            }, 60);
+        });
 
-    receptionMarker.addListener('click', function() {
-        ceremonyInfo.close();
-        receptionInfo.open(map, receptionMarker);
-    });
+    $('#btn-show-content')
+        .off('click.map')
+        .on('click.map', function () {
+            $('#map-content').toggleClass('toggle-map-content');
+            $('#btn-show-content').toggleClass('toggle-map-content');
+            $('#btn-directions').toggleClass('toggle-map-content');
+            invalidateSoon();
+        });
 
-    // Toggle map content buttons
-    $('#btn-show-map-ceremony').click(function () {
-        $('#map-content').toggleClass('toggle-map-content');
-        $('#btn-show-content').toggleClass('toggle-map-content');
-        map.setCenter({lat: 20.744395, lng: -103.3928862});
-        map.setZoom(15);
-        ceremonyInfo.open(map, ceremonyMarker);
-    });
+    $('#btn-directions')
+        .off('click.map')
+        .on('click.map', function () {
+            openGoogleMapsDirectionsTo(currentDestinationLatLng);
+        });
 
-    $('#btn-show-map-reception').click(function () {
-        $('#map-content').toggleClass('toggle-map-content');
-        $('#btn-show-content').toggleClass('toggle-map-content');
-        map.setCenter({lat: 20.7784148, lng: -103.4550886});
-        map.setZoom(15);
-        receptionInfo.open(map, receptionMarker);
-    });
+    // Initial size fix (in case the section loads while not visible)
+    invalidateSoon();
+}
 
-    $('#btn-show-content').click(function () {
-        $('#map-content').toggleClass('toggle-map-content');
-        $('#btn-show-content').toggleClass('toggle-map-content');
-    });
+// Leaflet is loaded via CDN; initialize once DOM is ready.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+} else {
+    initMap();
 }
 
 // Smooth Scroll Link Handler
@@ -639,6 +727,23 @@ const currentTimeEl = document.getElementById('current-time');
 const durationEl = document.getElementById('duration');
 const progressBar = document.querySelector('.progress-bar');
 
+function isAudioPlaying() {
+    return !!(audioPlayer && !audioPlayer.paused && !audioPlayer.ended);
+}
+
+function syncPlayPauseUI() {
+    if (!audioPlayer || !playPauseBtn) return;
+    const icon = playPauseBtn.querySelector('i');
+    if (!icon) return;
+
+    const playingNow = isAudioPlaying();
+    isPlaying = playingNow;
+    icon.classList.toggle('fa-play', !playingNow);
+    icon.classList.toggle('fa-pause', playingNow);
+    playPauseBtn.setAttribute('title', playingNow ? 'Pausar' : 'Reproducir');
+    playPauseBtn.setAttribute('aria-label', playingNow ? 'Pausar' : 'Reproducir');
+}
+
 // Función para cargar una canción
 function loadTrack(index) {
     if (playlist.length === 0) {
@@ -660,21 +765,25 @@ function loadTrack(index) {
 // Función para reproducir/pausar
 function togglePlayPause() {
     if (playlist.length === 0) return;
-    
-    if (isPlaying) {
-        audioPlayer.pause();
-        playPauseBtn.querySelector('i').classList.remove('fa-pause');
-        playPauseBtn.querySelector('i').classList.add('fa-play');
+
+    // Don't rely on a separate boolean; use the audio element as source of truth.
+    if (!audioPlayer) return;
+
+    if (audioPlayer.paused || audioPlayer.ended) {
+        const playPromise = audioPlayer.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function () {
+                // If autoplay/user-gesture restrictions block play, keep UI consistent.
+                syncPlayPauseUI();
+            });
+        }
     } else {
-        audioPlayer.play();
-        playPauseBtn.querySelector('i').classList.remove('fa-play');
-        playPauseBtn.querySelector('i').classList.add('fa-pause');
+        audioPlayer.pause();
     }
-    isPlaying = !isPlaying;
 }
 
 // Función para canción anterior
-function previousTrack() {
+function previousTrack(autoplay) {
     if (playlist.length === 0) return;
     
     currentTrackIndex--;
@@ -682,13 +791,16 @@ function previousTrack() {
         currentTrackIndex = playlist.length - 1;
     }
     loadTrack(currentTrackIndex);
-    if (isPlaying) {
-        audioPlayer.play();
+    if (autoplay) {
+        const playPromise = audioPlayer.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function () { syncPlayPauseUI(); });
+        }
     }
 }
 
 // Función para siguiente canción
-function nextTrack() {
+function nextTrack(autoplay) {
     if (playlist.length === 0) return;
     
     currentTrackIndex++;
@@ -696,8 +808,11 @@ function nextTrack() {
         currentTrackIndex = 0;
     }
     loadTrack(currentTrackIndex);
-    if (isPlaying) {
-        audioPlayer.play();
+    if (autoplay) {
+        const playPromise = audioPlayer.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function () { syncPlayPauseUI(); });
+        }
     }
 }
 
@@ -717,6 +832,7 @@ if (audioPlayer) {
 
     // Actualizar progreso
     audioPlayer.addEventListener('timeupdate', function() {
+        if (!isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
         const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
         progressFill.style.width = progress + '%';
         currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
@@ -724,8 +840,16 @@ if (audioPlayer) {
 
     // Cuando termina la canción
     audioPlayer.addEventListener('ended', function() {
-        nextTrack();
+        // Auto-advance and keep playing when a track ends naturally.
+        nextTrack(true);
+        syncPlayPauseUI();
     });
+
+    // Keep UI in sync even when audio state changes externally
+    audioPlayer.addEventListener('play', syncPlayPauseUI);
+    audioPlayer.addEventListener('pause', syncPlayPauseUI);
+    audioPlayer.addEventListener('playing', syncPlayPauseUI);
+    audioPlayer.addEventListener('emptied', syncPlayPauseUI);
 
     // Click en barra de progreso
     if (progressBar) {
@@ -747,11 +871,15 @@ if (playPauseBtn) {
 }
 
 if (prevBtn) {
-    prevBtn.addEventListener('click', previousTrack);
+    prevBtn.addEventListener('click', function () {
+        previousTrack(isAudioPlaying());
+    });
 }
 
 if (nextBtn) {
-    nextBtn.addEventListener('click', nextTrack);
+    nextBtn.addEventListener('click', function () {
+        nextTrack(isAudioPlaying());
+    });
 }
 
 // Cargar primera canción al inicio y reproducir automáticamente
@@ -840,11 +968,7 @@ if (playlist.length > 0) {
             playPromise.then(function() {
                 // Reproducción exitosa
                 musicStarted = true;
-                isPlaying = true;
-                if (playPauseBtn && playPauseBtn.querySelector('i')) {
-                    playPauseBtn.querySelector('i').classList.remove('fa-play');
-                    playPauseBtn.querySelector('i').classList.add('fa-pause');
-                }
+                syncPlayPauseUI();
                 console.log('✅ Música reproduciéndose');
                 
                 // Ocultar overlay y notificación
@@ -859,6 +983,7 @@ if (playlist.length > 0) {
                 document.getElementById('music-notif-content').removeEventListener('touchstart', startMusic);
             }).catch(function(error) {
                 console.log('⚠️ No se pudo reproducir:', error.message);
+                syncPlayPauseUI();
             });
         }
     }
@@ -891,6 +1016,11 @@ if (playlist.length > 0) {
     // Event listener para scroll
     window.addEventListener('scroll', scrollHandler, { passive: true });
 }
+
+// Extra safety: resync button state after returning to the page/tab.
+document.addEventListener('visibilitychange', syncPlayPauseUI);
+window.addEventListener('pageshow', syncPlayPauseUI);
+window.addEventListener('focus', syncPlayPauseUI);
 /* ============================================
    FUNCIONALIDAD DE SUBIDA DE FOTOS - GOOGLE APPS SCRIPT
    ============================================ */
@@ -922,8 +1052,70 @@ if (photoFileInput && fileInfo) {
 // Manejar el formulario de subida de fotos
 const photoUploadForm = document.getElementById('photo-upload-form');
 
+// Validación estricta (cliente) para reducir uploads no-imagen.
+// Nota: la validación real también ocurre en Apps Script.
+const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const DISALLOWED_EXTENSIONS = new Set(['svg']);
+
+function getFileExtensionLower(name) {
+    const parts = String(name || '').split('.');
+    if (parts.length < 2) return '';
+    return parts.pop().toLowerCase();
+}
+
+async function readFirstBytes(file, byteCount) {
+    const slice = file.slice(0, byteCount);
+    const buffer = await slice.arrayBuffer();
+    return new Uint8Array(buffer);
+}
+
+function hasJpegMagic(bytes) {
+    return bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF;
+}
+
+function hasPngMagic(bytes) {
+    return bytes.length >= 8 &&
+        bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47 &&
+        bytes[4] === 0x0D && bytes[5] === 0x0A && bytes[6] === 0x1A && bytes[7] === 0x0A;
+}
+
+function hasGifMagic(bytes) {
+    // GIF87a / GIF89a
+    return bytes.length >= 6 &&
+        bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 &&
+        (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61;
+}
+
+function hasWebpMagic(bytes) {
+    // RIFF .... WEBP
+    return bytes.length >= 12 &&
+        bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+        bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+}
+
+async function validateImageFile(file) {
+    const extension = getFileExtensionLower(file.name);
+    if (DISALLOWED_EXTENSIONS.has(extension) || String(file.type || '').toLowerCase() === 'image/svg+xml') {
+        return { ok: false, reason: 'No se permiten archivos SVG.' };
+    }
+
+    // Algunos navegadores pueden mandar type vacío; validamos por firma (magic bytes).
+    const mime = String(file.type || '').toLowerCase();
+    if (mime && !ALLOWED_IMAGE_MIME_TYPES.has(mime)) {
+        return { ok: false, reason: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.' };
+    }
+
+    const bytes = await readFirstBytes(file, 16);
+    const looksLikeImage = hasJpegMagic(bytes) || hasPngMagic(bytes) || hasGifMagic(bytes) || hasWebpMagic(bytes);
+    if (!looksLikeImage) {
+        return { ok: false, reason: 'El archivo no parece ser una imagen válida.' };
+    }
+
+    return { ok: true };
+}
+
 if (photoUploadForm) {
-    photoUploadForm.addEventListener('submit', function(e) {
+    photoUploadForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const guestName = document.getElementById('guest-name').value.trim();
@@ -938,6 +1130,21 @@ if (photoUploadForm) {
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
                 alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
+                return;
+            }
+        }
+
+        // Validación estricta (MIME/extensión/firma)
+        for (let file of files) {
+            try {
+                const result = await validateImageFile(file);
+                if (!result.ok) {
+                    alert(`"${file.name}": ${result.reason}`);
+                    return;
+                }
+            } catch (err) {
+                console.error('Error validando archivo:', err);
+                alert(`No se pudo validar "${file.name}". Intenta con otra imagen.`);
                 return;
             }
         }
@@ -962,8 +1169,11 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
     
     // Procesar cada archivo
     for (let file of files) {
-        if (!file.type.startsWith('image/')) {
-            console.log(`Archivo ${file.name} no es una imagen, se omite`);
+        // Defensa extra (ya se validó antes del submit)
+        const ext = getFileExtensionLower(file.name);
+        if (ext === 'svg' || String(file.type || '').toLowerCase() === 'image/svg+xml') {
+            console.log(`Archivo ${file.name} es SVG, se omite`);
+            failedCount++;
             continue;
         }
         
@@ -1009,7 +1219,7 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
     
     // Mostrar resultado
     if (uploadedCount > 0) {
-        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) subida(s) exitosamente.`);
+        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarán en la galería después de ser aprobadas.`);
         
         // Recargar galería después de 2 segundos
         setTimeout(() => {
