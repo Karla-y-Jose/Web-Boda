@@ -6,6 +6,10 @@ const SHEET_NAME = 'Galeria';  // Nombre de la hoja en el Sheet
 // Email para notificaciones
 const EMAIL_NOTIFICACION = 'karla.y.jose.18.12.26@gmail.com';
 
+// RSVP sheet (source of truth for CODIGO_GRUPO)
+const RSVP_SPREADSHEET_ID = '1tFt-UjwaQS80uM1ECrMxnLJGU-MWO9lWnxZyPnYV530';
+const RSVP_SHEET_NAME = 'RSVP-Boda-KarlaJose';
+
 // ========== SEGURIDAD / VALIDACIÓN ==========
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_CONTENT_TYPES = [
@@ -62,6 +66,67 @@ function normalizeSection(section) {
   return allowed.includes(s) ? s : 'invitados';
 }
 
+function normalizeGroupCode(code) {
+  return String(code || '').trim().toUpperCase().replace(/[\s-]+/g, '');
+}
+
+function findGroupCodeColumn(headers) {
+  const candidates = ['GROUP_CODE', 'CODIGO_GRUPO', 'ID_CODIGO_GRUPO', 'ACCESS_CODE', 'CLAVE_GRUPO', 'CODIGO'];
+  for (let i = 0; i < candidates.length; i++) {
+    const idx = headers.indexOf(candidates[i]);
+    if (idx !== -1) return idx;
+  }
+  return -1;
+}
+
+function isValidRsvpGroupCode(groupCode) {
+  const code = normalizeGroupCode(groupCode);
+  if (!code) return false;
+
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get('rsvp_group_code_' + code);
+  if (cached === '1') return true;
+  if (cached === '0') return false;
+
+  const ss = SpreadsheetApp.openById(RSVP_SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(RSVP_SHEET_NAME);
+  if (!sheet) return false;
+  const values = sheet.getDataRange().getValues();
+  if (!values || values.length < 2) return false;
+  const headers = values[0].map(String);
+  const col = findGroupCodeColumn(headers);
+  if (col === -1) return false;
+
+  for (let i = 1; i < values.length; i++) {
+    const rowCode = normalizeGroupCode(values[i][col]);
+    if (rowCode && rowCode === code) {
+      cache.put('rsvp_group_code_' + code, '1', 3600);
+      return true;
+    }
+  }
+
+  cache.put('rsvp_group_code_' + code, '0', 600);
+  return false;
+}
+
+function requireValidGroupCodeOrThrow(groupCode) {
+  if (!isValidRsvpGroupCode(groupCode)) {
+    throw new Error('Código de grupo inválido');
+  }
+}
+
+function parsePostParams(e) {
+  // Support both JSON and form-encoded.
+  if (e && e.postData && e.postData.contents) {
+    try {
+      return JSON.parse(e.postData.contents);
+    } catch (_err) {
+      return e.parameter || {};
+    }
+  }
+  return (e && e.parameter) ? e.parameter : {};
+}
+
 function parseDataUri(dataUri) {
   if (!dataUri || typeof dataUri !== 'string') {
     throw new Error('photoData inválido');
@@ -76,27 +141,30 @@ function parseDataUri(dataUri) {
 
 function isAllowedImageBytes(bytes, contentType) {
   // Valida magic bytes para evitar contenido no-imagen con MIME falso
+  // Nota: en Apps Script los bytes pueden venir como signed byte (-128..127).
+  // Normalizamos a 0..255 para comparar correctamente.
+  const u8 = (idx) => (bytes[idx] & 0xFF);
   // JPEG: FF D8 FF
   if (contentType === 'image/jpeg') {
-    return bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF;
+    return bytes.length >= 3 && u8(0) === 0xFF && u8(1) === 0xD8 && u8(2) === 0xFF;
   }
   // PNG: 89 50 4E 47 0D 0A 1A 0A
   if (contentType === 'image/png') {
     return bytes.length >= 8 &&
-      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47 &&
-      bytes[4] === 0x0D && bytes[5] === 0x0A && bytes[6] === 0x1A && bytes[7] === 0x0A;
+      u8(0) === 0x89 && u8(1) === 0x50 && u8(2) === 0x4E && u8(3) === 0x47 &&
+      u8(4) === 0x0D && u8(5) === 0x0A && u8(6) === 0x1A && u8(7) === 0x0A;
   }
   // GIF: GIF87a / GIF89a
   if (contentType === 'image/gif') {
     return bytes.length >= 6 &&
-      bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 &&
-      (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61;
+      u8(0) === 0x47 && u8(1) === 0x49 && u8(2) === 0x46 && u8(3) === 0x38 &&
+      (u8(4) === 0x37 || u8(4) === 0x39) && u8(5) === 0x61;
   }
   // WEBP: RIFF .... WEBP
   if (contentType === 'image/webp') {
     return bytes.length >= 12 &&
-      bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
-      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+      u8(0) === 0x52 && u8(1) === 0x49 && u8(2) === 0x46 && u8(3) === 0x46 &&
+      u8(8) === 0x57 && u8(9) === 0x45 && u8(10) === 0x42 && u8(11) === 0x50;
   }
   return false;
 }
@@ -143,7 +211,7 @@ function ensureSheetAndHeaders() {
  */
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const data = parsePostParams(e);
     const action = data.action;
     
     if (action === 'uploadPhoto') {
@@ -174,7 +242,11 @@ function doGet(e) {
     
     if (action === 'getPhotos') {
       const section = params.section || 'all';
-      return getPhotos(section);
+      return getPhotos(section, params.groupCode);
+    }
+
+    if (action === 'getPhoto') {
+      return getPhoto(params.fileId, params.groupCode);
     }
     
     return ContentService.createTextOutput('Gallery API funcionando correctamente');
@@ -194,9 +266,12 @@ function doGet(e) {
 function uploadPhoto(data) {
   try {
     const guestName = sanitizeGuestName(data.guestName);
+    const groupCode = normalizeGroupCode(data.groupCode);
     const photoData = data.photoData; // Data URI base64
     const fileName = sanitizeFileName(data.fileName);
     const section = normalizeSection(data.section || 'invitados'); // pedida, savethedate, boda, invitados
+
+    requireValidGroupCodeOrThrow(groupCode);
     
     if (!guestName || !photoData || !fileName) {
       return jsonResponse({
@@ -251,14 +326,10 @@ function uploadPhoto(data) {
     
     // Subir archivo a Drive
     const file = folder.createFile(blob);
-    
-    // Hacer el archivo público (IMPORTANTE: debe ser visible para cualquiera con el enlace)
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    
-    // Obtener URL pública en formato que funcione en <img> tags
-    // Este formato de URL funciona directamente en navegadores
+
     const fileId = file.getId();
-    const publicUrl = `https://lh3.googleusercontent.com/d/${fileId}=s4000?authuser=0`;
+    // Keep the file private (folder is private). Images are served via Apps Script (getPhoto).
+    const publicUrl = '';
     
     // Registrar en Google Sheets
     const sheetToUse = ensureSheetAndHeaders();
@@ -287,9 +358,7 @@ function uploadPhoto(data) {
           📁 Sección: ${section}
           📷 Archivo: ${fileName}
           🕐 Fecha: ${timestamp}
-          
-          Ver foto: ${publicUrl}
-          
+
           Moderación: esta foto queda PENDIENTE hasta aprobarla en el Google Sheet (${SHEET_NAME}) marcando la columna "Aprobada".
           
           ¡Saludos!
@@ -304,7 +373,8 @@ function uploadPhoto(data) {
       success: true,
       message: 'Foto subida exitosamente (pendiente de aprobación)',
       photo: {
-        url: publicUrl,
+        url: '',
+        fileId: fileId,
         guestName: guestName,
         timestamp: timestamp,
         section: section,
@@ -324,8 +394,9 @@ function uploadPhoto(data) {
 /**
  * Obtener todas las fotos o filtradas por sección
  */
-function getPhotos(section) {
+function getPhotos(section, groupCode) {
   try {
+    requireValidGroupCodeOrThrow(groupCode);
     const sheet = ensureSheetAndHeaders();
     
     if (!sheet) {
@@ -367,7 +438,6 @@ function getPhotos(section) {
       photos.push({
         timestamp: row[timestampCol],
         guestName: row[nombreCol],
-        url: row[urlCol],
         fileId: row[fileIdCol],
         section: photoSection,
         fileName: row[archivoCol]
@@ -389,6 +459,44 @@ function getPhotos(section) {
       success: false,
       message: 'Error al obtener fotos: ' + error.toString()
     });
+  }
+}
+
+function getPhoto(fileId, groupCode) {
+  try {
+    requireValidGroupCodeOrThrow(groupCode);
+    const id = String(fileId || '').trim();
+    if (!id) {
+      return jsonResponse({ success: false, message: 'fileId requerido' });
+    }
+
+    const file = DriveApp.getFileById(id);
+    const blob = file.getBlob();
+    const contentType = String(blob.getContentType() || '').toLowerCase();
+    if (ALLOWED_CONTENT_TYPES.indexOf(contentType) === -1) {
+      return jsonResponse({ success: false, message: 'Tipo de archivo no permitido' });
+    }
+    const bytes = blob.getBytes();
+    if (!bytes || bytes.length === 0) {
+      return jsonResponse({ success: false, message: 'Archivo vacío' });
+    }
+    if (bytes.length > MAX_IMAGE_BYTES) {
+      return jsonResponse({ success: false, message: 'Imagen demasiado grande' });
+    }
+    if (!isAllowedImageBytes(bytes, contentType)) {
+      return jsonResponse({ success: false, message: 'El archivo no parece ser una imagen válida' });
+    }
+
+    const base64 = Utilities.base64Encode(bytes);
+    return jsonResponse({
+      success: true,
+      fileId: id,
+      contentType: contentType,
+      base64: base64
+    });
+  } catch (error) {
+    Logger.log('Error en getPhoto: ' + error);
+    return jsonResponse({ success: false, message: 'Error al obtener foto: ' + error.toString() });
   }
 }
 

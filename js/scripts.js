@@ -110,8 +110,6 @@ $(document).ready(function() {
     setInterval(updateCountdown, 1000);
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
-    // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
-    // IMPORTANT: Replace this URL with your deployed Apps Script URL
     var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec';
 
     // Expose for global helpers (ticket QR generation lives outside document.ready)
@@ -1498,8 +1496,7 @@ window.addEventListener('focus', syncPlayPauseUI);
     PHOTO UPLOAD FUNCTIONALITY - GOOGLE APPS SCRIPT
    ============================================ */
 
-// ⚠️ IMPORTANT: Replace this URL with your Google Apps Script URL
-const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpDRH3XHlD29XuLAjU6N_8BVso02PnYhyIhFCSlysJpQPKZMIhglesHvUGj83sOKI_/exec';
+const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwvd5pnEPMmxvC9Tk6D0VWf03JJTI2W4rTwUz4x4AsP5a5qMAvysuxg2WJShrJngnU/exec';
 
 // Show selected file names
 const photoFileInput = document.getElementById('photo-file');
@@ -1524,6 +1521,7 @@ if (photoFileInput && fileInfo) {
 
 // Handle the photo upload form
 const photoUploadForm = document.getElementById('photo-upload-form');
+const galleryGroupCodeInput = document.getElementById('gallery-group-code');
 
 // Strict client-side validation to reduce non-image uploads.
 // Note: real validation also happens in Apps Script.
@@ -1592,9 +1590,10 @@ if (photoUploadForm) {
         e.preventDefault();
         
         const guestName = document.getElementById('guest-name').value.trim();
+        const groupCode = galleryGroupCodeInput ? String(galleryGroupCodeInput.value || '').trim() : '';
         const files = photoFileInput.files;
         
-        if (!guestName || files.length === 0) {
+        if (!guestName || !groupCode || files.length === 0) {
             alert('Por favor, completa todos los campos');
             return;
         }
@@ -1623,14 +1622,19 @@ if (photoUploadForm) {
         }
         
         // Upload photos to Google Apps Script
-        uploadPhotosToGoogleDrive(guestName, files);
+        try {
+            localStorage.setItem('galleryGroupCode', groupCode);
+        } catch (_e) {
+            // ignore
+        }
+        uploadPhotosToGoogleDrive(guestName, groupCode, files);
     });
 }
 
 /**
  * Upload photos to Google Drive via Google Apps Script
  */
-async function uploadPhotosToGoogleDrive(guestName, files) {
+async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
     const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
     const originalBtnText = uploadBtn.innerHTML;
     
@@ -1639,6 +1643,7 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
     
     let uploadedCount = 0;
     let failedCount = 0;
+    const failureMessages = [];
     
     // Process each file
     for (let file of files) {
@@ -1656,26 +1661,44 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
             // Send to Google Apps Script
             const response = await fetch(GALLERY_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important for Google Apps Script
                 headers: {
-                    'Content-Type': 'application/json',
+                    // Use a simple request to avoid CORS preflight.
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                 },
-                body: JSON.stringify({
+                body: new URLSearchParams({
                     action: 'uploadPhoto',
                     guestName: guestName,
+                    groupCode: String(groupCode || ''),
                     photoData: base64Data,
                     fileName: file.name,
                     section: 'invitados'
-                })
+                }),
+                redirect: 'follow',
+                cache: 'no-store'
             });
             
-            // Note: with mode: 'no-cors', we cannot read the response
-            // Assume it succeeded if there was no error
+            let payload = null;
+            try {
+                payload = await response.json();
+            } catch (_e) {
+                // If the response isn't JSON (or CORS blocks reading), treat as failure.
+            }
+
+            if (!response.ok) {
+                const msg = (payload && payload.message) ? payload.message : `HTTP ${response.status}`;
+                throw new Error(msg);
+            }
+            if (!payload || payload.success !== true) {
+                const msg = (payload && payload.message) ? payload.message : 'Respuesta inválida del servidor';
+                throw new Error(msg);
+            }
+
             uploadedCount++;
             
         } catch (error) {
             console.error(`❌ Error subiendo ${file.name}:`, error);
             failedCount++;
+            failureMessages.push(`${file.name}: ${error && error.message ? error.message : 'Error desconocido'}`);
         }
     }
     
@@ -1699,7 +1722,8 @@ async function uploadPhotosToGoogleDrive(guestName, files) {
     }
     
     if (failedCount > 0) {
-        alert(`Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.`);
+        const details = failureMessages.length ? `\n\nDetalle:\n- ${failureMessages.join('\n- ')}` : '';
+        alert(`Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.${details}`);
     }
 }
 
@@ -1722,9 +1746,18 @@ async function loadGuestPhotos() {
     const carouselTrack = document.getElementById('carousel-track');
     
     if (!carouselTrack) return;
+
+    const groupCode = (galleryGroupCodeInput && String(galleryGroupCodeInput.value || '').trim()) ||
+        (function () {
+            try { return String(localStorage.getItem('galleryGroupCode') || '').trim(); } catch (_e) { return ''; }
+        })();
+
+    if (!groupCode) {
+        return;
+    }
     
     try {
-        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados`);
+        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados&groupCode=${encodeURIComponent(groupCode)}`);
         const data = await response.json();
         
         if (data.success && data.photos && data.photos.length > 0) {
@@ -1739,8 +1772,7 @@ async function loadGuestPhotos() {
             
             // Add each photo to the carousel
             data.photos.forEach((photo, index) => {
-                // Convert URL to a format that works in an <img> tag
-                const imageUrl = convertDriveUrl(photo.url);
+                const fileId = String(photo.fileId || '').trim();
                 
                 // Format date
                 const photoDate = new Date(photo.timestamp);
@@ -1754,10 +1786,11 @@ async function loadGuestPhotos() {
                 
                 const slideHtml = `
                     <div class="carousel-slide" data-index="${index}">
-                        <img src="${imageUrl}" 
+                        <img data-file-id="${fileId}"
+                             src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" 
                              alt="Foto de ${photo.guestName}" 
                              loading="lazy"
-                             onerror="this.onerror=null; this.parentElement.innerHTML='<p style=color:#999>Error al cargar la imagen</p>';">
+                             >
                         <div class="photo-info">
                             <p class="photo-author">
                                 <i class="fa fa-user"></i> ${photo.guestName}
@@ -1770,6 +1803,22 @@ async function loadGuestPhotos() {
                 `;
                 carouselTrack.insertAdjacentHTML('beforeend', slideHtml);
             });
+
+            // Fetch private image bytes (base64) and set <img src="data:...">
+            const imgs = carouselTrack.querySelectorAll('img[data-file-id]');
+            for (const img of imgs) {
+                const fileId = img.getAttribute('data-file-id');
+                if (!fileId) continue;
+                try {
+                    const dataUrl = await fetchPrivateGalleryImageDataUrl(fileId, groupCode);
+                    img.src = dataUrl;
+                } catch (e) {
+                    console.error('Error cargando imagen privada:', e);
+                    if (img && img.parentElement) {
+                        img.parentElement.innerHTML = '<p style=color:#999>Error al cargar la imagen</p>';
+                    }
+                }
+            }
             
             // Update counter
             document.getElementById('total-photos').textContent = data.photos.length;
@@ -1787,6 +1836,25 @@ async function loadGuestPhotos() {
     } catch (error) {
         console.error('Error cargando fotos:', error);
     }
+}
+
+const __galleryImageCache = new Map();
+
+async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
+    const key = String(fileId || '').trim();
+    if (__galleryImageCache.has(key)) return __galleryImageCache.get(key);
+
+    const url = `${GALLERY_SCRIPT_URL}?action=getPhoto&fileId=${encodeURIComponent(key)}&groupCode=${encodeURIComponent(String(groupCode || '').trim())}`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (!json || !json.success) {
+        throw new Error((json && json.message) ? json.message : 'No se pudo cargar la imagen');
+    }
+    const contentType = String(json.contentType || 'image/jpeg');
+    const base64 = String(json.base64 || '');
+    const dataUrl = `data:${contentType};base64,${base64}`;
+    __galleryImageCache.set(key, dataUrl);
+    return dataUrl;
 }
 
 /**
