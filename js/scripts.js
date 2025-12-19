@@ -112,10 +112,14 @@ $(document).ready(function() {
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
     // Configure RSVP_ENDPOINT with your deployed Google Apps Script web app URL
     // IMPORTANT: Replace this URL with your deployed Apps Script URL
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzFsEGBNL13uK9-NkhhEsp6OMIHr9BOpFdRIaoZaMuJX2Kg5083PYYwg2Zo8eTuNO5JJQ/exec';
+    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec';
 
     // Expose for global helpers (ticket QR generation lives outside document.ready)
     window.__RSVP_ENDPOINT = RSVP_ENDPOINT;
+
+    // RSVP security state (email + pre-shared group code)
+    window.__rsvpAuthToken = '';
+    window.__rsvpVerifiedEmail = '';
     
     var currentGuests = [];
 
@@ -123,24 +127,47 @@ $(document).ready(function() {
     $('#rsvp-search-form').on('submit', function(e) {
         e.preventDefault();
         var searchName = $('#rsvp-search-name').val().trim();
+        var email = String($('#rsvp-search-email').val() || '').trim();
+        var groupCode = String($('#rsvp-group-code').val() || '').trim();
         var $btn = $(this).find('button[type="submit"]');
         
         if (!searchName) {
             $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu nombre.'));
             return;
         }
+
+        if (!email) {
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu correo.'));
+            return;
+        }
+
+        if (!groupCode) {
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
+            return;
+        }
+
+        // Reset previous auth state on a new search
+        window.__rsvpAuthToken = '';
+        window.__rsvpVerifiedEmail = '';
+        window.__rsvpGroupCode = '';
         
         $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
         
         // Use GET with URL params to avoid CORS issues
         $.ajax({
-            url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName),
+            url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName) + '&email=' + encodeURIComponent(email) + '&groupCode=' + encodeURIComponent(groupCode),
             method: 'GET',
             dataType: 'json'
         })
         .done(function(response) {
             if (response.result === 'success') {
+                // Backward-compatible path (if server returns guests directly)
+                if (response.token) {
+                    window.__rsvpAuthToken = String(response.token || '').trim();
+                    window.__rsvpVerifiedEmail = email;
+                    window.__rsvpGroupCode = groupCode;
+                }
                 currentGuests = response.invitados;
                 displayGuestList(response.grupo, response.invitados);
             } else if (response.result === 'not_found') {
@@ -203,6 +230,11 @@ $(document).ready(function() {
 
     // Confirm attendance
     $('#confirm-attendance-btn').on('click', function() {
+        if (!window.__rsvpAuthToken) {
+            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
+            return;
+        }
+
         var $btn = $(this);
         var updates = [];
         var confirmedGuestNames = [];
@@ -238,7 +270,7 @@ $(document).ready(function() {
         var updatesJson = encodeURIComponent(JSON.stringify(updates));
         
         $.ajax({
-            url: RSVP_ENDPOINT + '?action=updateAttendance&updates=' + updatesJson,
+            url: RSVP_ENDPOINT + '?action=updateAttendance&updates=' + updatesJson + '&token=' + encodeURIComponent(window.__rsvpAuthToken),
             method: 'GET',
             dataType: 'json'
         })
@@ -301,6 +333,11 @@ $(document).ready(function() {
         $('#rsvp-guest-list').hide();
         $('#rsvp-search-container').show();
         $('#rsvp-search-name').val('');
+        $('#rsvp-search-email').val('');
+        $('#rsvp-group-code').val('');
+        window.__rsvpAuthToken = '';
+        window.__rsvpVerifiedEmail = '';
+        window.__rsvpGroupCode = '';
         $('#alert-wrapper').html('');
         $('#confirm-alert-wrapper').html('');
     });
@@ -335,7 +372,7 @@ function downloadRsvpTickets() {
     // Canvas drawing needs assets loaded, so ticket generation is async.
     var qrPromise = Promise.resolve('');
     if (ticketId) {
-        qrPromise = fetchTicketQrDataUrl(ticketId).catch(function () { return ''; });
+        qrPromise = getQrDataUrlForTicket(ticketId).catch(function () { return ''; });
     }
 
     qrPromise
@@ -344,10 +381,117 @@ function downloadRsvpTickets() {
         })
         .then(function (dataUrl) {
             downloadDataUrl(dataUrl, filename);
+
+            // Also email the ticket details to the verified email.
+            if (window.__rsvpAuthToken) {
+                sendTicketEmail(dataUrl, filename).catch(function (e) {
+                    console.error('Ticket email failed:', e);
+                    // Keep UX minimal: only an alert so the user knows it didn't send.
+                    alert('No se pudo enviar el boleto por correo. Intenta de nuevo.');
+                });
+            }
         })
         .catch(function (e) {
             console.error('Ticket generation failed:', e);
             alert('No se pudo generar el boleto. Intenta de nuevo.');
+        });
+}
+
+function sendTicketEmail(ticketDataUrl, filename) {
+    var endpoint = window.__RSVP_ENDPOINT || '';
+    if (!endpoint || !window.__rsvpAuthToken) return Promise.reject(new Error('Missing RSVP auth token'));
+
+    var payload = {
+        action: 'sendTicketEmail',
+        token: String(window.__rsvpAuthToken),
+        ticketDataUrl: String(ticketDataUrl || ''),
+        filename: String(filename || '')
+    };
+
+    // Use application/x-www-form-urlencoded (simple request) to avoid CORS preflight that Apps Script doesn't handle.
+    if (typeof window.$ === 'function' && $.ajax) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: endpoint,
+                method: 'POST',
+                dataType: 'json',
+                data: payload
+            })
+                .done(function (json) {
+                    if (!json || json.result !== 'success') {
+                        reject(new Error((json && json.message) ? json.message : 'Email failed'));
+                        return;
+                    }
+                    resolve(json);
+                })
+                .fail(function (_xhr, _status, err) {
+                    reject(err || new Error('Email request failed'));
+                });
+        });
+    }
+
+    return fetch(endpoint, {
+        method: 'POST',
+        body: new URLSearchParams(payload)
+    })
+        .then(function (resp) { return resp.json(); })
+        .then(function (json) {
+            if (!json || json.result !== 'success') {
+                throw new Error((json && json.message) ? json.message : 'Email failed');
+            }
+            return json;
+        });
+}
+
+function buildVerifyTicketUrl(ticketId) {
+    var endpoint = window.__RSVP_ENDPOINT || '';
+    if (!endpoint) return '';
+    return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
+}
+
+function generateQrDataUrlLocal(text, sizePx) {
+    if (typeof qrcode !== 'function') {
+        throw new Error('QR library not loaded');
+    }
+    var size = Number(sizePx) > 0 ? Number(sizePx) : 240;
+    var qr = qrcode(0, 'M');
+    qr.addData(String(text || ''));
+    qr.make();
+
+    var count = qr.getModuleCount();
+    var canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#000000';
+
+    var tileW = size / count;
+    var tileH = size / count;
+
+    for (var row = 0; row < count; row++) {
+        for (var col = 0; col < count; col++) {
+            if (!qr.isDark(row, col)) continue;
+            var x = Math.round(col * tileW);
+            var y = Math.round(row * tileH);
+            var w = Math.ceil(tileW);
+            var h = Math.ceil(tileH);
+            ctx.fillRect(x, y, w, h);
+        }
+    }
+
+    return canvas.toDataURL('image/png');
+}
+
+function getQrDataUrlForTicket(ticketId) {
+    // Prefer server-side QR if available; fall back to local QR generation.
+    return fetchTicketQrDataUrl(ticketId)
+        .catch(function () {
+            var verifyUrl = buildVerifyTicketUrl(ticketId);
+            if (!verifyUrl) return '';
+            return generateQrDataUrlLocal(verifyUrl, 240);
         });
 }
 
