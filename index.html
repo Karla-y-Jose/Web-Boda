@@ -344,8 +344,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-camera"></i>Nuestra Galería</h3>
-                    <p class="gallery-subtitle">Momentos que atesoramos</p>
+                    <h3 class="header"><i class="fa fa-camera"></i>Galería de Recuerdos</h3>
                 </div>
             </div>
             
@@ -511,28 +510,49 @@
             <div class="gallery-subsection upload-subsection" style="margin: 10px 0; padding-bottom: 0;">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <div class="upload-box">
-                            <h4 class="gallery-subsection-title">
-                                <i class="fa fa-upload"></i> Comparte tus Momentos
-                            </h4>
-                            <p class="gallery-subsection-desc">Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
-                            <form id="photo-upload-form" class="upload-form">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="guest-name" placeholder="Tu nombre" required>
+                        <div class="rsvp-panel">
+                            <div class="rsvp-panel-header">
+                                <h4><i class="fa fa-upload"></i> Comparte tus Momentos</h4>
+                                <p class="rsvp-help">Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
+                            </div>
+
+                            <form id="photo-upload-form" class="rsvp-form" novalidate>
+                                <!-- Primera fila: Nombre y Código lado a lado -->
+                                <div class="row rsvp-form-row">
+                                    <div class="col-xs-6">
+                                        <div class="form-input-group">
+                                            <i class="fa fa-user"></i>
+                                            <input type="text" id="guest-name" placeholder="Nombre" required>
+                                            <label class="form-label">Nombre</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <div class="form-input-group">
+                                            <i class="fa fa-key"></i>
+                                            <input type="text" id="gallery-group-code" placeholder="Código" autocomplete="off" required>
+                                            <label class="form-label">Código de Grupo</label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="gallery-group-code" placeholder="Código de grupo" autocomplete="off" required>
+
+                                <!-- Segunda fila: Selector de archivos -->
+                                <div class="row rsvp-form-row">
+                                    <div class="col-md-12">
+                                        <label for="photo-file" class="file-upload-label">
+                                            <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
+                                            <input type="file" id="photo-file" accept="image/*" multiple>
+                                        </label>
+                                        <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="photo-file" class="file-upload-label">
-                                        <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
-                                        <input type="file" id="photo-file" accept="image/*" multiple>
-                                    </label>
-                                    <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">
+                                            <i class="fa fa-upload"></i> Subir Fotos
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-fill btn-large">
-                                    <i class="fa fa-upload"></i> Subir Fotos
-                                </button>
                             </form>
                         </div>
                     </div>
@@ -542,7 +562,6 @@
                 <div class="row" style="margin-top: 40px;">
                     <div class="col-md-12 text-center">
                         <h5 class="guest-photos-title">Fotos de nuestros invitados</h5>
-                        <p style="color: #777; font-size: 14px; margin-bottom: 30px;">Desliza para ver todas las fotos compartidas</p>
                     </div>
                 </div>
                 <div class="row">
@@ -663,62 +682,78 @@
 
                     <!-- RSVP Search Form -->
                     <div id="rsvp-search-container">
-                        <p>Ingresa tu nombre para buscar tu invitación.</p>
-                        <p><strong>FAVOR DE CONFIRMAR SU ASISTENCIA A MAS TARDAR EL 1° DE OCTUBRE</strong></p>
-                        <form id="rsvp-search-form" class="rsvp-form" novalidate>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-input-group">
-                                        <i class="fa fa-search"></i>
-                                        <input type="text" name="name" id="rsvp-search-name" placeholder="Escribe tu nombre o apellido" required>
+                        <div class="rsvp-panel">
+                            <div class="rsvp-panel-header">
+                                <h4>Busca tu Invitación</h4>
+                                <p class="rsvp-help">Ingresa tus datos para confirmar tu asistencia</p>
+                                <p class="rsvp-deadline">CONFIRMA TU ASISTENCIA A MÁS TARDAR EL <strong>1° DE OCTUBRE</strong></p>
+                            </div>
+
+                            <form id="rsvp-search-form" class="rsvp-form" novalidate>
+                                <!-- Primera fila: Nombre completo -->
+                                <div class="row rsvp-form-row">
+                                    <div class="col-md-12">
+                                        <div class="form-input-group">
+                                            <i class="fa fa-user"></i>
+                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre" required>
+                                            <label class="form-label">Nombre</label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row" style="margin-top: 10px;">
-                                <div class="col-md-12">
-                                    <div class="form-input-group">
-                                        <i class="fa fa-envelope"></i>
-                                        <input type="email" name="email" id="rsvp-search-email" placeholder="Escribe tu correo" autocomplete="email" required>
+                                <!-- Segunda fila: Correo y Código -->
+                                <div class="row rsvp-form-row">
+                                    <div class="col-xs-6">
+                                        <div class="form-input-group">
+                                            <i class="fa fa-envelope"></i>
+                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo" autocomplete="email" required>
+                                            <label class="form-label">Correo Electrónico</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <div class="form-input-group">
+                                            <i class="fa fa-key"></i>
+                                            <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código" autocomplete="off" required>
+                                            <label class="form-label">Código de Grupo</label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row" style="margin-top: 10px;">
-                                <div class="col-md-12">
-                                    <div class="form-input-group">
-                                        <i class="fa fa-key"></i>
-                                        <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código de grupo" autocomplete="off" required>
+                                <div class="row">
+                                    <div class="col-md-12" id="alert-wrapper"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">
+                                            <i class="fa fa-search"></i> Buscar mi Invitación
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-12" id="alert-wrapper"></div>
-                            </div>
-
-                            <button type="submit" class="btn btn-fill btn-large rsvp-btn">Buscar mi Invitación</button>
-                        </form>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Guest List (hidden initially) -->
                     <div id="rsvp-guest-list" style="display: none;">
-                        <div class="guest-list-header">
-                            <h4>Grupo de Invitados: <span id="group-name"></span></h4>
-                            <p style="color: #666; font-size: 14px;">Marca la asistencia de cada invitado:</p>
-                        </div>
+                        <div class="rsvp-panel">
+                            <div class="rsvp-panel-header">
+                                <h4>Grupo de Invitados: <span id="group-name"></span></h4>
+                                <p class="rsvp-help">Marca la asistencia de cada invitado:</p>
+                            </div>
 
-                        <div id="guests-container" class="guests-container">
-                            <!-- Guests will be loaded here dynamically -->
-                        </div>
+                            <div id="guests-container" class="guests-container">
+                                <!-- Guests will be loaded here dynamically -->
+                            </div>
 
-                        <div class="row" style="margin-top: 30px;">
-                            <div class="col-md-12" id="confirm-alert-wrapper"></div>
-                        </div>
+                            <div class="row" style="margin-top: 30px;">
+                                <div class="col-md-12" id="confirm-alert-wrapper"></div>
+                            </div>
 
-                        <div style="margin-top: 20px;">
-                            <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencias</button>
-                            <button id="back-to-search-btn" class="btn btn-green btn-large" style="margin-top: 15px;">Buscar Otra Invitación</button>
+                            <div style="margin-top: 20px;">
+                                <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencias</button>
+                                <button id="back-to-search-btn" class="btn btn-green btn-large" style="margin-top: 15px;">Buscar Otra Invitación</button>
+                            </div>
                         </div>
                     </div>
                 </div>

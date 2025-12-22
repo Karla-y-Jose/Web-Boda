@@ -1862,6 +1862,7 @@ async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
  */
 let currentSlide = 0;
 let totalSlides = 0;
+let carouselAutoplay = null;
 
 function initializeCarousel(total) {
     totalSlides = total;
@@ -1877,6 +1878,7 @@ function initializeCarousel(total) {
             if (currentSlide > 0) {
                 currentSlide--;
                 updateCarousel();
+                resetAutoplay();
             }
         };
         
@@ -1884,9 +1886,13 @@ function initializeCarousel(total) {
             if (currentSlide < totalSlides - 1) {
                 currentSlide++;
                 updateCarousel();
+                resetAutoplay();
             }
         };
     }
+    
+    // Create indicators
+    createCarouselIndicators();
     
     // Touch gesture support (swipe)
     const carousel = document.getElementById('guest-photos-carousel');
@@ -1907,11 +1913,13 @@ function initializeCarousel(total) {
             // Swipe left - next
             currentSlide++;
             updateCarousel();
+            resetAutoplay();
         }
         if (touchEndX > touchStartX + 50 && currentSlide > 0) {
             // Swipe right - previous
             currentSlide--;
             updateCarousel();
+            resetAutoplay();
         }
     }
     
@@ -1920,11 +1928,79 @@ function initializeCarousel(total) {
         if (e.key === 'ArrowLeft' && currentSlide > 0) {
             currentSlide--;
             updateCarousel();
+            resetAutoplay();
         } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
             currentSlide++;
             updateCarousel();
+            resetAutoplay();
         }
     });
+    
+    // Pause autoplay on hover
+    carousel.addEventListener('mouseenter', () => {
+        stopAutoplay();
+    });
+    
+    carousel.addEventListener('mouseleave', () => {
+        startAutoplay();
+    });
+    
+    // Start autoplay if there are photos
+    if (total > 1) {
+        startAutoplay();
+    }
+}
+
+function createCarouselIndicators() {
+    const carousel = document.getElementById('guest-photos-carousel');
+    let indicatorsContainer = carousel.querySelector('.carousel-indicators');
+    
+    // Remove existing indicators if any
+    if (indicatorsContainer) {
+        indicatorsContainer.remove();
+    }
+    
+    // Create new indicators
+    if (totalSlides > 1) {
+        indicatorsContainer = document.createElement('div');
+        indicatorsContainer.className = 'carousel-indicators';
+        
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'carousel-indicator';
+            if (i === 0) indicator.classList.add('active');
+            indicator.onclick = () => {
+                currentSlide = i;
+                updateCarousel();
+                resetAutoplay();
+            };
+            indicatorsContainer.appendChild(indicator);
+        }
+        
+        carousel.appendChild(indicatorsContainer);
+    }
+}
+
+function startAutoplay() {
+    if (totalSlides <= 1) return;
+    
+    stopAutoplay();
+    carouselAutoplay = setInterval(() => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    }, 5000); // Change slide every 5 seconds
+}
+
+function stopAutoplay() {
+    if (carouselAutoplay) {
+        clearInterval(carouselAutoplay);
+        carouselAutoplay = null;
+    }
+}
+
+function resetAutoplay() {
+    stopAutoplay();
+    startAutoplay();
 }
 
 function updateCarousel() {
@@ -1948,6 +2024,16 @@ function updateCarousel() {
         nextBtn.style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
         nextBtn.style.cursor = currentSlide === totalSlides - 1 ? 'not-allowed' : 'pointer';
     }
+    
+    // Actualizar indicadores
+    const indicators = document.querySelectorAll('.carousel-indicator');
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlide) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
 }
 
 /**
