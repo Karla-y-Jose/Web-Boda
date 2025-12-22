@@ -370,6 +370,28 @@ header nav ul.member-actions li:first-child a:hover:after {
     color: #fff;
 }
 
+/*
+   iOS Safari often renders `background-attachment: fixed` incorrectly (appears zoomed/cropped).
+   For touch devices, fall back to a normal scrolling background and a stable viewport height.
+*/
+@media (hover: none), (pointer: coarse) {
+    .hero {
+        background-attachment: scroll;
+        background-position: center center;
+        min-height: 100vh;
+        min-height: 100svh;
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+    .hero {
+        background-attachment: scroll;
+        background-position: center center;
+        min-height: 100vh;
+        min-height: 100svh;
+    }
+}
+
 .hero::before {
     content: '';
     position: absolute;
