@@ -2,13 +2,13 @@
    WEDDING WEBSITE - MAIN SCRIPTS
    ============================================ */
 
-$(document).ready(function() {
+$(document).ready(function () {
     // ========== Waypoints Animations ==================
     $('.wp1').waypoint(function () {
         $('.wp1').addClass('animated fadeInLeft');
     }, {
         offset: '75%'
-    }); 
+    });
     $('.wp2').waypoint(function () {
         $('.wp2').addClass('animated fadeInRight');
     }, {
@@ -77,7 +77,7 @@ $(document).ready(function() {
         $('.header-nav').toggleClass('open');
         e.preventDefault();
     });
-    
+
     /* When user clicks a link */
     $('.header-nav li a').click(function () {
         $('.nav-toggle').toggleClass('active');
@@ -87,16 +87,16 @@ $(document).ready(function() {
     // ========== Header BG Scroll ==================
     $(function () {
         $(window).scroll(function () {
-            var scroll = $(window).scrollTop();
+            const scroll = $(window).scrollTop();
 
             if (scroll >= 20) {
-                $('section.navigation').addClass('fixed');
+                $('.navigation').addClass('fixed');
                 // add class to header to hide the pseudo-element keyline
                 $('header').addClass('scrolled').css({
                     "padding": "35px 0"
                 });
             } else {
-                $('section.navigation').removeClass('fixed');
+                $('.navigation').removeClass('fixed');
                 // remove the class so the keyline (header::after) is visible again
                 $('header').removeClass('scrolled').css({
                     "padding": "50px 0"
@@ -110,7 +110,7 @@ $(document).ready(function() {
     setInterval(updateCountdown, 1000);
 
     // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
-    var RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec';
+    const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec';
 
     // Expose for global helpers (ticket QR generation lives outside document.ready)
     window.__RSVP_ENDPOINT = RSVP_ENDPOINT;
@@ -118,17 +118,17 @@ $(document).ready(function() {
     // RSVP security state (email + pre-shared group code)
     window.__rsvpAuthToken = '';
     window.__rsvpVerifiedEmail = '';
-    
-    var currentGuests = [];
+
+    let currentGuests = [];
 
     // Search guest by name
-    $('#rsvp-search-form').on('submit', function(e) {
+    $('#rsvp-search-form').on('submit', function (e) {
         e.preventDefault();
-        var searchName = $('#rsvp-search-name').val().trim();
-        var email = String($('#rsvp-search-email').val() || '').trim();
-        var groupCode = String($('#rsvp-group-code').val() || '').trim();
-        var $btn = $(this).find('button[type="submit"]');
-        
+        const searchName = $('#rsvp-search-name').val().trim();
+        const email = String($('#rsvp-search-email').val() || '').trim();
+        const groupCode = String($('#rsvp-group-code').val() || '').trim();
+        const $btn = $(this).find('button[type="submit"]');
+
         if (!searchName) {
             $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu nombre.'));
             return;
@@ -140,7 +140,7 @@ $(document).ready(function() {
         }
 
         if (!groupCode) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu cÃ³digo de grupo.'));
             return;
         }
 
@@ -148,39 +148,39 @@ $(document).ready(function() {
         window.__rsvpAuthToken = '';
         window.__rsvpVerifiedEmail = '';
         window.__rsvpGroupCode = '';
-        
+
         $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
-        
+
         // Use GET with URL params to avoid CORS issues
         $.ajax({
             url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName) + '&email=' + encodeURIComponent(email) + '&groupCode=' + encodeURIComponent(groupCode),
             method: 'GET',
             dataType: 'json'
         })
-        .done(function(response) {
-            if (response.result === 'success') {
-                // Backward-compatible path (if server returns guests directly)
-                if (response.token) {
-                    window.__rsvpAuthToken = String(response.token || '').trim();
-                    window.__rsvpVerifiedEmail = email;
-                    window.__rsvpGroupCode = groupCode;
+            .done(function (response) {
+                if (response.result === 'success') {
+                    // Backward-compatible path (if server returns guests directly)
+                    if (response.token) {
+                        window.__rsvpAuthToken = String(response.token || '').trim();
+                        window.__rsvpVerifiedEmail = email;
+                        window.__rsvpGroupCode = groupCode;
+                    }
+                    currentGuests = response.invitados;
+                    displayGuestList(response.grupo, response.invitados);
+                } else if (response.result === 'not_found') {
+                    $('#alert-wrapper').html(alert_markup('warning', response.message));
+                } else {
+                    $('#alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
                 }
-                currentGuests = response.invitados;
-                displayGuestList(response.grupo, response.invitados);
-            } else if (response.result === 'not_found') {
-                $('#alert-wrapper').html(alert_markup('warning', response.message));
-            } else {
-                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
-            }
-        })
-        .fail(function(err) {
-            console.error('Search error:', err);
-            $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
-        })
-        .always(function() {
-            $btn.prop('disabled', false);
-        });
+            })
+            .fail(function (err) {
+                console.error('Search error:', err);
+                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexiÃ³n.</strong> Por favor intenta mÃ¡s tarde.'));
+            })
+            .always(function () {
+                $btn.prop('disabled', false);
+            });
     });
 
     // Show guest list
@@ -189,64 +189,64 @@ $(document).ready(function() {
         $('#rsvp-search-container').hide();
         $('#rsvp-guest-list').show();
         $('#group-name').text(groupName);
-        
-        var guestsHtml = '';
-        guests.forEach(function(guest, index) {
-            var currentState = guest.estado || 'Pendiente';
+
+        let guestsHtml = '';
+        guests.forEach(function (guest, index) {
+            const currentState = guest.estado || 'Pendiente';
             guestsHtml += `
                 <div class="guest-item" data-row-index="${guest.rowIndex}">
                     <div class="guest-name">
-                        <i class="fa fa-user"></i>
+                        <span class="material-symbols-outlined">person</span>
                         ${guest.nombre} ${guest.apellido}
                     </div>
                     <div class="attendance-options">
                         <div class="attendance-option confirmed">
                             <label>
                                 <input type="radio" name="guest_${index}" value="Confirmado" ${currentState === 'Confirmado' ? 'checked' : ''}>
-                                <span><i class="fa fa-check-circle"></i> Confirmar</span>
+                                <span><span class="material-symbols-outlined">check_circle</span> Confirmar</span>
                             </label>
                         </div>
                         <div class="attendance-option not-attending">
                             <label>
                                 <input type="radio" name="guest_${index}" value="No Asiste" ${currentState === 'No Asiste' ? 'checked' : ''}>
-                                <span><i class="fa fa-times-circle"></i> No Asistirá</span>
+                                <span><span class="material-symbols-outlined">cancel</span> No Asistirá</span>
                             </label>
                         </div>
                         <div class="attendance-option pending">
                             <label>
                                 <input type="radio" name="guest_${index}" value="Pendiente" ${currentState === 'Pendiente' ? 'checked' : ''}>
-                                <span><i class="fa fa-clock-o"></i> Pendiente</span>
+                                <span><span class="material-symbols-outlined">schedule</span> Pendiente</span>
                             </label>
                         </div>
                     </div>
                 </div>
             `;
         });
-        
+
         $('#guests-container').html(guestsHtml);
     }
 
     // Confirm attendance
-    $('#confirm-attendance-btn').on('click', function() {
+    $('#confirm-attendance-btn').on('click', function () {
         if (!window.__rsvpAuthToken) {
-            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
+            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la bÃºsqueda con tu cÃ³digo para continuar.'));
             return;
         }
 
-        var $btn = $(this);
-        var updates = [];
-        var confirmedGuestNames = [];
-        var groupName = String($('#group-name').text() || '').trim();
-        
-        $('.guest-item').each(function(index) {
-            var rowIndex = $(this).data('row-index');
-            var selectedState = $(this).find('input[type="radio"]:checked').val();
+        const $btn = $(this);
+        const updates = [];
+        const confirmedGuestNames = [];
+        const groupName = String($('#group-name').text() || '').trim();
+
+        $('.guest-item').each(function (index) {
+            const rowIndex = $(this).data('row-index');
+            const selectedState = $(this).find('input[type="radio"]:checked').val();
 
             if (selectedState === 'Confirmado' && Array.isArray(currentGuests) && currentGuests[index]) {
-                var g = currentGuests[index];
+                const g = currentGuests[index];
                 confirmedGuestNames.push(String((g.nombre || '') + ' ' + (g.apellido || '')).trim());
             }
-            
+
             updates.push({
                 rowIndex: rowIndex,
                 estado: selectedState
@@ -260,74 +260,72 @@ $(document).ready(function() {
             generatedAt: Date.now(),
             ticketId: ''
         };
-        
+
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
-        
+
         // Serialize updates to JSON and URL-encode for the query string
-        var updatesJson = encodeURIComponent(JSON.stringify(updates));
-        
+        const updatesJson = encodeURIComponent(JSON.stringify(updates));
+
         $.ajax({
             url: RSVP_ENDPOINT + '?action=updateAttendance&updates=' + updatesJson + '&token=' + encodeURIComponent(window.__rsvpAuthToken),
             method: 'GET',
             dataType: 'json'
         })
-        .done(function(response) {
-            if (response.result === 'success') {
-                // Attach server-issued ticket code (verifiable against the sheet)
-                if (response.ticketId && window.__rsvpTicketPayload) {
-                    window.__rsvpTicketPayload.ticketId = String(response.ticketId || '').trim();
-                }
-                $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
-                
-                // Show confirmation modal
-                setTimeout(function() {
-                    $('#rsvp-modal').addClass('active');
-                    
-                    // Add calendar buttons with the same behavior as the events section
-                    var tickets = (window.__rsvpTicketPayload && Array.isArray(window.__rsvpTicketPayload.confirmedGuests))
-                        ? window.__rsvpTicketPayload.confirmedGuests
-                        : [];
-                    var ticketButtonHtml = '';
-                    if (tickets.length > 0) {
-                        var label = tickets.length === 1 ? 'Descargar boleto' : 'Descargar boletos';
-                        ticketButtonHtml = `
+            .done(function (response) {
+                if (response.result === 'success') {
+                    // Attach server-issued ticket code (verifiable against the sheet)
+                    if (response.ticketId && window.__rsvpTicketPayload) {
+                        window.__rsvpTicketPayload.ticketId = String(response.ticketId || '').trim();
+                    }
+                    $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>Â¡Listo!</strong> ' + response.message));
+
+                    // Show confirmation modal
+                    setTimeout(function () {
+                        $('#rsvp-modal').addClass('active');
+
+                        // Add calendar buttons with the same behavior as the events section
+                        const tickets = (window.__rsvpTicketPayload && Array.isArray(window.__rsvpTicketPayload.confirmedGuests))
+                            ? window.__rsvpTicketPayload.confirmedGuests
+                            : [];
+                        let ticketButtonHtml = '';
+                        if (tickets.length > 0) {
+                            const label = tickets.length === 1 ? 'Descargar boleto' : 'Descargar boletos';
+                            ticketButtonHtml = `
                             <button type="button"
                                     onclick="downloadRsvpTickets()"
-                                    class="btn btn-fill calendar-btn-modal"
-                                    style="width: 100%;">
-                                <i class="fa fa-ticket" style="margin-right: 8px;"></i> ${label}
+                                    class="calendar-btn-modal">
+                                <i class="fa fa-ticket" style="font-size:14px;"></i> ${label}
                             </button>
                         `;
-                    }
+                        }
 
-                    var calendarButtons = `
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                            <button onclick="agregarAlCalendario('Boda Karla & Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
-                                    class="btn btn-fill calendar-btn-modal" 
-                                    style="width: 100%;">
-                                <i class="fa fa-calendar" style="margin-right: 8px;"></i> Añadir al Calendario
+                        const calendarButtons = `
+                        <div style="display: flex; flex-direction: row; gap: 0.75rem; margin-top: 20px;">
+                            <button onclick="agregarAlCalendario('Boda Karla &amp; Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
+                                    class="calendar-btn-modal">
+                                <i class="fab fa-google" style="font-size:14px;"></i> Añadir al Calendario
                             </button>
                             ${ticketButtonHtml}
                         </div>
                     `;
-                    $('#add-to-cal').html(calendarButtons);
-                }, 1500);
-            } else {
-                $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
-            }
-        })
-        .fail(function(err) {
-            console.error('Update error:', err);
-            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
-        })
-        .always(function() {
-            $btn.prop('disabled', false);
-        });
+                        $('#add-to-cal').html(calendarButtons);
+                    }, 1500);
+                } else {
+                    $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
+                }
+            })
+            .fail(function (err) {
+                console.error('Update error:', err);
+                $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
+            })
+            .always(function () {
+                $btn.prop('disabled', false);
+            });
     });
 
     // Back to search
-    $('#back-to-search-btn').on('click', function() {
+    $('#back-to-search-btn').on('click', function () {
         $('#rsvp-guest-list').hide();
         $('#rsvp-search-container').show();
         $('#rsvp-search-name').val('');
@@ -339,36 +337,36 @@ $(document).ready(function() {
         $('#alert-wrapper').html('');
         $('#confirm-alert-wrapper').html('');
     });
-     
+
     // Helper function for alert markup
-     function alert_markup(alert_type, msg) {
-         return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">' 
-                + msg + 
-                '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
-     }
+    function alert_markup(alert_type, msg) {
+        return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">'
+            + msg +
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
+    }
 });
 
 function downloadRsvpTickets() {
-    var payload = window.__rsvpTicketPayload || null;
-    var guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
-    var groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
-    var ticketId = payload && typeof payload.ticketId === 'string' ? payload.ticketId : '';
+    const payload = window.__rsvpTicketPayload || null;
+    const guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
+    const groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
+    const ticketId = payload && typeof payload.ticketId === 'string' ? payload.ticketId : '';
 
     if (!guests.length) {
         alert('No hay boletos disponibles para descargar.');
         return;
     }
 
-    var safeGroup = String(groupName || 'grupo')
+    const safeGroup = String(groupName || 'grupo')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
         .toLowerCase();
-    var filename = guests.length === 1
+    const filename = guests.length === 1
         ? ('boleto-' + safeGroup + '.png')
         : ('boletos-' + safeGroup + '.png');
 
     // Canvas drawing needs assets loaded, so ticket generation is async.
-    var qrPromise = Promise.resolve('');
+    let qrPromise = Promise.resolve('');
     if (ticketId) {
         qrPromise = getQrDataUrlForTicket(ticketId).catch(function () { return ''; });
     }
@@ -396,10 +394,10 @@ function downloadRsvpTickets() {
 }
 
 function sendTicketEmail(ticketDataUrl, filename) {
-    var endpoint = window.__RSVP_ENDPOINT || '';
+    const endpoint = window.__RSVP_ENDPOINT || '';
     if (!endpoint || !window.__rsvpAuthToken) return Promise.reject(new Error('Missing RSVP auth token'));
 
-    var payload = {
+    const payload = {
         action: 'sendTicketEmail',
         token: String(window.__rsvpAuthToken),
         ticketDataUrl: String(ticketDataUrl || ''),
@@ -442,7 +440,7 @@ function sendTicketEmail(ticketDataUrl, filename) {
 }
 
 function buildVerifyTicketUrl(ticketId) {
-    var endpoint = window.__RSVP_ENDPOINT || '';
+    const endpoint = window.__RSVP_ENDPOINT || '';
     if (!endpoint) return '';
     return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 }
@@ -451,31 +449,31 @@ function generateQrDataUrlLocal(text, sizePx) {
     if (typeof qrcode !== 'function') {
         throw new Error('QR library not loaded');
     }
-    var size = Number(sizePx) > 0 ? Number(sizePx) : 240;
-    var qr = qrcode(0, 'M');
+    const size = Number(sizePx) > 0 ? Number(sizePx) : 240;
+    const qr = qrcode(0, 'M');
     qr.addData(String(text || ''));
     qr.make();
 
-    var count = qr.getModuleCount();
-    var canvas = document.createElement('canvas');
+    const count = qr.getModuleCount();
+    const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = '#000000';
 
-    var tileW = size / count;
-    var tileH = size / count;
+    const tileW = size / count;
+    const tileH = size / count;
 
-    for (var row = 0; row < count; row++) {
-        for (var col = 0; col < count; col++) {
+    for (let row = 0; row < count; row++) {
+        for (let col = 0; col < count; col++) {
             if (!qr.isDark(row, col)) continue;
-            var x = Math.round(col * tileW);
-            var y = Math.round(row * tileH);
-            var w = Math.ceil(tileW);
-            var h = Math.ceil(tileH);
+            const x = Math.round(col * tileW);
+            const y = Math.round(row * tileH);
+            const w = Math.ceil(tileW);
+            const h = Math.ceil(tileH);
             ctx.fillRect(x, y, w, h);
         }
     }
@@ -487,17 +485,17 @@ function getQrDataUrlForTicket(ticketId) {
     // Prefer server-side QR if available; fall back to local QR generation.
     return fetchTicketQrDataUrl(ticketId)
         .catch(function () {
-            var verifyUrl = buildVerifyTicketUrl(ticketId);
+            const verifyUrl = buildVerifyTicketUrl(ticketId);
             if (!verifyUrl) return '';
             return generateQrDataUrlLocal(verifyUrl, 240);
         });
 }
 
 function fetchTicketQrDataUrl(ticketId) {
-    var endpoint = window.__RSVP_ENDPOINT || '';
+    const endpoint = window.__RSVP_ENDPOINT || '';
     if (!endpoint) return Promise.reject(new Error('RSVP endpoint not available'));
 
-    var url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
+    const url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 
     // Prefer jQuery Ajax (already used elsewhere in this site) for consistent behavior.
     if (typeof window.$ === 'function' && $.ajax) {
@@ -541,7 +539,7 @@ function resolveAssetUrl(path) {
 
 function loadImageForCanvas(src) {
     return new Promise(function (resolve, reject) {
-        var img = new Image();
+        const img = new Image();
         // Do not force crossOrigin here; it can break loads in some local hosting setups.
         img.onload = function () { resolve(img); };
         img.onerror = function () { reject(new Error('Failed to load image: ' + src)); };
@@ -550,7 +548,7 @@ function loadImageForCanvas(src) {
 }
 
 function loadImageForCanvasUntainted(src) {
-    var resolved = resolveAssetUrl(src);
+    const resolved = resolveAssetUrl(src);
 
     // Data/blob URLs are safe to draw.
     if (/^(data:|blob:)/i.test(resolved)) {
@@ -566,14 +564,14 @@ function loadImageForCanvasUntainted(src) {
                 return resp.blob();
             })
             .then(function (blob) {
-                var objUrl = URL.createObjectURL(blob);
+                const objUrl = URL.createObjectURL(blob);
                 return loadImageForCanvas(objUrl)
                     .then(function (img) {
-                        try { URL.revokeObjectURL(objUrl); } catch (_e) {}
+                        try { URL.revokeObjectURL(objUrl); } catch (_e) { }
                         return img;
                     })
                     .catch(function (e) {
-                        try { URL.revokeObjectURL(objUrl); } catch (_e) {}
+                        try { URL.revokeObjectURL(objUrl); } catch (_e) { }
                         throw e;
                     });
             })
@@ -588,226 +586,146 @@ function loadImageForCanvasUntainted(src) {
 
 function getTicketLogoUrl() {
     // Reuse the same logo URL that is already working in the page.
-    var el = document.querySelector('img[src*="logo2.png"]');
+    const el = document.querySelector('img[src*="logo2.png"]');
     if (el && el.src) return el.src;
     return 'img/logo2.png';
 }
 
 function drawImageContain(ctx, img, x, y, w, h) {
-    var iw = img.naturalWidth || img.width;
-    var ih = img.naturalHeight || img.height;
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
     if (!iw || !ih) return;
-    var scale = Math.min(w / iw, h / ih);
-    var dw = Math.round(iw * scale);
-    var dh = Math.round(ih * scale);
-    var dx = Math.round(x + (w - dw) / 2);
-    var dy = Math.round(y + (h - dh) / 2);
+    const scale = Math.min(w / iw, h / ih);
+    const dw = Math.round(iw * scale);
+    const dh = Math.round(ih * scale);
+    const dx = Math.round(x + (w - dw) / 2);
+    const dy = Math.round(y + (h - dh) / 2);
     ctx.drawImage(img, dx, dy, dw, dh);
 }
 
 function generateRsvpTicketPng(opts) {
-    var groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
-    var guests = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
-    var ticketId = (opts && opts.ticketId) ? String(opts.ticketId).trim() : '';
-    var qrDataUrl = (opts && opts.qrDataUrl) ? String(opts.qrDataUrl) : '';
+    const groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
+    const guests = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
+    const ticketId = (opts && opts.ticketId) ? String(opts.ticketId).trim() : '';
+    const qrDataUrl = (opts && opts.qrDataUrl) ? String(opts.qrDataUrl) : '';
 
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = 1400;
     canvas.height = 800;
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
     // Palette matches existing site colors.
-    var greenDark = '#0F3B2E';
-    var green = '#2E8B57';
-    var gold = '#d4af37';
-    var grayText = '#4a4a4a';
+    const greenDark = '#0F3B2E';
+    const green = '#2E8B57';
+    const gold = '#d4af37';
+    const grayText = '#4a4a4a';
 
     function drawTicket(logoImg, qrImg) {
-        // Background
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Header band
-        ctx.fillStyle = greenDark;
-        ctx.fillRect(0, 0, canvas.width, 140);
-
-        // Gold accent line
-        ctx.fillStyle = gold;
-        ctx.fillRect(0, 138, canvas.width, 6);
-
-        // Logo watermark (centered)
-        if (logoImg) {
-            ctx.save();
-            // Make it visible even if the logo is light.
-            ctx.globalAlpha = 0.30;
-            ctx.globalCompositeOperation = 'multiply';
-            if ('filter' in ctx) {
-                ctx.filter = 'grayscale(1) contrast(1.25) brightness(0.75)';
-            }
-            // Large watermark area in the body (under text)
-            drawImageContain(ctx, logoImg, 320, 190, 760, 500);
-            if ('filter' in ctx) {
-                ctx.filter = 'none';
-            }
-            ctx.restore();
-        }
-
-        // Title
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '700 54px Karla, Arial, sans-serif';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText('BOLETO', 70, 92);
-
-        // Event name
-        ctx.font = '500 30px Karla, Arial, sans-serif';
-        ctx.fillText('Karla & Jose', 70, 125);
-
-        // Body
-        ctx.fillStyle = grayText;
-        ctx.font = '600 30px Karla, Arial, sans-serif';
-        ctx.fillText('Confirmación de asistencia', 70, 210);
-
-        ctx.fillStyle = green;
-        ctx.font = '600 26px Karla, Arial, sans-serif';
-        ctx.fillText('Fecha:', 70, 265);
-        ctx.fillStyle = grayText;
-        ctx.font = '400 26px Karla, Arial, sans-serif';
-        ctx.fillText('18 de diciembre, 2026', 155, 265);
-
-        ctx.fillStyle = green;
-        ctx.font = '600 26px Karla, Arial, sans-serif';
-        ctx.fillText('Grupo:', 70, 310);
-        ctx.fillStyle = grayText;
-        ctx.font = '400 26px Karla, Arial, sans-serif';
-        ctx.fillText(groupName || '—', 160, 310);
-
-        ctx.fillStyle = green;
-        ctx.font = '600 26px Karla, Arial, sans-serif';
-        ctx.fillText('Invitados confirmados:', 70, 370);
-
-        // Guest list
-        ctx.fillStyle = grayText;
-        ctx.font = '400 26px Karla, Arial, sans-serif';
-        var startY = 415;
-        var lineHeight = 34;
-        var maxLines = 8;
-        for (var i = 0; i < Math.min(guests.length, maxLines); i++) {
-            ctx.fillText('• ' + guests[i], 90, startY + (i * lineHeight));
-        }
-        if (guests.length > maxLines) {
-            ctx.fillStyle = '#777';
-            ctx.fillText('…y ' + (guests.length - maxLines) + ' más', 90, startY + (maxLines * lineHeight));
-        }
-
-        // Footer note
-        ctx.fillStyle = '#777';
-        ctx.font = '400 22px Karla, Arial, sans-serif';
-        ctx.fillText('Presenta este boleto el día del evento.', 70, 730);
-
-        // Ticket code (verifiable)
-        if (ticketId) {
-            ctx.fillStyle = '#777';
-            ctx.font = '600 22px Karla, Arial, sans-serif';
-            ctx.fillText('Código: ' + ticketId, 70, 765);
-        }
-
-        // QR for quick verification
-        if (ticketId && qrImg) {
-            var qrSize = 220;
-            var qrX = canvas.width - (qrSize + 80);
-            var qrY = canvas.height - (qrSize + 110);
-
-            // White backing to keep QR readable
+        function drawBackgroundAndWatermark() {
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
-
-            drawImageContain(ctx, qrImg, qrX, qrY, qrSize, qrSize);
-
-            ctx.fillStyle = '#777';
-            ctx.font = '400 18px Karla, Arial, sans-serif';
-            ctx.fillText('Escanea para validar', qrX, qrY + qrSize + 28);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = greenDark;
+            ctx.fillRect(0, 0, canvas.width, 140);
+            ctx.fillStyle = gold;
+            ctx.fillRect(0, 138, canvas.width, 6);
+            if (logoImg) {
+                ctx.save();
+                ctx.globalAlpha = 0.30;
+                ctx.globalCompositeOperation = 'multiply';
+                if ('filter' in ctx) ctx.filter = 'grayscale(1) contrast(1.25) brightness(0.75)';
+                drawImageContain(ctx, logoImg, 320, 190, 760, 500);
+                if ('filter' in ctx) ctx.filter = 'none';
+                ctx.restore();
+            }
         }
 
-        // Decorative border
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
-        ctx.lineWidth = 6;
-        ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+        function drawTextAndQRCode() {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "700 54px 'Crimson Pro', serif";
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('BOLETO', 70, 92);
+            ctx.font = '500 30px Manrope, Arial, sans-serif';
+            ctx.fillText('Boda de Karla & Jose', 70, 125);
+
+            ctx.fillStyle = grayText;
+            ctx.font = '600 30px Manrope, Arial, sans-serif';
+            ctx.fillText('ConfirmaciÃ³n de asistencia', 70, 210);
+
+            ctx.fillStyle = green;
+            ctx.font = '600 26px Manrope, Arial, sans-serif';
+            ctx.fillText('Fecha:', 70, 265);
+            ctx.fillStyle = grayText;
+            ctx.font = '400 26px Manrope, Arial, sans-serif';
+            ctx.fillText('18 de diciembre, 2026', 155, 265);
+
+            ctx.fillStyle = green;
+            ctx.font = '600 26px Manrope, Arial, sans-serif';
+            ctx.fillText('Grupo:', 70, 310);
+            ctx.fillStyle = grayText;
+            ctx.font = '400 26px Manrope, Arial, sans-serif';
+            ctx.fillText(groupName || 'â€”', 160, 310);
+
+            ctx.fillStyle = green;
+            ctx.font = '600 26px Manrope, Arial, sans-serif';
+            ctx.fillText('Invitados confirmados:', 70, 370);
+
+            ctx.fillStyle = grayText;
+            ctx.font = '400 26px Manrope, Arial, sans-serif';
+            const startY = 415;
+            const lineHeight = 34;
+            const maxLines = 8;
+            for (let i = 0; i < Math.min(guests.length, maxLines); i++) {
+                ctx.fillText('â€¢ ' + guests[i], 90, startY + (i * lineHeight));
+            }
+            if (guests.length > maxLines) {
+                ctx.fillStyle = '#777';
+                ctx.fillText('â€¦y ' + (guests.length - maxLines) + ' mÃ¡s', 90, startY + (maxLines * lineHeight));
+            }
+
+            ctx.fillStyle = '#777';
+            ctx.font = '400 22px Manrope, Arial, sans-serif';
+            ctx.fillText('Presenta este boleto el dÃ­a del evento.', 70, 730);
+
+            if (ticketId) {
+                ctx.fillStyle = '#777';
+                ctx.font = '600 22px Manrope, Arial, sans-serif';
+                ctx.fillText('CÃ³digo: ' + ticketId, 70, 765);
+            }
+
+            if (ticketId && qrImg) {
+                const qrSize = 220;
+                const qrX = canvas.width - (qrSize + 80);
+                const qrY = canvas.height - (qrSize + 110);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+                drawImageContain(ctx, qrImg, qrX, qrY, qrSize, qrSize);
+                ctx.fillStyle = '#777';
+                ctx.font = '400 18px Manrope, Arial, sans-serif';
+                ctx.fillText('Escanea para validar', qrX, qrY + qrSize + 28);
+            }
+
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+        }
+
+        drawBackgroundAndWatermark();
+        drawTextAndQRCode();
 
         try {
             return canvas.toDataURL('image/png');
         } catch (e) {
-            // If the canvas got tainted by an image, re-render without images so the user can still download.
             if (String(e && e.name) === 'SecurityError') {
                 console.warn('Ticket canvas was tainted; exporting without images.');
-                // Clear and draw again without logo/QR.
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.globalAlpha = 1;
                 ctx.globalCompositeOperation = 'source-over';
                 if ('filter' in ctx) ctx.filter = 'none';
-                // Redraw, but with null images
-                // (Call the same function body by recursion guard: inline a minimal redraw)
 
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = greenDark;
-                ctx.fillRect(0, 0, canvas.width, 140);
-                ctx.fillStyle = gold;
-                ctx.fillRect(0, 138, canvas.width, 6);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '700 54px Karla, Arial, sans-serif';
-                ctx.textBaseline = 'alphabetic';
-                ctx.fillText('BOLETO', 70, 92);
-                ctx.font = '500 30px Karla, Arial, sans-serif';
-                ctx.fillText('Karla & Jose', 70, 125);
-
-                ctx.fillStyle = grayText;
-                ctx.font = '600 30px Karla, Arial, sans-serif';
-                ctx.fillText('Confirmación de asistencia', 70, 210);
-
-                ctx.fillStyle = green;
-                ctx.font = '600 26px Karla, Arial, sans-serif';
-                ctx.fillText('Fecha:', 70, 265);
-                ctx.fillStyle = grayText;
-                ctx.font = '400 26px Karla, Arial, sans-serif';
-                ctx.fillText('18 de diciembre, 2026', 155, 265);
-
-                ctx.fillStyle = green;
-                ctx.font = '600 26px Karla, Arial, sans-serif';
-                ctx.fillText('Grupo:', 70, 310);
-                ctx.fillStyle = grayText;
-                ctx.font = '400 26px Karla, Arial, sans-serif';
-                ctx.fillText(groupName || '—', 160, 310);
-
-                ctx.fillStyle = green;
-                ctx.font = '600 26px Karla, Arial, sans-serif';
-                ctx.fillText('Invitados confirmados:', 70, 370);
-
-                ctx.fillStyle = grayText;
-                ctx.font = '400 26px Karla, Arial, sans-serif';
-                var startY2 = 415;
-                var lineHeight2 = 34;
-                var maxLines2 = 8;
-                for (var j = 0; j < Math.min(guests.length, maxLines2); j++) {
-                    ctx.fillText('• ' + guests[j], 90, startY2 + (j * lineHeight2));
-                }
-                if (guests.length > maxLines2) {
-                    ctx.fillStyle = '#777';
-                    ctx.fillText('…y ' + (guests.length - maxLines2) + ' más', 90, startY2 + (maxLines2 * lineHeight2));
-                }
-
-                ctx.fillStyle = '#777';
-                ctx.font = '400 22px Karla, Arial, sans-serif';
-                ctx.fillText('Presenta este boleto el día del evento.', 70, 730);
-                if (ticketId) {
-                    ctx.fillStyle = '#777';
-                    ctx.font = '600 22px Karla, Arial, sans-serif';
-                    ctx.fillText('Código: ' + ticketId, 70, 765);
-                }
-
-                ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
-                ctx.lineWidth = 6;
-                ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+                logoImg = null;
+                qrImg = null;
+                drawBackgroundAndWatermark();
+                drawTextAndQRCode();
 
                 return canvas.toDataURL('image/png');
             }
@@ -816,21 +734,21 @@ function generateRsvpTicketPng(opts) {
     }
 
     // Use the resolved DOM URL first to avoid path issues.
-    var logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
+    const logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
         .catch(function () { return loadImageForCanvasUntainted('img/logo2.png'); })
         .catch(function () { return loadImageForCanvasUntainted('./img/logo2.png'); })
         .catch(function () { return null; });
-    var qrPromise = qrDataUrl ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; }) : Promise.resolve(null);
+    const qrPromise = qrDataUrl ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; }) : Promise.resolve(null);
 
     return Promise.all([logoPromise, qrPromise]).then(function (results) {
-        var logoImg = results[0] || null;
-        var qrImg = results[1] || null;
+        const logoImg = results[0] || null;
+        const qrImg = results[1] || null;
         return drawTicket(logoImg, qrImg);
     });
 }
 
 function downloadDataUrl(dataUrl, filename) {
-    var a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = dataUrl;
     a.download = filename;
     document.body.appendChild(a);
@@ -840,19 +758,19 @@ function downloadDataUrl(dataUrl, filename) {
 
 // Update Countdown Timer
 function updateCountdown() {
-    var weddingDate = new Date('December 18, 2026 18:00:00').getTime();
-    var now = new Date().getTime();
-    var diff = weddingDate - now;
+    const weddingDate = new Date('December 18, 2026 18:00:00').getTime();
+    const now = new Date().getTime();
+    const diff = weddingDate - now;
 
     if (diff <= 0) {
-        $('#countdown-hero').html('<p style="color: #2E8B57;">¡El gran día ha llegado!</p>');
+        $('#countdown-hero').html('<p style="color: #2E8B57;">Â¡El gran dÃ­a ha llegado!</p>');
         return;
     }
 
-    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    var minutes = Math.floor((diff / (1000 * 60)) % 60);
-    var seconds = Math.floor((diff / 1000) % 60);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
 
     document.getElementById('d-hero').textContent = String(days).padStart(2, '0');
     document.getElementById('h-hero').textContent = String(hours).padStart(2, '0');
@@ -862,11 +780,11 @@ function updateCountdown() {
 
 // Add to Calendar Function
 function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
-    var encodedTitulo = encodeURIComponent(titulo);
-    var encodedUbicacion = encodeURIComponent(ubicacion);
-    
+    const encodedTitulo = encodeURIComponent(titulo);
+    const encodedUbicacion = encodeURIComponent(ubicacion);
+
     // Generate an ICS file for Apple Calendar
-    var icsContent = [
+    const icsContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
         'PRODID:-//Boda Karla & Jose//ES',
@@ -880,60 +798,67 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
         'END:VEVENT',
         'END:VCALENDAR'
     ].join('\r\n');
-    
-    var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    var icsUrl = URL.createObjectURL(icsBlob);
 
-    var opciones = `
+    const icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const icsUrl = URL.createObjectURL(icsBlob);
+
+    const opciones = `
         <div id="calendar-modal-overlay" class="gifts-modal active" style="z-index: 9998;">
             <div onclick="event.stopPropagation()" class="gifts-modal-content calendar-modal-content">
-                <button onclick="cerrarModalCalendario()" class="gifts-modal-close">
+                <button onclick="cerrarModalCalendario()" class="gifts-modal-close calendar-modal-close">
                     <i class="fa fa-times"></i>
                 </button>
-                <h3 class="gifts-modal-title">
-                    <i class="fa fa-calendar"></i> Agregar al Calendario
-                </h3>
-                <p class="gifts-modal-subtitle">Selecciona tu aplicación de calendario preferida</p>
-                
-                <div class="gifts-options calendar-options">
-                    <!-- Google Calendar option -->
-                    <div class="gift-option calendar-option">
-                        <div class="gift-option-icon google-color">
-                            <i class="fab fa-google"></i>
-                        </div>
-                        <h4>Google Calendar</h4>
-                        <p>Sincroniza con todos tus dispositivos</p>
-                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
-                           target="_blank"
-                           class="btn-gift-option google-btn">
-                            <i class="fa fa-external-link"></i> Ir a Google
-                        </a>
-                    </div>
+                <span class="registry-eyebrow" style="display:block; text-align:center;">Añadir al Calendario</span>
+                <h3 class="calendar-modal-heading">Elige tu aplicación</h3>
+                <p class="calendar-modal-sub">Selecciona tu app de calendario preferida</p>
 
-                    <!-- Apple Calendar option -->
-                    <div class="gift-option calendar-option">
-                        <div class="gift-option-icon apple-color">
-                            <i class="fab fa-apple"></i>
+                <div class="calendar-grid">
+
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
+                       target="_blank" rel="noopener noreferrer" class="registry-card">
+                        <div class="registry-card-icon">
+                            <i class="fab fa-google" aria-hidden="true"></i>
                         </div>
-                        <h4>Apple Calendar</h4>
-                        <p>Para iPhone, iPad y Mac</p>
-                        <a href="${icsUrl}" download="evento-boda.ics"
-                           class="btn-gift-option apple-btn">
-                            <i class="fa fa-download"></i> Descargar ICS
-                        </a>
-                    </div>
+                        <div class="registry-card-body">
+                            <span class="registry-card-name">Google Calendar</span>
+                            <span class="registry-card-sub">Sincroniza con todos tus dispositivos</span>
+                        </div>
+                        <span class="registry-card-cta">
+                            Ir a Google
+                            <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 8h10M9 4l4 4-4 4"/>
+                            </svg>
+                        </span>
+                    </a>
+
+                    <a href="${icsUrl}" download="evento-boda.ics" class="registry-card">
+                        <div class="registry-card-icon">
+                            <i class="fab fa-apple" aria-hidden="true"></i>
+                        </div>
+                        <div class="registry-card-body">
+                            <span class="registry-card-name">Apple Calendar</span>
+                            <span class="registry-card-sub">Para iPhone, iPad y Mac</span>
+                        </div>
+                        <span class="registry-card-cta">
+                            Descargar ICS
+                            <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 8h10M9 4l4 4-4 4"/>
+                            </svg>
+                        </span>
+                    </a>
+
                 </div>
             </div>
         </div>
     `;
 
-    var modal = document.createElement('div');
+    const modal = document.createElement('div');
     modal.id = 'calendar-modal-container';
     modal.innerHTML = opciones;
     document.body.appendChild(modal);
-    
+
     // Close when clicking on the overlay
-    document.getElementById('calendar-modal-overlay').onclick = function(e) {
+    document.getElementById('calendar-modal-overlay').onclick = function (e) {
         if (e.target.id === 'calendar-modal-overlay') {
             cerrarModalCalendario();
         }
@@ -941,217 +866,156 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
 }
 
 function cerrarModalCalendario() {
-    var modal = document.getElementById('calendar-modal-container');
+    const modal = document.getElementById('calendar-modal-container');
     if (modal) {
         modal.remove();
     }
 }
 
-// Map Integration (Leaflet + OpenStreetMap)
-function initMap() {
-    var mapEl = document.getElementById('map-canvas');
-    if (!mapEl) {
-        console.warn('Map container element not found');
-        return;
-    }
+// Map Widget â€“ Tab Switching (Google Maps Embeds)
+(function () {
+    const tabs = document.querySelectorAll('.map-tab');
+    const allFrames = document.querySelectorAll('.map-frame-wrap iframe');
+    const barLabel = document.getElementById('bar-label');
+    const barSublabel = document.getElementById('bar-sublabel');
+    const barBtn = document.getElementById('bar-btn');
+    const barIcon = document.getElementById('bar-icon');
 
-    if (typeof L === 'undefined') {
-        console.warn('Leaflet library not loaded');
-        return;
-    }
+    if (!tabs.length) return;
 
-    // Prevent re-initialization if initMap is called more than once
-    if (mapEl._leaflet_map) {
-        return;
-    }
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            // Activate tab
+            tabs.forEach(function (t) { t.classList.remove('active'); });
+            tab.classList.add('active');
 
-    var ceremonyLatLng = [20.744395, -103.3928862];
-    var receptionLatLng = [20.7784148, -103.4550886];
-    var centerLatLng = [20.761404, -103.4241881];
+            // Show correct iframe
+            allFrames.forEach(function (f) {
+                f.classList.toggle('visible', f.id === tab.dataset.target);
+            });
 
-    // Track last selected destination for the directions button
-    var currentDestinationLatLng = ceremonyLatLng;
-
-    var map = L.map(mapEl, {
-        scrollWheelZoom: false,
-        zoomControl: true
-    }).setView(centerLatLng, 12);
-
-    // Store reference for later resize invalidation
-    mapEl._leaflet_map = map;
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    var ceremonyMarker = L.circleMarker(ceremonyLatLng, {
-        radius: 10,
-        color: '#ffffff',
-        weight: 3,
-        fillColor: '#d4af37',
-        fillOpacity: 1
-    }).addTo(map);
-
-    var receptionMarker = L.circleMarker(receptionLatLng, {
-        radius: 10,
-        color: '#ffffff',
-        weight: 3,
-        fillColor: '#2E8B57',
-        fillOpacity: 1
-    }).addTo(map);
-
-    var ceremonyPopupHtml = (
-        '<div class="map-popup">' +
-            '<strong class="map-popup-title map-popup-title--gold">Ceremonia</strong><br>' +
-            '<span class="map-popup-subtitle">Parroquia Nuestra Señora de Altagracia</span><br>' +
-            '<span class="map-popup-meta">6:00 PM</span>' +
-        '</div>'
-    );
-
-    var receptionPopupHtml = (
-        '<div class="map-popup">' +
-            '<strong class="map-popup-title map-popup-title--green">Recepción</strong><br>' +
-            '<span class="map-popup-subtitle">Jardin de Eventos Andira</span><br>' +
-            '<span class="map-popup-meta">8:00 PM</span>' +
-        '</div>'
-    );
-
-    // Disable auto-pan so opening the popup doesn't shove the marker to a corner.
-    ceremonyMarker.bindPopup(ceremonyPopupHtml, { closeButton: false, autoPan: false });
-    receptionMarker.bindPopup(receptionPopupHtml, { closeButton: false, autoPan: false });
-
-    function focusLocation(latLng, zoom, markerToOpen) {
-        // Make repeated focusing deterministic:
-        // - Stop any in-progress pan/zoom animation
-        // - Invalidate size *without* Leaflet auto-panning
-        // - Center without animation (avoids corner drift)
-        map.stop();
-        window.requestAnimationFrame(function () {
-            map.invalidateSize({ animate: false, pan: false });
-            map.setView(latLng, zoom, { animate: false });
-            if (markerToOpen) {
-                markerToOpen.openPopup();
+            // Update bottom bar
+            if (barLabel) barLabel.textContent = tab.dataset.label;
+            if (barSublabel) barSublabel.textContent = tab.dataset.sublabel;
+            if (barBtn) {
+                barBtn.textContent = tab.dataset.btnText;
+                barBtn.href = tab.dataset.btnHref;
+                barBtn.className = 'map-btn-link';
             }
+            if (barIcon) barIcon.className = 'map-icon ' + tab.dataset.iconClass;
         });
-    }
-
-    function focusCeremony() {
-        currentDestinationLatLng = ceremonyLatLng;
-        focusLocation(ceremonyLatLng, 15, ceremonyMarker);
-    }
-
-    function focusReception() {
-        currentDestinationLatLng = receptionLatLng;
-        focusLocation(receptionLatLng, 15, receptionMarker);
-    }
-
-    ceremonyMarker.on('click', function () {
-        focusCeremony();
     });
+}());
 
-    receptionMarker.on('click', function () {
-        focusReception();
-    });
 
-    function openGoogleMapsDirectionsTo(destLatLng) {
-        var dest = Array.isArray(destLatLng) ? destLatLng : ceremonyLatLng;
-        var destinationParam = encodeURIComponent(dest[0] + ',' + dest[1]);
-
-        // Note: Browsers may block opening a *new tab* after the permission prompt (not a direct user gesture),
-        // so we navigate in the same tab for reliable behavior.
-        var destinationOnlyUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + destinationParam + '&travelmode=driving';
-
-        if (navigator.geolocation && typeof navigator.geolocation.getCurrentPosition === 'function') {
-            navigator.geolocation.getCurrentPosition(
-                function (pos) {
-                    var originParam = encodeURIComponent(pos.coords.latitude + ',' + pos.coords.longitude);
-                    var fullUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + originParam + '&destination=' + destinationParam + '&travelmode=driving';
-                    window.location.href = fullUrl;
-                },
-                function () {
-                    // If user blocks location, still open Google Maps with destination.
-                    window.location.href = destinationOnlyUrl;
-                },
-                { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-            );
-        } else {
-            window.location.href = destinationOnlyUrl;
-        }
-    }
-
-    function invalidateSoon() {
-        // Leaflet needs this when the map is shown/overlays change
-        setTimeout(function () {
-            map.invalidateSize({ animate: false, pan: false });
-        }, 50);
-    }
-
-    // Keep map aligned on window resize/orientation changes
-    window.addEventListener('resize', invalidateSoon);
-
-    // Toggle map content buttons (preserve existing UX)
-    $('#btn-show-map-ceremony')
-        .off('click.map')
-        .on('click.map', function (e) {
-            e.preventDefault();
-            $('#map-content').toggleClass('toggle-map-content');
-            $('#btn-show-content').toggleClass('toggle-map-content');
-            $('#btn-directions').toggleClass('toggle-map-content');
-            // Wait for layout changes (opacity/visibility) before centering
-            setTimeout(function () {
-                focusCeremony();
-            }, 60);
-        });
-
-    $('#btn-show-map-reception')
-        .off('click.map')
-        .on('click.map', function (e) {
-            e.preventDefault();
-            $('#map-content').toggleClass('toggle-map-content');
-            $('#btn-show-content').toggleClass('toggle-map-content');
-            $('#btn-directions').toggleClass('toggle-map-content');
-            setTimeout(function () {
-                focusReception();
-            }, 60);
-        });
-
-    $('#btn-show-content')
-        .off('click.map')
-        .on('click.map', function () {
-            $('#map-content').toggleClass('toggle-map-content');
-            $('#btn-show-content').toggleClass('toggle-map-content');
-            $('#btn-directions').toggleClass('toggle-map-content');
-            invalidateSoon();
-        });
-
-    $('#btn-directions')
-        .off('click.map')
-        .on('click.map', function () {
-            openGoogleMapsDirectionsTo(currentDestinationLatLng);
-        });
-
-    // Initial size fix (in case the section loads while not visible)
-    invalidateSoon();
-}
-
-// Leaflet is loaded via CDN; initialize once DOM is ready.
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMap);
-} else {
-    initMap();
+// Activate a specific map tab programmatically (called from event card buttons)
+function activarMapTab(targetId) {
+    const tab = document.querySelector('.map-tab[data-target="' + targetId + '"]');
+    if (tab) tab.click();
 }
 
 // Smooth Scroll Link Handler
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
+    anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        var target = document.querySelector(this.getAttribute('href'));
+        const target = document.querySelector(this.getAttribute('href'));
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
         }
     });
 });
+
+/* ============================================
+   GALLERY LIGHTBOX
+   ============================================ */
+(function () {
+    // Collect all gallery item sources in DOM order
+    function getGalleryImages() {
+        return Array.from(document.querySelectorAll('.gallery-item[data-src]'))
+            .map(btn => btn.dataset.src);
+    }
+
+    // Build lightbox DOM once
+    const lb = document.createElement('div');
+    lb.id = 'gallery-lightbox';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.setAttribute('aria-label', 'Visor de imÃ¡genes');
+    lb.innerHTML = `
+        <button class="lb-close" aria-label="Cerrar"><span class="material-symbols-outlined">close</span></button>
+        <button class="lb-prev" aria-label="Anterior"><span class="material-symbols-outlined">chevron_left</span></button>
+        <button class="lb-next" aria-label="Siguiente"><span class="material-symbols-outlined">chevron_right</span></button>
+        <div class="lb-img-wrap"><img class="lb-img" src="" alt="Imagen galerÃ­a"></div>
+        <div class="lb-counter"></div>
+    `;
+    document.body.appendChild(lb);
+
+    const lbImg = lb.querySelector('.lb-img');
+    const lbCounter = lb.querySelector('.lb-counter');
+    let lbImages = [];
+    let lbIndex = 0;
+    let lbTouchStartX = 0;
+
+    function lbOpen(index) {
+        lbImages = getGalleryImages();
+        lbIndex = index;
+        lbShow();
+        lb.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        lb.querySelector('.lb-close').focus();
+    }
+
+    function lbClose() {
+        lb.classList.remove('active');
+        document.body.style.overflow = '';
+        lbImg.src = '';
+    }
+
+    function lbShow() {
+        lbImg.src = lbImages[lbIndex];
+        lbCounter.textContent = `${lbIndex + 1} / ${lbImages.length}`;
+        lb.querySelector('.lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
+        lb.querySelector('.lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+    }
+
+    function lbPrev() { lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; lbShow(); }
+    function lbNext() { lbIndex = (lbIndex + 1) % lbImages.length; lbShow(); }
+
+    // Delegate clicks on gallery buttons
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.gallery-item[data-src]');
+        if (btn) {
+            const srcs = getGalleryImages();
+            const idx = srcs.indexOf(btn.dataset.src);
+            lbOpen(idx >= 0 ? idx : 0);
+        }
+    });
+
+    lb.querySelector('.lb-close').addEventListener('click', lbClose);
+    lb.querySelector('.lb-prev').addEventListener('click', lbPrev);
+    lb.querySelector('.lb-next').addEventListener('click', lbNext);
+
+    // Close on backdrop click
+    lb.querySelector('.lb-img-wrap').addEventListener('click', function (e) {
+        if (e.target === this) lbClose();
+    });
+
+    // Keyboard: Escape closes, arrows navigate
+    document.addEventListener('keydown', function (e) {
+        if (!lb.classList.contains('active')) return;
+        if (e.key === 'Escape') lbClose();
+        if (e.key === 'ArrowLeft') lbPrev();
+        if (e.key === 'ArrowRight') lbNext();
+    });
+
+    // Touch swipe
+    lb.addEventListener('touchstart', function (e) { lbTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) {
+        const dx = e.changedTouches[0].screenX - lbTouchStartX;
+        if (dx < -50) lbNext();
+        if (dx > 50) lbPrev();
+    });
+}());
 
 /* ============================================
    MUSIC PLAYER
@@ -1202,7 +1066,7 @@ const trackArtist = document.getElementById('track-artist');
 const progressFill = document.getElementById('progress-fill');
 const currentTimeEl = document.getElementById('current-time');
 const durationEl = document.getElementById('duration');
-const progressBar = document.querySelector('.progress-bar');
+const progressBar = document.querySelector('#music-player-bar .mpb-progress-track');
 
 function isAudioPlaying() {
     return !!(audioPlayer && !audioPlayer.paused && !audioPlayer.ended);
@@ -1210,12 +1074,11 @@ function isAudioPlaying() {
 
 function syncPlayPauseUI() {
     if (!audioPlayer || !playPauseBtn) return;
-    const icon = playPauseBtn.querySelector('i');
+    const icon = playPauseBtn.querySelector('.material-symbols-outlined');
     if (!icon) return;
 
     const playingNow = isAudioPlaying();
-    icon.classList.toggle('fa-play', !playingNow);
-    icon.classList.toggle('fa-pause', playingNow);
+    icon.textContent = playingNow ? 'pause_circle' : 'play_circle';
     playPauseBtn.setAttribute('title', playingNow ? 'Pausar' : 'Reproducir');
     playPauseBtn.setAttribute('aria-label', playingNow ? 'Pausar' : 'Reproducir');
 }
@@ -1227,12 +1090,12 @@ function loadTrack(index) {
         trackArtist.textContent = "Agrega archivos MP3 a la carpeta 'mp3'";
         return;
     }
-    
+
     const track = playlist[index];
     audioPlayer.src = track.src;
     trackTitle.textContent = track.title;
     trackArtist.textContent = track.artist;
-    
+
     // Reset progress
     progressFill.style.width = '0%';
     currentTimeEl.textContent = '0:00';
@@ -1261,7 +1124,7 @@ function togglePlayPause() {
 // Previous track
 function previousTrack(autoplay) {
     if (playlist.length === 0) return;
-    
+
     currentTrackIndex--;
     if (currentTrackIndex < 0) {
         currentTrackIndex = playlist.length - 1;
@@ -1278,7 +1141,7 @@ function previousTrack(autoplay) {
 // Next track
 function nextTrack(autoplay) {
     if (playlist.length === 0) return;
-    
+
     currentTrackIndex++;
     if (currentTrackIndex >= playlist.length) {
         currentTrackIndex = 0;
@@ -1302,12 +1165,12 @@ function formatTime(seconds) {
 // Event Listeners
 if (audioPlayer) {
     // When metadata is available
-    audioPlayer.addEventListener('loadedmetadata', function() {
+    audioPlayer.addEventListener('loadedmetadata', function () {
         durationEl.textContent = formatTime(audioPlayer.duration);
     });
 
     // Update progress
-    audioPlayer.addEventListener('timeupdate', function() {
+    audioPlayer.addEventListener('timeupdate', function () {
         if (!isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
         const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
         progressFill.style.width = progress + '%';
@@ -1315,7 +1178,7 @@ if (audioPlayer) {
     });
 
     // When the track ends
-    audioPlayer.addEventListener('ended', function() {
+    audioPlayer.addEventListener('ended', function () {
         // Auto-advance and keep playing when a track ends naturally.
         nextTrack(true);
         syncPlayPauseUI();
@@ -1329,9 +1192,9 @@ if (audioPlayer) {
 
     // Click on the progress bar
     if (progressBar) {
-        progressBar.addEventListener('click', function(e) {
+        progressBar.addEventListener('click', function (e) {
             if (playlist.length === 0) return;
-            
+
             const rect = progressBar.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const width = rect.width;
@@ -1358,140 +1221,102 @@ if (nextBtn) {
     });
 }
 
-// Load the first track on startup and autoplay
+// Load the first track on startup (music will auto-play when the envelope opens)
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
-    
-    let musicStarted = false;
-    let scrollDetected = false;
-    
-    // Create an invisible overlay and a notification
-    const musicOverlay = document.createElement('div');
-    musicOverlay.id = 'music-overlay';
-    musicOverlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        z-index: 999999;
-        cursor: pointer;
-        display: none;
-    `;
-    
-    const musicNotification = document.createElement('div');
-    musicNotification.id = 'music-notification';
-    musicNotification.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #0F3B2E 0%, #2E8B57 100%);
-            color: white;
-            padding: 25px 35px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            font-family: 'Karla', sans-serif;
-            font-size: 18px;
-            z-index: 1000001;
-            cursor: pointer;
-            animation: fadeInScale 0.5s ease, pulse 2s infinite;
-            display: none;
-            text-align: center;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            max-width: 90%;
-        " id="music-notif-content">
-            <i class="fa fa-music" style="margin-right: 10px; font-size: 22px;"></i>
-            <div style="margin-top: 10px; font-weight: 600; font-size: 20px;">Toca aquí para activar la música</div>
-            <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">🎵 Disfruta de nuestra selección musical</div>
-        </div>
-        <style>
-            @keyframes fadeInScale {
-                from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-                to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            }
-            @keyframes pulse {
-                0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
-                50% { box-shadow: 0 10px 40px rgba(212, 175, 55, 0.6); }
-            }
-            @media (max-width: 480px) {
-                #music-notif-content {
-                    padding: 30px 25px !important;
-                    font-size: 16px !important;
-                    border-radius: 16px !important;
-                }
-                #music-notif-content > div:first-of-type {
-                    font-size: 18px !important;
-                }
-            }
-        </style>
-    `;
-    
-    document.body.appendChild(musicOverlay);
-    document.body.appendChild(musicNotification);
-    
-    // Start music
-    function startMusic() {
-        if (musicStarted) return;
-        
-        const playPromise = audioPlayer.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(function() {
-                // Playback started successfully
-                musicStarted = true;
-                syncPlayPauseUI();
-                
-                // Hide overlay and notification
-                musicOverlay.style.display = 'none';
-                document.getElementById('music-notif-content').style.display = 'none';
-                
-                // Remove event listeners
-                window.removeEventListener('scroll', scrollHandler);
-                musicOverlay.removeEventListener('click', startMusic);
-                musicOverlay.removeEventListener('touchstart', startMusic);
-                document.getElementById('music-notif-content').removeEventListener('click', startMusic);
-                document.getElementById('music-notif-content').removeEventListener('touchstart', startMusic);
-            }).catch(function(error) {
-                syncPlayPauseUI();
-            });
-        }
+    // Set initial volume
+    audioPlayer.volume = 0.8;
+}
+
+// Called from openInvitation() after the envelope finishes fading
+function startMusicAfterEnvelope() {
+    if (!audioPlayer || playlist.length === 0) return;
+
+    const playPromise = audioPlayer.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(function () {
+            // Autoplay blocked by browser â€” user can press play manually
+            syncPlayPauseUI();
+        });
     }
-    
-    // Scroll handler - shows the notification
-    function scrollHandler() {
-        if (musicStarted || scrollDetected) return;
-        
-        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-        
-        if (scrolled > 50) {
-            scrollDetected = true;
-            
-            // Show overlay and notification
-            musicOverlay.style.display = 'block';
-            document.getElementById('music-notif-content').style.display = 'block';
-            
-            // Make the notification directly clickable
-            const notifContent = document.getElementById('music-notif-content');
-            notifContent.addEventListener('click', startMusic);
-            notifContent.addEventListener('touchstart', startMusic, { passive: true });
-            
-            // The overlay also captures clicks outside the notification
-            musicOverlay.addEventListener('click', startMusic);
-            musicOverlay.addEventListener('touchstart', startMusic, { passive: true });
-        }
+    syncPlayPauseUI();
+}
+
+// ========== Volume Control ==========
+const volumeSlider = document.getElementById('volume-slider');
+const volumeBtn = document.getElementById('volume-btn');
+let lastVolume = 0.8; // remember volume before muting
+
+function updateVolumeIcon() {
+    if (!volumeBtn) return;
+    const icon = document.getElementById('vol-icon');
+    if (!icon) return;
+
+    const vol = audioPlayer ? audioPlayer.volume : 1;
+    if (vol === 0) {
+        icon.textContent = 'volume_off';
+        volumeBtn.setAttribute('title', 'Activar sonido');
+    } else if (vol < 0.5) {
+        icon.textContent = 'volume_down';
+        volumeBtn.setAttribute('title', 'Silenciar');
+    } else {
+        icon.textContent = 'volume_up';
+        volumeBtn.setAttribute('title', 'Silenciar');
     }
-    
-    // Scroll event listener
-    window.addEventListener('scroll', scrollHandler, { passive: true });
+}
+
+if (volumeSlider && audioPlayer) {
+    volumeSlider.addEventListener('input', function () {
+        const vol = parseInt(this.value, 10) / 100;
+        audioPlayer.volume = vol;
+        lastVolume = vol > 0 ? vol : lastVolume;
+        updateVolumeIcon();
+    });
+}
+
+if (volumeBtn && audioPlayer) {
+    volumeBtn.addEventListener('click', function () {
+        if (audioPlayer.volume > 0) {
+            lastVolume = audioPlayer.volume;
+            audioPlayer.volume = 0;
+            if (volumeSlider) volumeSlider.value = 0;
+        } else {
+            audioPlayer.volume = lastVolume || 0.8;
+            if (volumeSlider) volumeSlider.value = Math.round(audioPlayer.volume * 100);
+        }
+        updateVolumeIcon();
+    });
+}
+
+// Sync slider if volume changes externally
+if (audioPlayer) {
+    audioPlayer.addEventListener('volumechange', function () {
+        if (volumeSlider) {
+            volumeSlider.value = Math.round(audioPlayer.volume * 100);
+        }
+        updateVolumeIcon();
+    });
 }
 
 // Extra safety: resync button state after returning to the page/tab.
 document.addEventListener('visibilitychange', syncPlayPauseUI);
 window.addEventListener('pageshow', syncPlayPauseUI);
 window.addEventListener('focus', syncPlayPauseUI);
+
+// Fade-in the music bar on scroll
+(function () {
+    var bar = document.getElementById('music-player-bar');
+    if (!bar) return;
+    var shown = false;
+    function checkScroll() {
+        if (!shown && window.scrollY > 80) {
+            bar.classList.add('mpb-visible');
+            shown = true;
+            window.removeEventListener('scroll', checkScroll);
+        }
+    }
+    window.addEventListener('scroll', checkScroll, { passive: true });
+}());
 /* ============================================
     PHOTO UPLOAD FUNCTIONALITY - GOOGLE APPS SCRIPT
    ============================================ */
@@ -1503,7 +1328,7 @@ const photoFileInput = document.getElementById('photo-file');
 const fileInfo = document.getElementById('file-info');
 
 if (photoFileInput && fileInfo) {
-    photoFileInput.addEventListener('change', function() {
+    photoFileInput.addEventListener('change', function () {
         const files = this.files;
         if (files.length > 0) {
             if (files.length === 1) {
@@ -1513,7 +1338,7 @@ if (photoFileInput && fileInfo) {
             }
             fileInfo.style.color = '#2E8B57';
         } else {
-            fileInfo.textContent = 'Ningún archivo seleccionado';
+            fileInfo.textContent = 'NingÃºn archivo seleccionado';
             fileInfo.style.color = '#999';
         }
     });
@@ -1579,29 +1404,29 @@ async function validateImageFile(file) {
     const bytes = await readFirstBytes(file, 16);
     const looksLikeImage = hasJpegMagic(bytes) || hasPngMagic(bytes) || hasGifMagic(bytes) || hasWebpMagic(bytes);
     if (!looksLikeImage) {
-        return { ok: false, reason: 'El archivo no parece ser una imagen válida.' };
+        return { ok: false, reason: 'El archivo no parece ser una imagen vÃ¡lida.' };
     }
 
     return { ok: true };
 }
 
 if (photoUploadForm) {
-    photoUploadForm.addEventListener('submit', async function(e) {
+    photoUploadForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         const guestName = document.getElementById('guest-name').value.trim();
         const groupCode = galleryGroupCodeInput ? String(galleryGroupCodeInput.value || '').trim() : '';
         const files = photoFileInput.files;
-        
+
         if (!guestName || !groupCode || files.length === 0) {
             alert('Por favor, completa todos los campos');
             return;
         }
-        
+
         // Validate file size (max 5MB per photo)
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
-                alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
+                alert(`La foto "${file.name}" es demasiado grande. TamaÃ±o mÃ¡ximo: 5MB`);
                 return;
             }
         }
@@ -1620,7 +1445,7 @@ if (photoUploadForm) {
                 return;
             }
         }
-        
+
         // Upload photos to Google Apps Script
         try {
             localStorage.setItem('galleryGroupCode', groupCode);
@@ -1637,14 +1462,14 @@ if (photoUploadForm) {
 async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
     const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
     const originalBtnText = uploadBtn.innerHTML;
-    
-    uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Subiendo...';
+
+    uploadBtn.innerHTML = '<span class="material-symbols-outlined rotating">progress_activity</span> Subiendo...';
     uploadBtn.disabled = true;
-    
+
     let uploadedCount = 0;
     let failedCount = 0;
     const failureMessages = [];
-    
+
     // Process each file
     for (let file of files) {
         // Extra defense (already validated before submit)
@@ -1653,11 +1478,11 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
             failedCount++;
             continue;
         }
-        
+
         try {
             // Convert file to base64
             const base64Data = await fileToBase64(file);
-            
+
             // Send to Google Apps Script
             const response = await fetch(GALLERY_SCRIPT_URL, {
                 method: 'POST',
@@ -1676,7 +1501,7 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
                 redirect: 'follow',
                 cache: 'no-store'
             });
-            
+
             let payload = null;
             try {
                 payload = await response.json();
@@ -1689,38 +1514,38 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
                 throw new Error(msg);
             }
             if (!payload || payload.success !== true) {
-                const msg = (payload && payload.message) ? payload.message : 'Respuesta inválida del servidor';
+                const msg = (payload && payload.message) ? payload.message : 'Respuesta invÃ¡lida del servidor';
                 throw new Error(msg);
             }
 
             uploadedCount++;
-            
+
         } catch (error) {
-            console.error(`❌ Error subiendo ${file.name}:`, error);
+            console.error(`âŒ Error subiendo ${file.name}:`, error);
             failedCount++;
             failureMessages.push(`${file.name}: ${error && error.message ? error.message : 'Error desconocido'}`);
         }
     }
-    
+
     // Restore button
     uploadBtn.innerHTML = originalBtnText;
     uploadBtn.disabled = false;
-    
+
     // Reset form
     photoUploadForm.reset();
-    fileInfo.textContent = 'Ningún archivo seleccionado';
+    fileInfo.textContent = 'NingÃºn archivo seleccionado';
     fileInfo.style.color = '#999';
-    
+
     // Show result
     if (uploadedCount > 0) {
-        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarán en la galería después de ser aprobadas.`);
-        
+        alert(`Â¡Gracias por compartir tus fotos! ðŸ“¸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarÃ¡n en la galerÃ­a despuÃ©s de ser aprobadas.`);
+
         // Reload gallery after 2 seconds
         setTimeout(() => {
             loadGuestPhotos();
         }, 2000);
     }
-    
+
     if (failedCount > 0) {
         const details = failureMessages.length ? `\n\nDetalle:\n- ${failureMessages.join('\n- ')}` : '';
         alert(`Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.${details}`);
@@ -1744,7 +1569,7 @@ function fileToBase64(file) {
  */
 async function loadGuestPhotos() {
     const carouselTrack = document.getElementById('carousel-track');
-    
+
     if (!carouselTrack) return;
 
     const groupCode = (galleryGroupCodeInput && String(galleryGroupCodeInput.value || '').trim()) ||
@@ -1755,35 +1580,35 @@ async function loadGuestPhotos() {
     if (!groupCode) {
         return;
     }
-    
+
     try {
         const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados&groupCode=${encodeURIComponent(groupCode)}`);
         const data = await response.json();
-        
+
         if (data.success && data.photos && data.photos.length > 0) {
             // Remove "no photos" message
             const noPhotosMsg = carouselTrack.querySelector('.no-photos-carousel');
             if (noPhotosMsg) {
                 noPhotosMsg.remove();
             }
-            
+
             // Clear existing photos
             carouselTrack.innerHTML = '';
-            
+
             // Add each photo to the carousel
             data.photos.forEach((photo, index) => {
                 const fileId = String(photo.fileId || '').trim();
-                
+
                 // Format date
                 const photoDate = new Date(photo.timestamp);
-                const dateStr = photoDate.toLocaleDateString('es-MX', { 
-                    year: 'numeric', 
-                    month: 'long', 
+                const dateStr = photoDate.toLocaleDateString('es-MX', {
+                    year: 'numeric',
+                    month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                
+
                 const slideHtml = `
                     <div class="carousel-slide" data-index="${index}">
                         <img data-file-id="${fileId}"
@@ -1793,10 +1618,10 @@ async function loadGuestPhotos() {
                              >
                         <div class="photo-info">
                             <p class="photo-author">
-                                <i class="fa fa-user"></i> ${photo.guestName}
+                                <span class="material-symbols-outlined">person</span> ${photo.guestName}
                             </p>
                             <p class="photo-date">
-                                <i class="fa fa-clock-o"></i> ${dateStr}
+                                <span class="material-symbols-outlined">schedule</span> ${dateStr}
                             </p>
                         </div>
                     </div>
@@ -1819,17 +1644,17 @@ async function loadGuestPhotos() {
                     }
                 }
             }
-            
+
             // Update counter
             document.getElementById('total-photos').textContent = data.photos.length;
             document.getElementById('carousel-counter').style.display = 'block';
-            
+
             // Show controls if there is more than one photo
             if (data.photos.length > 1) {
                 document.getElementById('carousel-prev').style.display = 'flex';
                 document.getElementById('carousel-next').style.display = 'flex';
             }
-            
+
             // Initialize carousel
             initializeCarousel(data.photos.length);
         }
@@ -1868,11 +1693,11 @@ function initializeCarousel(total) {
     totalSlides = total;
     currentSlide = 0;
     updateCarousel();
-    
+
     // Event listeners for the controls
     const prevBtn = document.getElementById('carousel-prev');
     const nextBtn = document.getElementById('carousel-next');
-    
+
     if (prevBtn && nextBtn) {
         prevBtn.onclick = () => {
             if (currentSlide > 0) {
@@ -1881,7 +1706,7 @@ function initializeCarousel(total) {
                 resetAutoplay();
             }
         };
-        
+
         nextBtn.onclick = () => {
             if (currentSlide < totalSlides - 1) {
                 currentSlide++;
@@ -1890,24 +1715,24 @@ function initializeCarousel(total) {
             }
         };
     }
-    
+
     // Create indicators
     createCarouselIndicators();
-    
+
     // Touch gesture support (swipe)
     const carousel = document.getElementById('guest-photos-carousel');
     let touchStartX = 0;
     let touchEndX = 0;
-    
+
     carousel.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
     });
-    
+
     carousel.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
     });
-    
+
     function handleSwipe() {
         if (touchEndX < touchStartX - 50 && currentSlide < totalSlides - 1) {
             // Swipe left - next
@@ -1922,9 +1747,19 @@ function initializeCarousel(total) {
             resetAutoplay();
         }
     }
-    
-    // Keyboard support (arrow keys)
+
+    // Keyboard support (arrow keys) â€” only active while carousel is visible
+    let carouselKeyboardActive = false;
+
+    if ('IntersectionObserver' in window) {
+        const carouselObserver = new IntersectionObserver((entries) => {
+            carouselKeyboardActive = entries[0].isIntersecting;
+        }, { threshold: 0.2 });
+        carouselObserver.observe(carousel);
+    }
+
     document.addEventListener('keydown', (e) => {
+        if (!carouselKeyboardActive) return;
         if (e.key === 'ArrowLeft' && currentSlide > 0) {
             currentSlide--;
             updateCarousel();
@@ -1935,16 +1770,16 @@ function initializeCarousel(total) {
             resetAutoplay();
         }
     });
-    
+
     // Pause autoplay on hover
     carousel.addEventListener('mouseenter', () => {
         stopAutoplay();
     });
-    
+
     carousel.addEventListener('mouseleave', () => {
         startAutoplay();
     });
-    
+
     // Start autoplay if there are photos
     if (total > 1) {
         startAutoplay();
@@ -1954,17 +1789,17 @@ function initializeCarousel(total) {
 function createCarouselIndicators() {
     const carousel = document.getElementById('guest-photos-carousel');
     let indicatorsContainer = carousel.querySelector('.carousel-indicators');
-    
+
     // Remove existing indicators if any
     if (indicatorsContainer) {
         indicatorsContainer.remove();
     }
-    
+
     // Create new indicators
     if (totalSlides > 1) {
         indicatorsContainer = document.createElement('div');
         indicatorsContainer.className = 'carousel-indicators';
-        
+
         for (let i = 0; i < totalSlides; i++) {
             const indicator = document.createElement('div');
             indicator.className = 'carousel-indicator';
@@ -1976,14 +1811,14 @@ function createCarouselIndicators() {
             };
             indicatorsContainer.appendChild(indicator);
         }
-        
+
         carousel.appendChild(indicatorsContainer);
     }
 }
 
 function startAutoplay() {
     if (totalSlides <= 1) return;
-    
+
     stopAutoplay();
     carouselAutoplay = setInterval(() => {
         currentSlide = (currentSlide + 1) % totalSlides;
@@ -2007,24 +1842,24 @@ function updateCarousel() {
     const track = document.getElementById('carousel-track');
     const offset = -currentSlide * 100;
     track.style.transform = `translateX(${offset}%)`;
-    
+
     // Actualizar contador
     document.getElementById('current-photo').textContent = currentSlide + 1;
-    
+
     // Actualizar estado de botones
     const prevBtn = document.getElementById('carousel-prev');
     const nextBtn = document.getElementById('carousel-next');
-    
+
     if (prevBtn) {
         prevBtn.style.opacity = currentSlide === 0 ? '0.3' : '1';
         prevBtn.style.cursor = currentSlide === 0 ? 'not-allowed' : 'pointer';
     }
-    
+
     if (nextBtn) {
         nextBtn.style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
         nextBtn.style.cursor = currentSlide === totalSlides - 1 ? 'not-allowed' : 'pointer';
     }
-    
+
     // Actualizar indicadores
     const indicators = document.querySelectorAll('.carousel-indicator');
     indicators.forEach((indicator, index) => {
@@ -2044,58 +1879,38 @@ function convertDriveUrl(url) {
     if (url.includes('googleusercontent.com')) {
         return url;
     }
-    
+
     // Extract the file ID from different Drive URL formats
     let fileId = null;
-    
+
     // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
     if (url.includes('drive.google.com/uc')) {
         const match = url.match(/[?&]id=([^&]+)/);
         if (match) fileId = match[1];
     }
-    
+
     // Formato: https://drive.google.com/file/d/FILE_ID/view
     if (url.includes('drive.google.com/file/d/')) {
         const match = url.match(/\/file\/d\/([^\/]+)/);
         if (match) fileId = match[1];
     }
-    
+
     // If we found the ID, convert to an <img>-friendly format
     if (fileId) {
         return `https://lh3.googleusercontent.com/d/${fileId}=s4000?authuser=0`;
     }
-    
+
     // If we couldn't convert it, return the original URL
     return url;
 }
 
 // Load photos when the page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Wait 1 second before loading photos
     setTimeout(() => {
         loadGuestPhotos();
     }, 1000);
 });
-
-/* ============================================
-    GIFT REGISTRY MODAL
-   ============================================ */
-
-function openGiftsModal() {
-    const modal = document.getElementById('gifts-modal');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent body scroll
-    }
-}
-
-function closeGiftsModal() {
-    const modal = document.getElementById('gifts-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scroll
-    }
-}
 
 function closeRsvpModal() {
     const modal = document.getElementById('rsvp-modal');
@@ -2106,30 +1921,54 @@ function closeRsvpModal() {
 }
 
 // Close modal when clicking outside the content
-document.addEventListener('DOMContentLoaded', function() {
-    const giftsModal = document.getElementById('gifts-modal');
-    if (giftsModal) {
-        giftsModal.addEventListener('click', function(e) {
-            if (e.target === giftsModal) {
-                closeGiftsModal();
-            }
-        });
-    }
-    
+document.addEventListener('DOMContentLoaded', function () {
     const rsvpModal = document.getElementById('rsvp-modal');
     if (rsvpModal) {
-        rsvpModal.addEventListener('click', function(e) {
+        rsvpModal.addEventListener('click', function (e) {
             if (e.target === rsvpModal) {
                 closeRsvpModal();
             }
         });
     }
-    
-    // Close modals with the Escape key
-    document.addEventListener('keydown', function(e) {
+
+    // Close modal with the Escape key
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            closeGiftsModal();
             closeRsvpModal();
         }
     });
 });
+
+/* ============================================
+    ENVELOPE ANIMATION
+   ============================================ */
+function openInvitation() {
+    const envelope = document.getElementById('main-envelope');
+    const overlay = document.getElementById('intro-overlay');
+    const wrapper = document.getElementById('envelope-wrapper');
+    const prompt = document.getElementById('open-prompt');
+
+    wrapper.style.pointerEvents = 'none';
+    if (prompt) prompt.style.opacity = '0';
+
+    // Phase 1: Flap opens completely
+    envelope.classList.add('is-open');
+
+    // Phase 2: After flap is fully open (1.2s), fade everything out
+    setTimeout(function () {
+        envelope.classList.add('is-fading');
+        overlay.style.opacity = '0';
+
+        // Phase 3: Remove overlay after fade-out completes, then start music
+        setTimeout(function () {
+            overlay.style.visibility = 'hidden';
+            overlay.style.display = 'none';
+            document.body.classList.remove('envelope-visible');
+
+            // Start music once the invitation is fully open
+            if (typeof startMusicAfterEnvelope === 'function') {
+                startMusicAfterEnvelope();
+            }
+        }, 1800);
+    }, 1200);
+}

@@ -1,8 +1,9 @@
 <!doctype html>
 <html class="no-js" lang="es">
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Karla & Jose - Boda 2026</title>
     <meta name="description" content="¡Te invitamos a celebrar nuestro matrimonio!">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,16 +12,22 @@
     <meta property="og:title" content="Karla & Jose - Boda 2026">
     <meta property="og:description" content="¡Te invitamos a celebrar nuestro matrimonio el 18 de Diciembre de 2026!">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://karlayjose.com/">
+    <meta property="og:image" content="https://karlayjose.com/img/logo.png">
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/logo.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <!-- Fonts and Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Didot&family=Karla:wght@400;500;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/v4-shims.css" crossorigin="anonymous">
-    <!-- Leaflet (OpenStreetMap) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/v4-shims.css"
+        integrity="sha384-TTjEZR8VsD+LjNa98drkrTRYhdUEaS3gAGE7PGnx2qkePR3fZtnVNoAfxPNyf+IQ" crossorigin="anonymous">
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -30,26 +37,68 @@
         function loadJsFromCDN(js) {
             if (js === 'jquery.js') {
                 document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
-            } 
+            }
         }
     </script>
 </head>
 
-<body id="top">
+<body id="top" class="envelope-visible">
+    <noscript>
+        <div class="noscript-alert">
+            <strong>Atención:</strong> JavaScript está desactivado en tu navegador. Esta página requiere JavaScript para
+            funcionar correctamente (como la confirmación de asistencia).
+        </div>
+    </noscript>
+    <!-- Introductory Envelope Animation Overlay -->
+    <div class="fixed intro-overlay" id="intro-overlay">
+        <!-- Foliage corner ornaments -->
+        <div class="foliage-frame frame-top"><img src="img/slazzer-preview-8y1fu.png" alt="Decoración floral"></div>
+        <div class="foliage-frame frame-bottom"><img src="img/slazzer-preview-8y1fu.png" alt="Decoración floral"></div>
+        <div class="envelope-wrapper" id="envelope-wrapper" onclick="openInvitation()">
+            <div class="envelope linen-texture" id="main-envelope">
+                <!-- Back of the envelope (base) -->
+                <div class="envelope-base linen-texture"></div>
+                <!-- Letter Card (Tucked behind the front flaps) -->
+                <div class="letter-card">
+                    <div class="letter-card-inner"></div>
+                </div>
+                <!-- Front Side Flaps (Pocket) -->
+                <div class="envelope-side-left linen-texture"></div>
+                <div class="envelope-side-right linen-texture"></div>
+                <div class="envelope-bottom linen-texture"></div>
+                <!-- Pocket Decorative Gold Trim -->
+                <div class="internal-trim gold-foil"></div>
+                <!-- The Top Flap -->
+                <div class="envelope-flap linen-texture">
+                    <div class="flap-trim gold-foil"></div>
+                </div>
+                <!-- Wax Seal -->
+                <div class="wax-seal">
+                    <img class="wax-seal-bg" src="img/gold-wax-seal.png" alt="Sello de cera">
+                    <img class="wax-seal-logo" alt="Karla &amp; Jose" src="img/logo.png">
+                </div>
+            </div>
+            <div class="open-prompt" id="open-prompt">
+                <span>Una invitación te espera.<br> Haz click para abrir.</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section with Navigation -->
     <section class="hero">
         <!-- Navigation Bar -->
-        <section class="navigation">
-            <header >
+        <div class="navigation">
+            <header>
                 <div class="header-content">
-                    <div class="logo"><a href="#top"><img src="img/logo-blanco2.png" alt="Karla & Jose"></a></div>
+                    <div class="logo"><a href="#top"><img src="img/logo-blanco2.png" alt="Karla & Jose"
+                                loading="lazy"></a></div>
                     <div class="header-nav">
                         <nav>
                             <ul class="primary-nav">
-                                <li><a href="#intro">Nuestra Historia</a></li>
+                                <li><a href="#intro">Inicio</a></li>
                                 <li><a href="#events">Eventos & Protocolos</a></li>
-                                <li><a href="#map">Ubicación</a></li>
                                 <li><a href="#gallery">Galería</a></li>
+                                <li><a href="#map">Ubicación</a></li>
                             </ul>
                             <ul class="member-actions">
                                 <li><a href="#gifts">Mesa de regalos</a></li>
@@ -58,462 +107,315 @@
                         </nav>
                     </div>
                     <div class="navicon">
-                        <a class="nav-toggle" href="#"><span></span></a>
+                        <a class="nav-toggle" href="#" aria-label="Menú"><span></span></a>
                     </div>
                 </div>
             </header>
-        </section>
+        </div>
         <!-- Hero Content -->
         <div class="container">
             <div class="row">
                 <div class="col-md-10 col-md-offset-1">
                     <div class="hero-content text-center">
-                        <img src="img/logo2.png" alt="Karla & Jose">
+                        <h1 class="sr-only">Karla y Jose - Invitación de Boda</h1>
+                        <img src="img/logo2-dorado.png" alt="Karla & Jose">
                         <div id="countdown-hero" class="countdown-hero">
-                            <div><span id="d-hero">00</span><p>Días</p></div>
-                            <div><span id="h-hero">00</span><p>Horas</p></div>
-                            <div><span id="m-hero">00</span><p>Minutos</p></div>
-                            <div><span id="s-hero">00</span><p>Segundos</p></div>
+                            <div><span id="d-hero">00</span>
+                                <p>Días</p>
+                            </div>
+                            <div><span id="h-hero">00</span>
+                                <p>Horas</p>
+                            </div>
+                            <div><span id="m-hero">00</span>
+                                <p>Minutos</p>
+                            </div>
+                            <div><span id="s-hero">00</span>
+                                <p>Segundos</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-4 hidden-xs"></div>
-                <div class="col-sm-4 hidden-xs text-center">
-                    <a href="#rsvp" class="btn btn-fill btn-large rsvp-btn">Confirma Tu Asistencia</a>
-                </div>
                 <div class="col-sm-4 hidden-xs"></div>
             </div>
         </div>
         <div class="down-arrow floating-arrow"><a href="#intro"><i class="fa fa-angle-down"></i></a></div>
     </section>
 
-    <!-- Intro / Our Story -->
-    <section id="intro" class="section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-heart"></i>Nuestra Historia</h3>
+    <!-- Nuestra Historia — Premium Story Section -->
+    <section id="intro" class="story-section">
+        <div class="story-grid">
+
+            <!-- Imagen de la pareja -->
+            <div class="story-image-col">
+                <div class="story-image-frame">
+                    <img
+                        src="img/5.jpg"
+                        alt="Karla y Jose"
+                        class="story-image"
+                        loading="lazy"
+                    />
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-3 hidden-sm hidden-xs"><img src="img/6.png" class="wp1" alt="Jose"></div>
-                <div class="col-md-6">
+
+            <!-- Texto de la historia -->
+            <div class="story-text-col">
+
+                <!-- Título -->
+                <p class="story-eyebrow">Con Amor</p>
+                <h2 class="story-title">
+                    Nuestra<br/>Historia.
+                </h2>
+
+                <!-- Párrafos -->
+                <div class="story-paragraphs">
                     <p>
-                        Lo que comenzó como una amistad en el trabajo evolucionó en una relación llena de amor, 
-                        complicidad y sueños compartidos. Hoy, después de tanto tiempo juntos, queremos que todos nuestros 
-                        seres queridos sean testigos de este momento tan especial en nuestras vidas.
+                        Lo que comenzó como una amistad en el trabajo evolucionó en una relación llena de amor,
+                        complicidad y sueños compartidos. Hoy, después de tanto tiempo juntos, queremos que todos
+                        nuestros seres queridos sean testigos de este momento tan especial en nuestras vidas.
                     </p>
                     <p>
-                        Con mucha alegría te invitamos a ser parte de esta celebración donde uniremos nuestras vidas 
+                        Con mucha alegría te invitamos a ser parte de esta celebración donde uniremos nuestras vidas
                         y nuestras familias en una sola.
                     </p>
                 </div>
-                <div class="col-md-3 hidden-sm hidden-xs"><img src="img/7.png" class="wp2" alt="Karla"></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 hidden-md hidden-lg" style="text-align: center;">
-                    <div class="intro-images-mobile">
-                        <img src="img/6.png" class="wp8 intro-img-left" alt="Jose">
-                        <img src="img/7.png" class="wp9 intro-img-right" alt="Karla">
+
+                <!-- Divider dorado -->
+                <div class="story-gold-divider"></div>
+
+                <!-- Familias y Padrinos -->
+                <div class="story-families">
+                    <div class="story-family-item">
+                        <h4 class="story-family-title">Papás de Karla</h4>
+                        <p class="story-family-names">Maria Eduviges Guzman</p>
+                        <p class="story-family-names">Luis Arturo Sanchez</p>
+                    </div>
+                    <div class="story-family-item">
+                        <h4 class="story-family-title">Papás de Jose</h4>
+                        <p class="story-family-names">Maria del Carmen Rodriguez</p>
+                        <p class="story-family-names">Jose Martin Sanchez</p>
+                    </div>
+                    <div class="story-family-item">
+                        <h4 class="story-family-title">Padrinos</h4>
+                        <p class="story-family-names">Laura Sánchez Lozano</p>
+                        <p class="story-family-names">Salvador Martín Morales Castillo</p>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <!-- Parents & Godparents -->
-    <section class="parents section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-users"></i>Nuestras Familias</h3>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="family-box family-fade-left">
-                        <h5>Papás de Karla</h5>
-                        <p>Maria Eduviges Guzman</p>
-                        <p>Luis Arturo Sanchez</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="family-box family-fade-right">
-                        <h5>Papás de Jose</h5>
-                        <p>Maria del Carmen Rodriguez</p>
-                        <p>Jose Martin Sanchez</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="family-box family-fade-left">
-                        <h5>Padrinos</h5>
-                        <p>Laura Sánchez Lozano</p>
-                        <p>Salvador Martín Morales Castillo</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Events Timeline & Protocols -->
-    <section id="events" class="events section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h3 class="header text-center"><i class="fa fa-calendar-check-o"></i>Eventos</h3>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 col-sm-12 col-xs-12 leftcol">
-                    <div class="event-item">
-                        <h5>Ceremonia Religiosa</h5>
-                        <p class="time"><i class="fa fa-clock-o"></i> 6:00 PM - 18 de Diciembre</p>
-                        <p>
-                            <i class="fa fa-map-marker"></i> 
-                            <strong>Parroquia Nuestra Señora de Altagracia</strong><br>
-                            esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.
-                        </p>
-                        <p>
-                            El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.
-                        </p>
-                        <div class="event-buttons">
-                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia" class="btn btn-small btn-fill">
-                                <i class="fa fa-taxi"></i> Reservar Uber
-                            </a>
-                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')" class="btn btn-small btn-fill">
-                                <i class="fas fa-calendar-alt"></i> Añadir al Calendario
-                            </button>
-                            <a href="#map" class="btn btn-small btn-fill">
-                                <i class="fas fa-map-marked-alt"></i> Ver en el Mapa
-                            </a>
-                        </div>
+    <!-- Events Section -->
+    <section id="events" class="events-section">
+        <p class="events-eyebrow">La Celebración</p>
+        <h2 class="events-title">Eventos &amp; Protocolo</h2>
+        <div class="gold-divider-top"></div>
+
+        <div class="cards-grid">
+
+            <!-- Ceremony Card -->
+            <div class="event-card">
+                <div class="gold-corner tl"></div>
+                <div class="gold-corner tr"></div>
+                <div class="gold-corner bl"></div>
+                <div class="gold-corner br"></div>
+
+                <div class="card-image">
+                    <img src="img/Parroquia-Altagracia.png" alt="Parroquia Nuestra Señora de Altagracia"
+                        loading="lazy" />
+                    <div class="date-badge">
+                        <span class="month">Dic</span>
+                        <span class="day">18</span>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-sm-12 col-xs-12 rightcol">
-                    <div class="event-item">
-                        <h5>Recepción y Cena</h5>
-                        <p class="time"><i class="fa fa-clock-o"></i> 8:00 PM - 18 de Diciembre</p>
-                        <p>
-                            <i class="fa fa-map-marker"></i> 
-                            <strong>Jardin de Eventos Andira</strong><br>
-                            Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.
-                        </p>
-                        <p>
-                            Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.
-                        </p>
-                        <div class="event-buttons">
-                            <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira" class="btn btn-small btn-fill">
-                                <i class="fa fa-taxi"></i> Reservar Uber
-                            </a>
-                            <button onclick="agregarAlCalendario('Boda Karla & Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')" class="btn btn-small btn-fill">
-                                <i class="fas fa-calendar-alt"></i> Añadir al Calendario
-                            </button>
-                            <a href="#map" class="btn btn-small btn-fill">
-                                <i class="fas fa-map-marked-alt"></i> Ver en el Mapa
-                            </a>
-                        </div>
+                <div class="card-body">
+                    <div class="card-header-row">
+                        <h3 class="card-title">Ceremonia Religiosa</h3>
+                        <span class="card-icon"><i class="fa fa-church"></i></span>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h3 class="header text-center"><i class="fa fa-info-circle"></i>Protocolos</h3>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="dress-code-box">
-                        <h4><i class="fa fa-star"></i> Código de Vestimenta</h4>
-                        <p>
-                            <strong>Etiqueta:</strong> Formal / Cocktail Elegante (Winter Chic)<br>
-                            <i class="fa fa-female"></i><strong>Mujeres:</strong> Vestido largo elegante. Abrigo o chal formal opcional por el clima.<br>
-                            <i class="fa fa-male"></i><strong>Hombres:</strong> Traje oscuro con camisa formal; corbata o moño opcional según estilo.<br>
-                        </p>
-                        <p style="color: #2E8B57; font-style: italic; font-weight: bold;">
-                            "Recomendamos colores oscuros o tonos invernales y evitar tonos en blanco para no opacar a la novia."
-                        </p>
-                        <br>
-                        <p>                            
-                            <strong>Recomendación general:</strong> Evitar colores demasiado claros o muy veraniegos. Se sugiere traer un abrigo, pues el evento sera al aire libre..
-                        </p>
-                        <h4 style="margin-top: 20px;"><i class="fa fa-child"></i> Sobre los niños</h4>
-                        <p>
-                            Aunque amamos a los pequeños, nuestro gran día será una celebración sin niños (Salvo contados casos). 
-                            Apreciamos mucho su cariño y comprensión.
-                        </p>
-                        <h4 style="margin-top: 20px;"><i class="fa fa-glass"></i> Sobre el alcohol</h4>
-                        <p>
-                            Les invitamos a disfrutar con nosotros una noche especial y auténtica.
-                            Para que disfruten de su bebida favorita, les informamos que el evento no contará con barra de alcohol. 
-                            Por lo tanto, siéntanse libres de traer su propio alcohol para acompañar sus alimentos.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Venue Map -->
-    <section id="map" class="section-padding">
-        <div class="text-center">
-            <h3 class="header"><i class="fa fa-map-marker"></i>¿Cómo llegar?</h3>
-            <p style="padding-bottom: 20px;">Es más fácil de lo que crees</p>
-        </div>
-        <div id="map-canvas"></div>
-        <div id="map-content-wrapper" class="container pointer-events-none">
-            <div class="row">
-                <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
-                    <div class="text-center">
-                        <div id="btn-show-content" class="toggle-map-content pointer-events-auto">
-                            <i class="fa fa-info-circle"></i>&nbsp;&nbsp; Mostrar información
-                        </div>
-                    </div>
-                    <div id="map-content" class="pointer-events-auto">
-                        <div class="row map-row-equal-height">
-                            <!-- Ceremony -->
-                            <div class="col-md-6 map-location-column">
-                                <div class="map-location-content">
-                                    <h5><i class="fas fa-church"></i> Ceremonia</h5>
-                                    <p>Esquina con De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.</p>
-                                </div>
-                                <div class="map-location-buttons text-center">
-                                    <a class="btn btn-accent btn-small" id="btn-show-map-ceremony"
-                                       style="display: inline-block; width: 90%;"><i class="fas fa-map-marked-alt"></i>&nbsp;&nbsp;Ver en mapa</a>
-                                </div>
+                    <div class="card-divider"></div>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-clock-o"></i></span>
+                            <div>
+                                <p class="info-label">6:00 PM</p>
+                                <p class="info-sub">Favor de llegar 15 minutos antes</p>
                             </div>
-                            <!-- Reception -->
-                            <div class="col-md-6 map-location-column">
-                                <div class="map-location-content">
-                                    <h5><i class="fa fa-glass"></i> Recepción</h5>
-                                    <p>Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.</p>
-                                </div>
-                                <div class="map-location-buttons text-center">
-                                    <a class="btn btn-accent btn-small" id="btn-show-map-reception"
-                                       style="display: inline-block; width: 90%;"><i class="fas fa-map-marked-alt"></i>&nbsp;&nbsp;Ver en mapa</a>
-                                </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-map-marker"></i></span>
+                            <div>
+                                <p class="info-label">Parroquia Nuestra Señora de Altagracia</p>
+                                <p class="info-sub">esq. con De La Mancha, Real del Monte, Altagracia, 45130 Zapopan,
+                                    Jal.</p>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-star"></i></span>
+                            <div>
+                                <p class="info-sub">El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <div id="btn-directions" class="toggle-map-content pointer-events-auto">
-                            <i class="fa fa-location-arrow"></i>&nbsp;&nbsp; Cómo llegar
-                        </div>
+                    <div class="card-actions">
+                        <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia"
+                            class="btn-main" target="_blank" rel="noopener noreferrer">
+                            <i class="fa fa-taxi"></i>
+                            Reservar Uber
+                        </a>
+                        <a href="#map" class="btn-main" onclick="activarMapTab('map-ceremony')">
+                            <i class="fa fa-map-marker"></i>
+                            Ubicación
+                        </a>
+                        <button class="btn-icon" title="Añadir al Calendario"
+                            onclick="agregarAlCalendario('Boda Karla &amp; Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')">
+                            <i class="fa fa-calendar"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Accommodations -->
-    <section class="accommodations section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-bed"></i>¿Vienes de otro estado?<br>
-                        <span style="font-size: 0.8em; display: inline-block; margin-top: 10px;">¿Te gustaría quedarte cerca?</span>
-                    </h3>
-                    <p>
-                        Encuentra hospedaje en Tesistán a través de Airbnb
-                    </p>
+            <!-- Reception Card -->
+            <div class="event-card">
+                <div class="gold-corner tl"></div>
+                <div class="gold-corner tr"></div>
+                <div class="gold-corner bl"></div>
+                <div class="gold-corner br"></div>
+
+                <div class="card-image">
+                    <img src="img/Andira.png" alt="Jardín de Eventos Andira" loading="lazy" />
+                    <div class="date-badge">
+                        <span class="month">Dic</span>
+                        <span class="day">18</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="card-header-row">
+                        <h3 class="card-title">Recepción y Cena</h3>
+                        <span class="card-icon"><i class="fa fa-glass"></i></span>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-clock-o"></i></span>
+                            <div>
+                                <p class="info-label">8:00 PM</p>
+                                <p class="info-sub">Hora de coctel seguida de cena</p>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-map-marker"></i></span>
+                            <div>
+                                <p class="info-label">Jardín de Eventos Andira</p>
+                                <p class="info-sub">Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México,
+                                    Jal.</p>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-star"></i></span>
+                            <div>
+                                <p class="info-sub">Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira"
+                            class="btn-main" target="_blank" rel="noopener noreferrer">
+                            <i class="fa fa-taxi"></i>
+                            Reservar Uber
+                        </a>
+                        <a href="#map" class="btn-main" onclick="activarMapTab('map-reception')">
+                            <i class="fa fa-map-marker"></i>
+                            Ubicación
+                        </a>
+                        <button class="btn-icon" title="Añadir al Calendario"
+                            onclick="agregarAlCalendario('Boda Karla &amp; Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')">
+                            <i class="fa fa-calendar"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2 text-center">
-                    <a href="https://www.airbnb.mx/s/Tesistan--Mexico/homes?refinement_paths%5B%5D=%2Fhomes&checkin=2026-12-17&checkout=2026-12-19&adults=1" target="_blank" class="btn btn-fill btn-large">
-                        <i class="fa fa-bed"></i> Ver Opciones en Airbnb
-                    </a>
+
+            <!-- Protocols Card -->
+            <div class="event-card protocols-card">
+                <div class="gold-corner tl"></div>
+                <div class="gold-corner tr"></div>
+                <div class="gold-corner bl"></div>
+                <div class="gold-corner br"></div>
+
+                <div class="card-body">
+                    <div class="card-header-row">
+                        <h3 class="card-title">Código de Vestimenta</h3>
+                        <span class="card-icon"><i class="fa fa-info-circle"></i></span>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="info-list">
+                        <p class="info-sub"><strong>Etiqueta:</strong> Formal / Cocktail Elegante (Winter Chic)</p>
+                        <div class="info-row">                        
+                            <span class="info-icon"><i class="fa fa-female"></i></span>
+                            <div>
+                                <p class="info-label">Mujeres:</p>
+                                <p class="info-sub">Vestido largo elegante. Abrigo o chal formal opcional por el clima.</p>
+                            </div>
+                            <span class="info-icon"><i class="fa fa-male"></i></span>
+                            <div>
+                                <p class="info-label">Hombres:</p>
+                                <p class="info-sub">Traje oscuro con camisa formal; corbata o moño opcional.</p>                                
+                            </div>
+                        </div>
+                        <p class="info-sub protocols-note">"Recomendamos colores oscuros o tonos invernales y evitar tonos en blanco para no opacar a la novia."</p>
+                    </div>
                 </div>
             </div>
+
         </div>
     </section>
 
     <!-- Gallery -->
     <section id="gallery" class="gallery section-padding">
         <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-camera"></i>Galería de Recuerdos</h3>
-                </div>
-            </div>
-            
-            <!-- Subsection 1: Engagement -->
-            <div class="gallery-subsection">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h4 class="gallery-subsection-title">
-                            La Pedida de Mano
-                        </h4>
-                        <p class="gallery-subsection-desc">El momento en que nuestro sueño comenzó</p>
-                    </div>
-                </div>
-                <div class="row gallery-grid">
-                    <div class="col-md-4 col-sm-6">
-                        <a href="img/pedida1.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/pedida1.jpg" alt="Pedida de mano 1">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <a href="img/pedida2.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/pedida2.jpg" alt="Pedida de mano 2">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <a href="img/pedida3.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/pedida3.jpg" alt="Pedida de mano 3">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+            <!-- ── Bento Gallery Header ── -->
+            <div class="bento-gallery-header">
+                <span class="bento-gallery-eyebrow">Galería</span>
+                <h2 class="bento-gallery-headline">Un Vistazo a Nuestro Mundo</h2>
             </div>
 
-            <!-- Subsection 2: Save the Date -->
-            <div class="gallery-subsection">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h4 class="gallery-subsection-title">
-                            Save the Date
-                        </h4>
-                        <p class="gallery-subsection-desc">Contando los días para nuestro gran día</p>
-                    </div>
+            <!-- ── Bento Grid ── -->
+            <div class="bento-grid">
+                <!-- Large feature image (2 cols × 2 rows) -->
+                <div class="bento-item bento-large">
+                    <img src="img/pedida1.jpg" alt="Pedida de mano" loading="lazy">
                 </div>
-                <div class="row gallery-grid">
-                    <div class="col-md-3 col-sm-6">
-                        <a href="img/savedate1.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/savedate1.jpg" alt="Save the date 1">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="img/savedate2.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/savedate2.jpg" alt="Save the date 2">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="img/savedate3.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/savedate3.jpg" alt="Save the date 3">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="img/savedate4.jpg" class="gallery-item">
-                            <div class="img-wrap">
-                                <img src="img/savedate4.jpg" alt="Save the date 4">
-                                <div class="overlay">
-                                    <i class="fa fa-search"></i>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                <!-- Top-right small image -->
+                <div class="bento-item bento-small">
+                    <img src="img/pedida2.jpg" alt="Pedida de mano 2" loading="lazy">
+                </div>
+                <!-- Bottom-right small image -->
+                <div class="bento-item bento-small">
+                    <img src="img/pedida3.jpg" alt="Pedida de mano 3" loading="lazy">
+                </div>
+                <!-- Wide bottom tile: coming soon -->
+                <div class="bento-item bento-wide bento-coming-soon">
+                    <span class="bento-cs-label">Próximamente</span>
+                    <p class="bento-cs-text">Las fotos de nuestra boda aparecerán aquí muy pronto</p>
                 </div>
             </div>
-
-            <!-- Music Player (Centered) -->
-            <div class="gallery-subsection music-subsection">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h4 class="gallery-subsection-title">
-                            Nuestra Música
-                        </h4>
-                        <p class="gallery-subsection-desc">Asi suena nuestro Amor</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                        <div class="music-player">
-                            <div class="track-info">
-                                <p class="track-title" id="track-title">Sin canción</p>
-                                <p class="track-artist" id="track-artist">Selecciona una canción</p>
-                            </div>
-                            <div class="player-controls">
-                                <button class="control-btn" id="prev-btn" title="Anterior">
-                                    <i class="fa fa-step-backward"></i>
-                                </button>
-                                <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir">
-                                    <i class="fa fa-play"></i>
-                                </button>
-                                <button class="control-btn" id="next-btn" title="Siguiente">
-                                    <i class="fa fa-step-forward"></i>
-                                </button>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-fill"></div>
-                            </div>
-                            <div class="time-info">
-                                <span id="current-time">0:00</span>
-                                <span id="duration">0:00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Subsection 3: Our Wedding Day -->
-            <div class="gallery-subsection">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h4 class="gallery-subsection-title">
-                            El Día de Nuestra Boda
-                        </h4>
-                        <p class="gallery-subsection-desc">Pronto compartiremos los mejores momentos de nuestra celebración</p>
-                    </div>
-                </div>
-                <div class="row gallery-grid">
-                    <div class="col-md-12 text-center">
-                        <div class="coming-soon-box">
-                            <i class="fa fa-image"></i>
-                            <p>Las fotos de nuestro gran día estarán disponibles próximamente</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- ── /Bento Grid ── -->
 
             <!-- Subsection 4: Upload Your Photos -->
-            <div class="gallery-subsection upload-subsection" style="margin: 10px 0; padding-bottom: 0;">
+            <div class="gallery-subsection upload-subsection upload-subsection-compact">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="rsvp-panel">
                             <div class="rsvp-panel-header">
                                 <h4><i class="fa fa-upload"></i> Comparte tus Momentos</h4>
-                                <p class="rsvp-help">Comparte las fotos que tomaste durante la celebración. Nos encantaría verlas.</p>
+                                <p class="rsvp-help">Comparte las fotos que tomaste durante la celebración. Nos
+                                    encantaría verlas.</p>
                             </div>
 
                             <form id="photo-upload-form" class="rsvp-form" novalidate>
@@ -529,7 +431,8 @@
                                     <div class="col-xs-6">
                                         <div class="form-input-group">
                                             <i class="fa fa-key"></i>
-                                            <input type="text" id="gallery-group-code" placeholder="Código" autocomplete="off" required>
+                                            <input type="text" id="gallery-group-code" placeholder="Código"
+                                                autocomplete="off" required>
                                             <label class="form-label">Código de Grupo</label>
                                         </div>
                                     </div>
@@ -557,9 +460,9 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Carousel to display guest-uploaded photos -->
-                <div class="row" style="margin-top: 40px;">
+                <div class="row guest-photos-row">
                     <div class="col-md-12 text-center">
                         <h5 class="guest-photos-title">Fotos de nuestros invitados</h5>
                     </div>
@@ -571,7 +474,7 @@
                             <!-- Uploaded photos will appear here dynamically -->
                             <div class="carousel-track" id="carousel-track">
                                 <div class="no-photos-carousel">
-                                    <i class="fa fa-image" style="font-size: 60px; color: #d4af37; margin-bottom: 20px;"></i>
+                                    <i class="fa fa-image no-photos-icon"></i>
                                     <p>Aun no hay fotos subidas ¡Ayúdanos a llenar este álbum de memorias!</p>
                                 </div>
                             </div>
@@ -592,74 +495,152 @@
             </div>
 
         </div>
-        <audio id="audio-player" preload="metadata"></audio>
+    </section>
+    
+    <!-- Venue Map -->
+    <section id="map" class="section-padding">
+        <div class="map-section-container">
+
+            <!-- Section header -->
+            <div class="map-section-header">
+                <span class="map-eyebrow">Ubicación</span>
+                <h2 class="map-headline">¿Cómo llegar?</h2>
+            </div>
+
+            <!-- Widget — dark green background -->
+            <div class="event-map-widget">
+
+                <!-- Tabs -->
+                <div class="map-tabs">
+                    <button class="map-tab active" data-target="map-ceremony"
+                        data-label="Parroquia Nuestra Señora de Altagracia"
+                        data-sublabel="Av. De La Mancha 258, Col. Altagracia, Zapopan, Jal."
+                        data-btn-text="Abrir en Google Maps"
+                        data-btn-href="https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Se%C3%B1ora+de+Altagracia+Zapopan"
+                        data-icon-class="primary">
+                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 10h14v11H5z" />
+                            <path d="M5 10l7-5 7 5" />
+                            <path d="M9 21V15a3 3 0 0 1 6 0v6" />
+                        </svg>
+                        Ceremonia
+                    </button>
+                    <button class="map-tab" data-target="map-reception"
+                        data-label="Andira Jardín de Eventos"
+                        data-sublabel="Av. de las Calandrias 32, Villas de la Loma, Zapopan, Jal."
+                        data-btn-text="Abrir en Google Maps"
+                        data-btn-href="https://www.google.com/maps/search/?api=1&query=Andira+Jardin+de+Eventos+Zapopan+Calandrias"
+                        data-icon-class="accent">
+                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        Recepción
+                    </button>
+                </div>
+
+                <!-- Iframes -->
+                <div class="map-frame-wrap">
+                    <iframe id="map-ceremony" class="visible"
+                        title="Parroquia Nuestra Señora de Altagracia, Zapopan"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3731.16335618101!2d-103.3929933!3d20.744172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8428af9005555555%3A0x3c08c0cd647484cc!2sParroquia%20Nuestra%20Se%C3%B1ora%20de%20la%20Altagracia!5e0!3m2!1ses-419!2smx!4v1774281961308!5m2!1ses-419!2smx"
+                        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                    <iframe id="map-reception"
+                        title="Andira Jardín de Eventos, Zapopan"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3730.3181049848126!2d-103.4550886!3d20.778414800000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8428a7987fd0982f%3A0x7dfadc7da621ad98!2sAndira%20Jard%C3%ADn%20de%20Eventos!5e0!3m2!1ses-419!2smx!4v1774282040136!5m2!1ses-419!2smx"
+                        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <!-- Bottom bar -->
+                <div class="map-bar">
+                    <div class="map-info">
+                        <div class="map-icon" id="bar-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#004d08"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="map-label" id="bar-label">Parroquia Nuestra Señora de Altagracia</div>
+                            <div class="map-sublabel" id="bar-sublabel">Av. De La Mancha 258, Col. Altagracia, Zapopan, Jal.</div>
+                        </div>
+                    </div>
+                    <a class="map-btn-link" id="bar-btn"
+                        href="https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Se%C3%B1ora+de+Altagracia+Zapopan"
+                        target="_blank" rel="noopener noreferrer">
+                        Abrir en Google Maps
+                    </a>
+                </div>
+
+            </div>
+        </div>
     </section>
 
     <!-- Gift Registry -->
-    <section id="gifts" class="gifts section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3 class="header"><i class="fa fa-gift"></i>Mesa de Regalos</h3>
-                    <p>Tu presencia es el mejor regalo, pero si deseas ayudarnos...</p>
-                </div>
+    <section id="gifts" class="section-padding">
+        <div class="registry-section-container">
+
+            <!-- Section header -->
+            <div class="registry-section-header">
+                <span class="registry-eyebrow">Mesa de Regalos</span>
+                <h2 class="registry-headline">
+                    Tu presencia es nuestro mayor regalo
+                </h2>
+                <p class="registry-subtext">
+                    pero si deseas ayudarnos...<br>
+                    Hemos creado mesas de regalos para que nos ayudes a decorar nuestro hogar.
+                </p>
             </div>
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2 text-center">
-                    <p>
-                        Hemos creado mesas de regalos para que nos ayudes a decorar nuestro hogar.
-                    </p>
-                    <button class="circular-gift-btn" onclick="openGiftsModal()" title="Ver Mesas de Regalos">
-                        <i class="fa fa-gift"></i>
-                    </button>
-                    <p style="margin-top: 15px; color: #666; font-size: 14px;">Haz click en el regalo</p>
-                </div>
+
+            <!-- Registry cards -->
+            <div class="registry-grid">
+
+                <!-- Liverpool -->
+                <a class="registry-card" href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771"
+                    target="_blank" rel="noopener noreferrer">
+                    <div class="registry-card-icon">
+                        <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+                    </div>
+                    <div class="registry-card-body">
+                        <span class="registry-card-name">Liverpool</span>
+                        <span class="registry-card-sub">Hogar &amp; Estilo de Vida</span>
+                    </div>
+                    <span class="registry-card-cta">
+                        Ver Registro
+                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 8h10M9 4l4 4-4 4"/>
+                        </svg>
+                    </span>
+                </a>
+
+                <!-- Amazon -->
+                <a class="registry-card" href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT"
+                    target="_blank" rel="noopener noreferrer">
+                    <div class="registry-card-icon">
+                        <i class="fab fa-amazon" aria-hidden="true"></i>
+                    </div>
+                    <div class="registry-card-body">
+                        <span class="registry-card-name">Amazon</span>
+                        <span class="registry-card-sub">Lista de Bodas</span>
+                    </div>
+                    <span class="registry-card-cta">
+                        Ver Registro
+                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 8h10M9 4l4 4-4 4"/>
+                        </svg>
+                    </span>
+                </a>
+
             </div>
         </div>
     </section>
-
-    <!-- Gift Registry Modal -->
-    <div id="gifts-modal" class="gifts-modal">
-        <div class="gifts-modal-content">
-            <button class="gifts-modal-close" onclick="closeGiftsModal()">
-                <i class="fa fa-times"></i>
-            </button>
-            <h3 class="gifts-modal-title">
-                <i class="fa fa-gift"></i> Elige tu Mesa de Regalos
-            </h3>
-            <p class="gifts-modal-subtitle">Selecciona la tienda de tu preferencia</p>
-            
-            <div class="gifts-options">
-                <!-- Option 1: Liverpool -->
-                <div class="gift-option">
-                    <div class="gift-option-icon liverpool-color">
-                        <i class="fa fa-shopping-bag"></i>
-                    </div>
-                    <h4>Liverpool</h4>
-                    <p>Número de evento: <strong>51898771</strong></p>
-                    <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771" 
-                       target="_blank" 
-                       class="btn-gift-option liverpool-btn">
-                        <i class="fa fa-external-link"></i> Ir a Liverpool
-                    </a>
-                </div>
-
-                <!-- Option 2: Amazon -->
-                <div class="gift-option">
-                    <div class="gift-option-icon amazon-color">
-                        <i class="fab fa-amazon"></i>
-                    </div>
-                    <h4>Amazon</h4>
-                    <p>Lista de bodas</p>
-                    <a href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT" 
-                       target="_blank" 
-                       class="btn-gift-option amazon-btn">
-                        <i class="fa fa-external-link"></i> Ir a Amazon
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- RSVP Section -->
     <section id="rsvp" class="rsvp text-center section-padding">
@@ -668,10 +649,10 @@
                 <button type="button" class="gifts-modal-close" onclick="closeRsvpModal();">
                     <i class="fa fa-times"></i>
                 </button>
-                <img src="img/logo2.png" alt="Karla & Jose" style="margin: 0 auto 20px; max-width: 150px; display: block;">
+                <img src="img/logo2-dorado.png" alt="Karla & Jose" class="rsvp-modal-logo">
                 <h3 class="gifts-modal-title">¡Gracias!</h3>
                 <p class="gifts-modal-subtitle">Nos alegra mucho que confirmes tu asistencia en nuestro gran día.</p>
-                <div id="add-to-cal" style="margin-top: 20px;"></div>
+                <div id="add-to-cal" class="mt-20"></div>
             </div>
         </div>
 
@@ -686,7 +667,8 @@
                             <div class="rsvp-panel-header">
                                 <h4>Busca tu Invitación</h4>
                                 <p class="rsvp-help">Ingresa tus datos para confirmar tu asistencia</p>
-                                <p class="rsvp-deadline">CONFIRMA TU ASISTENCIA A MÁS TARDAR EL <strong>1° DE OCTUBRE</strong></p>
+                                <p class="rsvp-deadline">CONFIRMA TU ASISTENCIA A MÁS TARDAR EL <strong>1° DE
+                                        OCTUBRE</strong></p>
                             </div>
 
                             <form id="rsvp-search-form" class="rsvp-form" novalidate>
@@ -695,7 +677,8 @@
                                     <div class="col-md-12">
                                         <div class="form-input-group">
                                             <i class="fa fa-user"></i>
-                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre" required>
+                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre"
+                                                required>
                                             <label class="form-label">Nombre</label>
                                         </div>
                                     </div>
@@ -706,14 +689,16 @@
                                     <div class="col-xs-6">
                                         <div class="form-input-group">
                                             <i class="fa fa-envelope"></i>
-                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo" autocomplete="email" required>
+                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo"
+                                                autocomplete="email" required>
                                             <label class="form-label">Correo Electrónico</label>
                                         </div>
                                     </div>
                                     <div class="col-xs-6">
                                         <div class="form-input-group">
                                             <i class="fa fa-key"></i>
-                                            <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código" autocomplete="off" required>
+                                            <input type="text" name="groupCode" id="rsvp-group-code"
+                                                placeholder="Código" autocomplete="off" required>
                                             <label class="form-label">Código de Grupo</label>
                                         </div>
                                     </div>
@@ -746,13 +731,15 @@
                                 <!-- Guests will be loaded here dynamically -->
                             </div>
 
-                            <div class="row" style="margin-top: 30px;">
+                            <div class="row mt-30">
                                 <div class="col-md-12" id="confirm-alert-wrapper"></div>
                             </div>
 
-                            <div style="margin-top: 20px;">
-                                <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar Asistencias</button>
-                                <button id="back-to-search-btn" class="btn btn-green btn-large" style="margin-top: 15px;">Buscar Otra Invitación</button>
+                            <div class="mt-20">
+                                <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar
+                                    Asistencias</button>
+                                <button id="back-to-search-btn" class="btn btn-green btn-large" class="mt-15">Buscar
+                                    Otra Invitación</button>
                             </div>
                         </div>
                     </div>
@@ -769,8 +756,8 @@
                     <span class="to-top-wrapper"><a href="#top" class="to-top"><i class="fa fa-angle-up"></i></a></span>
                     <br>
                     <img src="img/logo2-blanco.png" alt="Karla & Jose" id="logo2-blanco">
-                    <p style="margin-top: 15px; font-size: 13px; color: #999;">
-                        Hecho con <span class="fa fa-heart" style="color: #d4af37;"></span> para Karla, de Jose.
+                    <p class="footer-credit">
+                        Hecho con <span class="fa fa-heart footer-heart"></span> para Karla, de Jose.
                     </p>
                 </div>
             </div>
@@ -782,9 +769,62 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <!-- Waypoints JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
-    <!-- Leaflet (OpenStreetMap) -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-    <script src="js/scripts.js?v=20251218"></script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MUSIC PLAYER — fixed bottom bar
+         ═══════════════════════════════════════════════════════════ -->
+    <audio id="audio-player" preload="metadata"></audio>
+
+    <div id="music-player-bar">
+
+        <!-- Track info -->
+        <div class="mpb-track">
+            <div class="mpb-track-icon">
+                <span class="material-symbols-outlined">music_note</span>
+            </div>
+            <div class="mpb-track-text">
+                <span id="track-title">Sin canción</span>
+                <span id="track-artist">Selecciona una canción</span>
+            </div>
+        </div>
+
+        <!-- Controls + progress -->
+        <div class="mpb-controls">
+            <div class="mpb-buttons">
+                <button class="mpb-btn mpb-btn-sec" id="prev-btn" title="Anterior">
+                    <span class="material-symbols-outlined">skip_previous</span>
+                </button>
+                <button class="mpb-btn mpb-btn-play" id="play-pause-btn" title="Reproducir">
+                    <span class="material-symbols-outlined">play_circle</span>
+                </button>
+                <button class="mpb-btn mpb-btn-sec" id="next-btn" title="Siguiente">
+                    <span class="material-symbols-outlined">skip_next</span>
+                </button>
+            </div>
+            <div class="mpb-progress-row">
+                <span id="current-time" class="mpb-time">0:00</span>
+                <div class="mpb-progress-track progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <span id="duration" class="mpb-time">0:00</span>
+            </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="mpb-volume">
+            <button class="mpb-btn" id="volume-btn" title="Silenciar">
+                <span id="vol-icon" class="material-symbols-outlined">volume_up</span>
+            </button>
+            <input type="range" id="volume-slider" class="mpb-vol-slider" min="0" max="100" value="80">
+        </div>
+
+    </div>
+    <!-- ═══════════════════════════════════════════════════════════
+         END MUSIC PLAYER
+         ═══════════════════════════════════════════════════════════ -->
+    <script src="js/scripts.js?v=20260320"></script>
 </body>
+
 </html>
