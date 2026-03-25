@@ -1,4 +1,4 @@
-/* ============================================
+﻿/* ============================================
    WEDDING WEBSITE - MAIN SCRIPTS
    ============================================ */
 
@@ -140,7 +140,7 @@ $(document).ready(function () {
         }
 
         if (!groupCode) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu cÃ³digo de grupo.'));
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
             return;
         }
 
@@ -176,7 +176,7 @@ $(document).ready(function () {
             })
             .fail(function (err) {
                 console.error('Search error:', err);
-                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexiÃ³n.</strong> Por favor intenta mÃ¡s tarde.'));
+                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
             })
             .always(function () {
                 $btn.prop('disabled', false);
@@ -229,7 +229,7 @@ $(document).ready(function () {
     // Confirm attendance
     $('#confirm-attendance-btn').on('click', function () {
         if (!window.__rsvpAuthToken) {
-            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la bÃºsqueda con tu cÃ³digo para continuar.'));
+            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
             return;
         }
 
@@ -278,7 +278,7 @@ $(document).ready(function () {
                     if (response.ticketId && window.__rsvpTicketPayload) {
                         window.__rsvpTicketPayload.ticketId = String(response.ticketId || '').trim();
                     }
-                    $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>Â¡Listo!</strong> ' + response.message));
+                    $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
 
                     // Show confirmation modal
                     setTimeout(function () {
@@ -649,7 +649,7 @@ function generateRsvpTicketPng(opts) {
 
             ctx.fillStyle = grayText;
             ctx.font = '600 30px Manrope, Arial, sans-serif';
-            ctx.fillText('ConfirmaciÃ³n de asistencia', 70, 210);
+            ctx.fillText('Confirmación de asistencia', 70, 210);
 
             ctx.fillStyle = green;
             ctx.font = '600 26px Manrope, Arial, sans-serif';
@@ -663,7 +663,7 @@ function generateRsvpTicketPng(opts) {
             ctx.fillText('Grupo:', 70, 310);
             ctx.fillStyle = grayText;
             ctx.font = '400 26px Manrope, Arial, sans-serif';
-            ctx.fillText(groupName || 'â€”', 160, 310);
+            ctx.fillText(groupName || '—', 160, 310);
 
             ctx.fillStyle = green;
             ctx.font = '600 26px Manrope, Arial, sans-serif';
@@ -675,21 +675,21 @@ function generateRsvpTicketPng(opts) {
             const lineHeight = 34;
             const maxLines = 8;
             for (let i = 0; i < Math.min(guests.length, maxLines); i++) {
-                ctx.fillText('â€¢ ' + guests[i], 90, startY + (i * lineHeight));
+                ctx.fillText('• ' + guests[i], 90, startY + (i * lineHeight));
             }
             if (guests.length > maxLines) {
                 ctx.fillStyle = '#777';
-                ctx.fillText('â€¦y ' + (guests.length - maxLines) + ' mÃ¡s', 90, startY + (maxLines * lineHeight));
+                ctx.fillText('…y ' + (guests.length - maxLines) + ' más', 90, startY + (maxLines * lineHeight));
             }
 
             ctx.fillStyle = '#777';
             ctx.font = '400 22px Manrope, Arial, sans-serif';
-            ctx.fillText('Presenta este boleto el dÃ­a del evento.', 70, 730);
+            ctx.fillText('Presenta este boleto el día del evento.', 70, 730);
 
             if (ticketId) {
                 ctx.fillStyle = '#777';
                 ctx.font = '600 22px Manrope, Arial, sans-serif';
-                ctx.fillText('CÃ³digo: ' + ticketId, 70, 765);
+                ctx.fillText('Código: ' + ticketId, 70, 765);
             }
 
             if (ticketId && qrImg) {
@@ -763,7 +763,7 @@ function updateCountdown() {
     const diff = weddingDate - now;
 
     if (diff <= 0) {
-        $('#countdown-hero').html('<p style="color: #2E8B57;">Â¡El gran dÃ­a ha llegado!</p>');
+        $('#countdown-hero').html('<p style="color: #2E8B57;">¡El gran día ha llegado!</p>');
         return;
     }
 
@@ -816,6 +816,10 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
 
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitulo}&dates=${inicio}/${fin}&location=${encodedUbicacion}"
                        target="_blank" rel="noopener noreferrer" class="registry-card">
+                        <div class="gold-corner tl"></div>
+                        <div class="gold-corner tr"></div>
+                        <div class="gold-corner bl"></div>
+                        <div class="gold-corner br"></div>
                         <div class="registry-card-icon">
                             <i class="fab fa-google" aria-hidden="true"></i>
                         </div>
@@ -832,6 +836,10 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                     </a>
 
                     <a href="${icsUrl}" download="evento-boda.ics" class="registry-card">
+                        <div class="gold-corner tl"></div>
+                        <div class="gold-corner tr"></div>
+                        <div class="gold-corner bl"></div>
+                        <div class="gold-corner br"></div>
                         <div class="registry-card-icon">
                             <i class="fab fa-apple" aria-hidden="true"></i>
                         </div>
@@ -872,7 +880,7 @@ function cerrarModalCalendario() {
     }
 }
 
-// Map Widget â€“ Tab Switching (Google Maps Embeds)
+// Map Widget – Tab Switching (Google Maps Embeds)
 (function () {
     const tabs = document.querySelectorAll('.map-tab');
     const allFrames = document.querySelectorAll('.map-frame-wrap iframe');
@@ -940,12 +948,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     lb.id = 'gallery-lightbox';
     lb.setAttribute('role', 'dialog');
     lb.setAttribute('aria-modal', 'true');
-    lb.setAttribute('aria-label', 'Visor de imÃ¡genes');
+    lb.setAttribute('aria-label', 'Visor de imágenes');
     lb.innerHTML = `
         <button class="lb-close" aria-label="Cerrar"><span class="material-symbols-outlined">close</span></button>
         <button class="lb-prev" aria-label="Anterior"><span class="material-symbols-outlined">chevron_left</span></button>
         <button class="lb-next" aria-label="Siguiente"><span class="material-symbols-outlined">chevron_right</span></button>
-        <div class="lb-img-wrap"><img class="lb-img" src="" alt="Imagen galerÃ­a"></div>
+        <div class="lb-img-wrap"><img class="lb-img" src="" alt="Imagen galería"></div>
         <div class="lb-counter"></div>
     `;
     document.body.appendChild(lb);
@@ -1235,7 +1243,7 @@ function startMusicAfterEnvelope() {
     const playPromise = audioPlayer.play();
     if (playPromise && typeof playPromise.catch === 'function') {
         playPromise.catch(function () {
-            // Autoplay blocked by browser â€” user can press play manually
+            // Autoplay blocked by browser — user can press play manually
             syncPlayPauseUI();
         });
     }
@@ -1338,7 +1346,7 @@ if (photoFileInput && fileInfo) {
             }
             fileInfo.style.color = '#2E8B57';
         } else {
-            fileInfo.textContent = 'NingÃºn archivo seleccionado';
+            fileInfo.textContent = 'Ningún archivo seleccionado';
             fileInfo.style.color = '#999';
         }
     });
@@ -1404,7 +1412,7 @@ async function validateImageFile(file) {
     const bytes = await readFirstBytes(file, 16);
     const looksLikeImage = hasJpegMagic(bytes) || hasPngMagic(bytes) || hasGifMagic(bytes) || hasWebpMagic(bytes);
     if (!looksLikeImage) {
-        return { ok: false, reason: 'El archivo no parece ser una imagen vÃ¡lida.' };
+        return { ok: false, reason: 'El archivo no parece ser una imagen válida.' };
     }
 
     return { ok: true };
@@ -1426,7 +1434,7 @@ if (photoUploadForm) {
         // Validate file size (max 5MB per photo)
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
-                alert(`La foto "${file.name}" es demasiado grande. TamaÃ±o mÃ¡ximo: 5MB`);
+                alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
                 return;
             }
         }
@@ -1514,7 +1522,7 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
                 throw new Error(msg);
             }
             if (!payload || payload.success !== true) {
-                const msg = (payload && payload.message) ? payload.message : 'Respuesta invÃ¡lida del servidor';
+                const msg = (payload && payload.message) ? payload.message : 'Respuesta inválida del servidor';
                 throw new Error(msg);
             }
 
@@ -1533,12 +1541,15 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
 
     // Reset form
     photoUploadForm.reset();
-    fileInfo.textContent = 'NingÃºn archivo seleccionado';
+    fileInfo.textContent = 'Ningún archivo seleccionado';
     fileInfo.style.color = '#999';
+
+    // Close the upload modal
+    closeUploadModal();
 
     // Show result
     if (uploadedCount > 0) {
-        alert(`Â¡Gracias por compartir tus fotos! ðŸ“¸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarÃ¡n en la galerÃ­a despuÃ©s de ser aprobadas.`);
+        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarán en la galería después de ser aprobadas.`);
 
         // Reload gallery after 2 seconds
         setTimeout(() => {
@@ -1565,102 +1576,164 @@ function fileToBase64(file) {
 }
 
 /**
- * Load guest photos from Google Drive and display in the carousel
+ * Load guest photos from Google Drive and display as a paginated polaroid grid
  */
-async function loadGuestPhotos() {
-    const carouselTrack = document.getElementById('carousel-track');
+const POLAROID_INITIAL = 6; // 3 columns × 2 rows
+let _allGuestPhotos = [];
+let _visibleCount = 0;
+let _polaroidGroupCode = '';
 
-    if (!carouselTrack) return;
+async function loadGuestPhotos() {
+    const grid = document.getElementById('polaroid-grid');
+    if (!grid) return;
 
     const groupCode = (galleryGroupCodeInput && String(galleryGroupCodeInput.value || '').trim()) ||
         (function () {
             try { return String(localStorage.getItem('galleryGroupCode') || '').trim(); } catch (_e) { return ''; }
         })();
 
-    if (!groupCode) {
-        return;
-    }
+    if (!groupCode) return;
+    _polaroidGroupCode = groupCode;
 
     try {
         const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados&groupCode=${encodeURIComponent(groupCode)}`);
         const data = await response.json();
 
         if (data.success && data.photos && data.photos.length > 0) {
-            // Remove "no photos" message
-            const noPhotosMsg = carouselTrack.querySelector('.no-photos-carousel');
-            if (noPhotosMsg) {
-                noPhotosMsg.remove();
-            }
+            _allGuestPhotos = data.photos;
+            _visibleCount = 0;
+            grid.innerHTML = '';
+            const old = document.getElementById('polaroid-more-wrap');
+            if (old) old.remove();
 
-            // Clear existing photos
-            carouselTrack.innerHTML = '';
-
-            // Add each photo to the carousel
-            data.photos.forEach((photo, index) => {
-                const fileId = String(photo.fileId || '').trim();
-
-                // Format date
-                const photoDate = new Date(photo.timestamp);
-                const dateStr = photoDate.toLocaleDateString('es-MX', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const slideHtml = `
-                    <div class="carousel-slide" data-index="${index}">
-                        <img data-file-id="${fileId}"
-                             src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" 
-                             alt="Foto de ${photo.guestName}" 
-                             loading="lazy"
-                             >
-                        <div class="photo-info">
-                            <p class="photo-author">
-                                <span class="material-symbols-outlined">person</span> ${photo.guestName}
-                            </p>
-                            <p class="photo-date">
-                                <span class="material-symbols-outlined">schedule</span> ${dateStr}
-                            </p>
-                        </div>
-                    </div>
-                `;
-                carouselTrack.insertAdjacentHTML('beforeend', slideHtml);
-            });
-
-            // Fetch private image bytes (base64) and set <img src="data:...">
-            const imgs = carouselTrack.querySelectorAll('img[data-file-id]');
-            for (const img of imgs) {
-                const fileId = img.getAttribute('data-file-id');
-                if (!fileId) continue;
-                try {
-                    const dataUrl = await fetchPrivateGalleryImageDataUrl(fileId, groupCode);
-                    img.src = dataUrl;
-                } catch (e) {
-                    console.error('Error cargando imagen privada:', e);
-                    if (img && img.parentElement) {
-                        img.parentElement.innerHTML = '<p style=color:#999>Error al cargar la imagen</p>';
-                    }
-                }
-            }
-
-            // Update counter
-            document.getElementById('total-photos').textContent = data.photos.length;
-            document.getElementById('carousel-counter').style.display = 'block';
-
-            // Show controls if there is more than one photo
-            if (data.photos.length > 1) {
-                document.getElementById('carousel-prev').style.display = 'flex';
-                document.getElementById('carousel-next').style.display = 'flex';
-            }
-
-            // Initialize carousel
-            initializeCarousel(data.photos.length);
+            await _renderPolaroidBatch(grid, POLAROID_INITIAL);
         }
     } catch (error) {
         console.error('Error cargando fotos:', error);
     }
+}
+
+async function _renderPolaroidBatch(grid, count) {
+    const batch = _allGuestPhotos.slice(_visibleCount, _visibleCount + count);
+    if (batch.length === 0) return;
+
+    const startIdx = _visibleCount;
+
+    batch.forEach((photo, i) => {
+        const index = startIdx + i;
+        const fileId = String(photo.fileId || '').trim();
+        const safeName = String(photo.guestName || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        const cardHtml = `
+            <div class="polaroid-card" data-file-id="${fileId}" data-index="${index}" onclick="openPhotoLightbox(this)">
+                <div class="polaroid-photo">
+                    <img data-file-id="${fileId}"
+                         src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+                         alt="Foto de ${safeName}"
+                         loading="lazy">
+                </div>
+                <div class="polaroid-caption">
+                    <p class="polaroid-author">${safeName}</p>
+                </div>
+            </div>
+        `;
+        grid.insertAdjacentHTML('beforeend', cardHtml);
+    });
+
+    _visibleCount += batch.length;
+
+    // Fetch images only for the newly added cards
+    const allCards = grid.querySelectorAll('.polaroid-card');
+    const newCards = Array.from(allCards).slice(startIdx);
+    for (const card of newCards) {
+        const img = card.querySelector('img[data-file-id]');
+        const fileId = img ? img.getAttribute('data-file-id') : null;
+        if (!fileId) continue;
+        try {
+            const dataUrl = await fetchPrivateGalleryImageDataUrl(fileId, _polaroidGroupCode);
+            img.src = dataUrl;
+        } catch (e) {
+            console.error('Error cargando imagen:', e);
+            const wrap = img.closest('.polaroid-photo');
+            if (wrap) wrap.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px';
+        }
+    }
+
+    _updatePolaroidButton(grid);
+}
+
+function _updatePolaroidButton(grid) {
+    let moreWrap = document.getElementById('polaroid-more-wrap');
+    const total = _allGuestPhotos.length;
+
+    if (total <= POLAROID_INITIAL) {
+        // Never need a button — remove if exists
+        if (moreWrap) moreWrap.remove();
+        return;
+    }
+
+    if (!moreWrap) {
+        moreWrap = document.createElement('div');
+        moreWrap.id = 'polaroid-more-wrap';
+        moreWrap.className = 'polaroid-more-wrap';
+        grid.insertAdjacentElement('afterend', moreWrap);
+    }
+
+    if (_visibleCount < total) {
+        // Still photos to show — "Ver más"
+        const remaining = total - _visibleCount;
+        moreWrap.innerHTML = `<button class="polaroid-more-btn" onclick="loadMorePolaroids()">
+            Ver más fotos (${remaining})
+            <span class="material-symbols-outlined">expand_more</span>
+        </button>`;
+    } else {
+        // All shown — "Ver menos"
+        moreWrap.innerHTML = `<button class="polaroid-more-btn" onclick="collapsePolaroids()">
+            Ver menos fotos
+            <span class="material-symbols-outlined">expand_less</span>
+        </button>`;
+    }
+}
+
+async function loadMorePolaroids() {
+    const grid = document.getElementById('polaroid-grid');
+    if (!grid) return;
+    // Load all remaining at once
+    const remaining = _allGuestPhotos.length - _visibleCount;
+    if (remaining > 0) await _renderPolaroidBatch(grid, remaining);
+}
+
+function collapsePolaroids() {
+    const grid = document.getElementById('polaroid-grid');
+    if (!grid) return;
+
+    // Remove all cards beyond the initial 6
+    const cards = grid.querySelectorAll('.polaroid-card');
+    Array.from(cards).slice(POLAROID_INITIAL).forEach(card => card.remove());
+    _visibleCount = POLAROID_INITIAL;
+
+    _updatePolaroidButton(grid);
+
+    // Scroll the grid into view
+    grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openPhotoLightbox(card) {
+    const img = card ? card.querySelector('img') : null;
+    if (!img || !img.src || img.src.includes('R0lGODlh')) return; // still loading placeholder
+    const lightbox = document.getElementById('photo-lightbox');
+    if (!lightbox) return;
+    document.getElementById('lightbox-img').src = img.src;
+    const author = card.querySelector('.polaroid-author');
+    document.getElementById('lightbox-caption').textContent = author ? author.textContent.trim() : '';
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePhotoLightbox() {
+    const lightbox = document.getElementById('photo-lightbox');
+    if (lightbox) lightbox.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 const __galleryImageCache = new Map();
@@ -1748,7 +1821,7 @@ function initializeCarousel(total) {
         }
     }
 
-    // Keyboard support (arrow keys) â€” only active while carousel is visible
+    // Keyboard support (arrow keys) — only active while carousel is visible
     let carouselKeyboardActive = false;
 
     if ('IntersectionObserver' in window) {
@@ -1920,6 +1993,22 @@ function closeRsvpModal() {
     }
 }
 
+function openUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
 // Close modal when clicking outside the content
 document.addEventListener('DOMContentLoaded', function () {
     const rsvpModal = document.getElementById('rsvp-modal');
@@ -1935,6 +2024,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeRsvpModal();
+            closeUploadModal();
+            closePhotoLightbox();
         }
     });
 });

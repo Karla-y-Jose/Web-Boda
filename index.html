@@ -407,89 +407,28 @@
             </div>
             <!-- ── /Bento Grid ── -->
 
+            <!-- Upload trigger — flush right under bento grid -->
+            <div class="upload-trigger-row">
+                <button class="upload-trigger-wrap" onclick="openUploadModal()">
+                    <p class="upload-eyebrow">Contribuye a nuestro álbum</p>
+                    <div class="upload-trigger-btn">
+                        <span class="upload-trigger-text">Sube tus Fotos</span>
+                        <span class="material-symbols-outlined">upload_file</span>
+                    </div>
+                </button>
+            </div>
+
             <!-- Subsection 4: Upload Your Photos -->
             <div class="gallery-subsection upload-subsection upload-subsection-compact">
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="rsvp-panel">
-                            <div class="rsvp-panel-header">
-                                <h4><i class="fa fa-upload"></i> Comparte tus Momentos</h4>
-                                <p class="rsvp-help">Comparte las fotos que tomaste durante la celebración. Nos
-                                    encantaría verlas.</p>
-                            </div>
 
-                            <form id="photo-upload-form" class="rsvp-form" novalidate>
-                                <!-- Primera fila: Nombre y Código lado a lado -->
-                                <div class="row rsvp-form-row">
-                                    <div class="col-xs-6">
-                                        <div class="form-input-group">
-                                            <i class="fa fa-user"></i>
-                                            <input type="text" id="guest-name" placeholder="Nombre" required>
-                                            <label class="form-label">Nombre</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6">
-                                        <div class="form-input-group">
-                                            <i class="fa fa-key"></i>
-                                            <input type="text" id="gallery-group-code" placeholder="Código"
-                                                autocomplete="off" required>
-                                            <label class="form-label">Código de Grupo</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Segunda fila: Selector de archivos -->
-                                <div class="row rsvp-form-row">
-                                    <div class="col-md-12">
-                                        <label for="photo-file" class="file-upload-label">
-                                            <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
-                                            <input type="file" id="photo-file" accept="image/*" multiple>
-                                        </label>
-                                        <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">
-                                            <i class="fa fa-upload"></i> Subir Fotos
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                <!-- Polaroid grid: guest-uploaded photos -->
+                <div class="guest-album-header">
+                    <span class="guest-album-eyebrow">Álbum Colaborativo</span>
                 </div>
-
-                <!-- Carousel to display guest-uploaded photos -->
-                <div class="row guest-photos-row">
-                    <div class="col-md-12 text-center">
-                        <h5 class="guest-photos-title">Fotos de nuestros invitados</h5>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-10 col-md-offset-1">
-                        <!-- Photo carousel -->
-                        <div class="guest-photos-carousel" id="guest-photos-carousel">
-                            <!-- Uploaded photos will appear here dynamically -->
-                            <div class="carousel-track" id="carousel-track">
-                                <div class="no-photos-carousel">
-                                    <i class="fa fa-image no-photos-icon"></i>
-                                    <p>Aun no hay fotos subidas ¡Ayúdanos a llenar este álbum de memorias!</p>
-                                </div>
-                            </div>
-                            <!-- Carousel controls -->
-                            <button class="carousel-control prev" id="carousel-prev" style="display: none;">
-                                <i class="fa fa-chevron-left"></i>
-                            </button>
-                            <button class="carousel-control next" id="carousel-next" style="display: none;">
-                                <i class="fa fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        <!-- Photo counter -->
-                        <div class="carousel-counter" id="carousel-counter" style="display: none;">
-                            <span id="current-photo">1</span> / <span id="total-photos">0</span>
-                        </div>
+                <div id="polaroid-grid" class="polaroid-grid">
+                    <div class="no-photos-msg">
+                        <span class="material-symbols-outlined no-photos-icon">photo_camera</span>
+                        <p>Aún no hay fotos. ¡Ayúdanos a llenar este álbum de memorias!</p>
                     </div>
                 </div>
             </div>
@@ -603,6 +542,10 @@
                 <!-- Liverpool -->
                 <a class="registry-card" href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771"
                     target="_blank" rel="noopener noreferrer">
+                    <div class="gold-corner tl"></div>
+                    <div class="gold-corner tr"></div>
+                    <div class="gold-corner bl"></div>
+                    <div class="gold-corner br"></div>
                     <div class="registry-card-icon">
                         <i class="fa fa-shopping-bag" aria-hidden="true"></i>
                     </div>
@@ -622,6 +565,10 @@
                 <!-- Amazon -->
                 <a class="registry-card" href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT"
                     target="_blank" rel="noopener noreferrer">
+                    <div class="gold-corner tl"></div>
+                    <div class="gold-corner tr"></div>
+                    <div class="gold-corner bl"></div>
+                    <div class="gold-corner br"></div>
                     <div class="registry-card-icon">
                         <i class="fab fa-amazon" aria-hidden="true"></i>
                     </div>
@@ -643,7 +590,7 @@
     </section>
 
     <!-- RSVP Section -->
-    <section id="rsvp" class="rsvp text-center section-padding">
+    <section id="rsvp" class="rsvp-section">
         <div id="rsvp-modal" class="gifts-modal" tabindex="-1" role="dialog">
             <div class="gifts-modal-content rsvp-modal-content">
                 <button type="button" class="gifts-modal-close" onclick="closeRsvpModal();">
@@ -656,94 +603,116 @@
             </div>
         </div>
 
-        <div class="container">
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <h3 class="header"><i class="fa fa-envelope"></i>Confirma tu asistencia</h3>
+        <div class="rsvp-section-container">
+            <div class="rsvp-section-header">
+                <p class="rsvp-eyebrow">Celebra con nosotros</p>
+                <h2 class="rsvp-title">Confirma tu Asistencia</h2>
+            </div>
 
-                    <!-- RSVP Search Form -->
-                    <div id="rsvp-search-container">
-                        <div class="rsvp-panel">
-                            <div class="rsvp-panel-header">
-                                <h4>Busca tu Invitación</h4>
-                                <p class="rsvp-help">Ingresa tus datos para confirmar tu asistencia</p>
-                                <p class="rsvp-deadline">CONFIRMA TU ASISTENCIA A MÁS TARDAR EL <strong>1° DE
-                                        OCTUBRE</strong></p>
+            <div class="rsvp-card-wrapper">
+
+                <!-- Search Form Card -->
+                <div id="rsvp-search-container">
+                    <div class="event-card rsvp-card">
+                        <div class="gold-corner tl"></div>
+                        <div class="gold-corner tr"></div>
+                        <div class="gold-corner bl"></div>
+                        <div class="gold-corner br"></div>
+                        <div class="card-body">
+                            <div class="card-header-row">
+                                <h3 class="card-title">Busca tu Invitación</h3>
+                                <span class="card-icon"><i class="fa fa-envelope-o"></i></span>
+                            </div>
+                            <div class="card-divider"></div>
+                            <div class="info-list">
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="fa fa-info-circle"></i></span>
+                                    <div>
+                                        <p class="info-sub">Ingresa tus datos para confirmar tu asistencia.</p>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="fa fa-calendar"></i></span>
+                                    <div>
+                                        <p class="info-sub">Confirma a más tardar el <strong class="rsvp-deadline-strong">1° de Octubre</strong>.</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <form id="rsvp-search-form" class="rsvp-form" novalidate>
-                                <!-- Primera fila: Nombre completo -->
                                 <div class="row rsvp-form-row">
                                     <div class="col-md-12">
                                         <div class="form-input-group">
                                             <i class="fa fa-user"></i>
-                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre"
-                                                required>
-                                            <label class="form-label">Nombre</label>
+                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre" required>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Segunda fila: Correo y Código -->
                                 <div class="row rsvp-form-row">
                                     <div class="col-xs-6">
                                         <div class="form-input-group">
                                             <i class="fa fa-envelope"></i>
-                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo"
-                                                autocomplete="email" required>
-                                            <label class="form-label">Correo Electrónico</label>
+                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo" autocomplete="email" required>
                                         </div>
                                     </div>
                                     <div class="col-xs-6">
                                         <div class="form-input-group">
                                             <i class="fa fa-key"></i>
-                                            <input type="text" name="groupCode" id="rsvp-group-code"
-                                                placeholder="Código" autocomplete="off" required>
-                                            <label class="form-label">Código de Grupo</label>
+                                            <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código" autocomplete="off" required>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="row">
                                     <div class="col-md-12" id="alert-wrapper"></div>
                                 </div>
-
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-fill btn-large rsvp-btn">
-                                            <i class="fa fa-search"></i> Buscar mi Invitación
-                                        </button>
-                                    </div>
+                                <div class="card-actions rsvp-card-actions">
+                                    <button type="submit" class="rsvp-submit-btn">
+                                        <i class="fa fa-search"></i> Buscar mi Invitación
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Guest List (hidden initially) -->
-                    <div id="rsvp-guest-list" style="display: none;">
-                        <div class="rsvp-panel">
-                            <div class="rsvp-panel-header">
-                                <h4>Grupo de Invitados: <span id="group-name"></span></h4>
-                                <p class="rsvp-help">Marca la asistencia de cada invitado:</p>
+                <!-- Guest List Card -->
+                <div id="rsvp-guest-list" style="display: none;">
+                    <div class="event-card rsvp-card">
+                        <div class="gold-corner tl"></div>
+                        <div class="gold-corner tr"></div>
+                        <div class="gold-corner bl"></div>
+                        <div class="gold-corner br"></div>
+                        <div class="card-body">
+                            <div class="card-header-row">
+                                <h3 class="card-title">Grupo: <span id="group-name"></span></h3>
+                                <span class="card-icon"><i class="fa fa-users"></i></span>
+                            </div>
+                            <div class="card-divider"></div>
+                            <div class="info-list">
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="fa fa-check-square-o"></i></span>
+                                    <div>
+                                        <p class="info-sub">Marca la asistencia de cada invitado en el grupo.</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div id="guests-container" class="guests-container">
-                                <!-- Guests will be loaded here dynamically -->
-                            </div>
+                            <div id="guests-container" class="guests-container"></div>
 
-                            <div class="row mt-30">
-                                <div class="col-md-12" id="confirm-alert-wrapper"></div>
-                            </div>
+                            <div id="confirm-alert-wrapper" class="mt-20"></div>
 
-                            <div class="mt-20">
-                                <button id="confirm-attendance-btn" class="btn btn-fill btn-large rsvp-btn">Confirmar
-                                    Asistencias</button>
-                                <button id="back-to-search-btn" class="btn btn-green btn-large" class="mt-15">Buscar
-                                    Otra Invitación</button>
+                            <div class="card-actions rsvp-card-actions mt-20">
+                                <button id="confirm-attendance-btn" class="rsvp-submit-btn">
+                                    <i class="fa fa-check"></i> Confirmar Asistencias
+                                </button>
+                                <button id="back-to-search-btn" class="rsvp-secondary-btn">
+                                    <i class="fa fa-arrow-left"></i> Buscar Otra
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -763,6 +732,91 @@
             </div>
         </div>
     </footer>
+
+    <!-- Upload Photos Modal -->
+    <div id="upload-modal" class="gifts-modal" tabindex="-1" role="dialog" onclick="if(event.target===this)closeUploadModal()">
+        <div class="gifts-modal-content upload-modal-content" onclick="event.stopPropagation()">
+            <!-- Close row — never scrolls -->
+            <div class="upload-modal-close-row">
+                <button type="button" class="gifts-modal-close" onclick="closeUploadModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable body -->
+            <div class="upload-modal-body">
+            <!-- Form card — event-card structure -->
+            <div class="upload-form-card">
+                <div class="gold-corner tl"></div>
+                <div class="gold-corner tr"></div>
+                <div class="gold-corner bl"></div>
+                <div class="gold-corner br"></div>
+
+                <div class="card-body">
+                    <div class="card-header-row">
+                        <h3 class="card-title">Comparte tus Fotos</h3>
+                        <span class="card-icon"><i class="fa fa-camera"></i></span>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-icon"><i class="fa fa-image"></i></span>
+                            <div>
+                                <p class="info-sub">Comparte los momentos que capturaste durante nuestra celebración. Máx. 5 MB por foto (JPG, PNG, WEBP, GIF).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="photo-upload-form" class="upload-form-inner" novalidate>
+                        <!-- Nombre y Código -->
+                        <div class="row rsvp-form-row">
+                            <div class="col-xs-6">
+                                <div class="form-input-group">
+                                    <i class="fa fa-user"></i>
+                                    <input type="text" id="guest-name" placeholder="Nombre" required>
+                                </div>
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="form-input-group">
+                                    <i class="fa fa-key"></i>
+                                    <input type="text" id="gallery-group-code" placeholder="Código"
+                                        autocomplete="off" required>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selector de archivos -->
+                        <div class="row rsvp-form-row">
+                            <div class="col-md-12">
+                                <label for="photo-file" class="file-upload-label">
+                                    <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
+                                    <input type="file" id="photo-file" accept="image/*" multiple>
+                                </label>
+                                <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
+                            </div>
+                        </div>
+
+                        <div class="card-actions upload-card-actions">
+                            <button type="submit" class="upload-submit-btn">
+                                <i class="fa fa-upload"></i> Subir Fotos
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </div><!-- /upload-modal-body -->
+        </div>
+    </div>
+
+    <!-- Photo lightbox -->
+    <div id="photo-lightbox" class="photo-lightbox" onclick="if(event.target===this)closePhotoLightbox()">
+        <button class="lightbox-close" onclick="closePhotoLightbox()">×</button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="">
+            <p id="lightbox-caption" class="lightbox-caption"></p>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" onerror="loadJsFromCDN('jquery.js')"></script>
