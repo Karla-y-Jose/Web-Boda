@@ -13,6 +13,7 @@ var _rsvpStore = (function () {
     var _email         = '';
     var _groupCode     = '';
     var _ticketPayload = null;
+    var _lastSubmit    = 0;
 
     return {
         getEndpoint:      function ()   { return _endpoint; },
@@ -26,13 +27,17 @@ var _rsvpStore = (function () {
         getTicketPayload: function ()   { return _ticketPayload; },
         setTicketPayload: function (v)  { _ticketPayload = v; },
         updateTicketId:   function (id) { if (_ticketPayload) _ticketPayload.ticketId = String(id || '').trim(); },
+        canSubmit:        function (ms) { return (Date.now() - _lastSubmit) >= (ms || 15000); },
+        recordSubmit:     function ()   { _lastSubmit = Date.now(); },
         clearSession:     function ()   { _token = ''; _email = ''; _groupCode = ''; },
         clearAll:         function ()   { _token = ''; _email = ''; _groupCode = ''; _ticketPayload = null; }
     };
 }());
 
 $(document).ready(function () {
-    // ========== Waypoints Animations ==================
+    // ========== Scroll-triggered entrance animations (Waypoints) ==========
+    // Elements with .wp1–.wp9 animate in when scrolled into view at 75% of the viewport.
+    // Left/right alternating pattern matches the two-column layout sections.
     $('.wp1').waypoint(function () {
         $('.wp1').addClass('animated fadeInLeft');
     }, {
@@ -79,7 +84,8 @@ $(document).ready(function () {
         offset: '75%'
     });
 
-    // ========== Family Cards Animations ==================
+    // ========== Family section cards: bidirectional scroll animation ==========
+    // Cards animate in when scrolling down and animate out when scrolling back up.
     $('.family-fade-left').waypoint(function (direction) {
         if (direction === 'down') {
             $(this.element).removeClass('animated-out').addClass('animated');
@@ -99,53 +105,49 @@ $(document).ready(function () {
         offset: '85%'
     });
 
-    // ========== Nav Transformicon ==================
-    /* When user clicks the Icon */
+    // ========== Mobile hamburger menu (Transformicon) ==========
+    // Toggles the animated icon state and slides the nav panel open/closed.
     $('.nav-toggle').click(function (e) {
         $(this).toggleClass('active');
         $('.header-nav').toggleClass('open');
         e.preventDefault();
     });
 
-    /* When user clicks a link */
+    // Also close the nav when the user taps any menu link
     $('.header-nav li a').click(function () {
         $('.nav-toggle').toggleClass('active');
         $('.header-nav').toggleClass('open');
     });
 
     // ========== Header BG Scroll ==================
-    $(function () {
-        $(window).scroll(function () {
-            const scroll = $(window).scrollTop();
+    // Pins the nav bar and collapses the header padding once the user scrolls past 20px
+    $(window).scroll(function () {
+        const scroll = $(window).scrollTop();
 
-            if (scroll >= 20) {
-                $('.navigation').addClass('fixed');
-                // add class to header to hide the pseudo-element keyline
-                $('header').addClass('scrolled').css({
-                    "padding": "35px 0"
-                });
-            } else {
-                $('.navigation').removeClass('fixed');
-                // remove the class so the keyline (header::after) is visible again
-                $('header').removeClass('scrolled').css({
-                    "padding": "50px 0"
-                });
-            }
-        });
+        if (scroll >= 20) {
+            $('.navigation').addClass('fixed');
+            // Collapse header padding and hide the decorative keyline (header::after)
+            $('header').addClass('scrolled').css({ "padding": "35px 0" });
+        } else {
+            $('.navigation').removeClass('fixed');
+            // Restore full header padding and show the decorative keyline
+            $('header').removeClass('scrolled').css({ "padding": "50px 0" });
+        }
     });
 
-    // ========== Countdown Timer ==========
+    // ========== Countdown timer ==========
+    // Tick immediately so the display is populated on page load, then update every second.
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Initialize the private RSVP session store
+    // Set the Apps Script endpoint for all RSVP requests
     _rsvpStore.setEndpoint('https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec');
-    _rsvpStore.setToken('');
-    _rsvpStore.setEmail('');
 
     let currentGuests = [];
 
-    // Search guest by name
+    // ========== RSVP: Step 1 – search for a guest by name, email and group code ==========
+    // On submit, clears any previous session and fires a GET request to the Apps Script.
+    // A successful response populates currentGuests and shows the attendance selection UI.
     $('#rsvp-search-form').on('submit', function (e) {
         e.preventDefault();
         const searchName = $('#rsvp-search-name').val().trim();
@@ -167,6 +169,13 @@ $(document).ready(function () {
             $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
             return;
         }
+
+        // Client-side rate limit: enforce a 15-second cooldown between search attempts
+        if (!_rsvpStore.canSubmit(15000)) {
+            $('#alert-wrapper').html(alert_markup('warning', 'Por favor espera unos segundos antes de intentar de nuevo.'));
+            return;
+        }
+        _rsvpStore.recordSubmit();
 
         // Reset previous auth state on a new search
         _rsvpStore.clearSession();
@@ -205,7 +214,8 @@ $(document).ready(function () {
             });
     });
 
-    // Show guest list
+    // ========== RSVP: Build guest list UI ==========
+    // Renders a radio-button card for each guest showing their current attendance state.
     function displayGuestList(groupName, guests) {
         $('#alert-wrapper').html('');
         $('#rsvp-search-container').hide();
@@ -248,7 +258,10 @@ $(document).ready(function () {
         $('#guests-container').html(guestsHtml);
     }
 
-    // Confirm attendance
+    // ========== RSVP: Step 2 – confirm attendance for each guest in the group ==========
+    // Collects the selected radio state for every guest item, builds an update list,
+    // stores a ticket payload, and sends the changes to the Apps Script via GET.
+    // On success, displays the confirmation modal with calendar and ticket buttons.
     $('#confirm-attendance-btn').on('click', function () {
         if (!_rsvpStore.getToken()) {
             $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
@@ -285,6 +298,7 @@ $(document).ready(function () {
 
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
+        _rsvpStore.recordSubmit();
 
         // Serialize updates to JSON and URL-encode for the query string
         const updatesJson = encodeURIComponent(JSON.stringify(updates));
@@ -347,7 +361,9 @@ $(document).ready(function () {
             });
     });
 
-    // Back to search
+    // ========== RSVP: Back button – reset to the search step ==========
+    // Hides the guest list, clears all form fields, and wipes the session store
+    // so the next search starts with a clean state.
     $('#back-to-search-btn').on('click', function () {
         $('#rsvp-guest-list').hide();
         $('#rsvp-search-container').show();
@@ -359,7 +375,8 @@ $(document).ready(function () {
         $('#confirm-alert-wrapper').html('');
     });
 
-    // Helper function for alert markup
+    // Builds a Bootstrap-style dismissible alert banner.
+    // alert_type: 'success' | 'danger' | 'warning' | 'info'
     function alert_markup(alert_type, msg) {
         return '<div class="alert alert-' + alert_type + ' alert-dismissible" role="alert" style="margin-bottom: 20px;">'
             + msg +
@@ -367,6 +384,9 @@ $(document).ready(function () {
     }
 });
 
+// Triggered by the "Descargar boleto(s)" button inside the RSVP confirmation modal.
+// Generates a PNG ticket via canvas, triggers a browser download, and e-mails
+// a copy to the guest's verified address.
 function downloadRsvpTickets() {
     const payload = _rsvpStore.getTicketPayload();
     const guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
@@ -414,6 +434,9 @@ function downloadRsvpTickets() {
         });
 }
 
+// POSTs the generated ticket PNG (as a base64 data URL) to the Apps Script so it
+// can e-mail a copy to the address that was verified during the RSVP search.
+// Uses jQuery $.ajax if available, falls back to the Fetch API otherwise.
 function sendTicketEmail(ticketDataUrl, filename) {
     const endpoint = _rsvpStore.getEndpoint();
     if (!endpoint || !_rsvpStore.getToken()) return Promise.reject(new Error('Missing RSVP auth token'));
@@ -460,12 +483,17 @@ function sendTicketEmail(ticketDataUrl, filename) {
         });
 }
 
+// Returns the Apps Script URL that verifies a ticket code.
+// Used as the QR code payload so event staff can scan and validate attendance.
 function buildVerifyTicketUrl(ticketId) {
     const endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return '';
     return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 }
 
+// Renders a QR code entirely in the browser using the bundled qrcode library.
+// sizePx: desired canvas dimension in pixels (default 240).
+// Returns a PNG data URL.
 function generateQrDataUrlLocal(text, sizePx) {
     if (typeof qrcode !== 'function') {
         throw new Error('QR library not loaded');
@@ -502,6 +530,9 @@ function generateQrDataUrlLocal(text, sizePx) {
     return canvas.toDataURL('image/png');
 }
 
+// Returns a Promise<string> that resolves to a QR PNG data URL for the ticket.
+// Tries to fetch a pre-rendered QR from the server first; falls back to
+// generating one locally if the server call fails.
 function getQrDataUrlForTicket(ticketId) {
     // Prefer server-side QR if available; fall back to local QR generation.
     return fetchTicketQrDataUrl(ticketId)
@@ -512,6 +543,8 @@ function getQrDataUrlForTicket(ticketId) {
         });
 }
 
+// Fetches a server-generated QR code PNG (as a data URL) from the Apps Script.
+// Rejects if the endpoint is unavailable or the server returns an error.
 function fetchTicketQrDataUrl(ticketId) {
     const endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return Promise.reject(new Error('RSVP endpoint not available'));
@@ -550,6 +583,8 @@ function fetchTicketQrDataUrl(ticketId) {
         });
 }
 
+// Resolves a relative asset path to an absolute URL using the page's base URI.
+// Ensures image loads work correctly regardless of the server's base path.
 function resolveAssetUrl(path) {
     try {
         return new URL(String(path || ''), document.baseURI || window.location.href).href;
@@ -558,6 +593,8 @@ function resolveAssetUrl(path) {
     }
 }
 
+// Loads an image from `src` into an HTMLImageElement for use on a canvas.
+// Returns a Promise that resolves with the loaded image or rejects on error.
 function loadImageForCanvas(src) {
     return new Promise(function (resolve, reject) {
         const img = new Image();
@@ -568,6 +605,9 @@ function loadImageForCanvas(src) {
     });
 }
 
+// Loads an image in a way that avoids canvas tainting from cross-origin sources.
+// Data/blob URLs are loaded directly; other URLs are fetched as a blob first
+// so that canvas.toDataURL() can be called without a SecurityError.
 function loadImageForCanvasUntainted(src) {
     const resolved = resolveAssetUrl(src);
 
@@ -605,13 +645,16 @@ function loadImageForCanvasUntainted(src) {
     return loadImageForCanvas(resolved);
 }
 
+// Returns the URL of the wedding logo that is already loaded in the page DOM.
+// Falls back to the known relative path when no img element is found.
 function getTicketLogoUrl() {
-    // Reuse the same logo URL that is already working in the page.
     const el = document.querySelector('img[src*="logo2.webp"]');
     if (el && el.src) return el.src;
     return 'img/logo2.webp';
 }
 
+// Draws an image centred and scaled to fit inside the (x, y, w, h) rectangle
+// using the "contain" strategy (no cropping, letter-boxing preserved).
 function drawImageContain(ctx, img, x, y, w, h) {
     const iw = img.naturalWidth || img.width;
     const ih = img.naturalHeight || img.height;
@@ -624,6 +667,9 @@ function drawImageContain(ctx, img, x, y, w, h) {
     ctx.drawImage(img, dx, dy, dw, dh);
 }
 
+// Generates the RSVP ticket as a 1400×800 PNG data URL drawn on an off-screen canvas.
+// opts: { groupName, guests[], ticketId, qrDataUrl }
+// Returns a Promise<string> (PNG data URL).
 function generateRsvpTicketPng(opts) {
     const groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
     const guests = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
@@ -768,6 +814,7 @@ function generateRsvpTicketPng(opts) {
     });
 }
 
+// Triggers a browser download for a data URL with the given filename.
 function downloadDataUrl(dataUrl, filename) {
     const a = document.createElement('a');
     a.href = dataUrl;
@@ -777,7 +824,9 @@ function downloadDataUrl(dataUrl, filename) {
     a.remove();
 }
 
-// Update Countdown Timer
+// Calculates the remaining time until the wedding and updates the hero countdown
+// elements (days, hours, minutes, seconds). Shows a celebration message when
+// the target date has passed.
 function updateCountdown() {
     const weddingDate = new Date('December 18, 2026 18:00:00').getTime();
     const now = new Date().getTime();
@@ -799,7 +848,9 @@ function updateCountdown() {
     document.getElementById('s-hero').textContent = String(seconds).padStart(2, '0');
 }
 
-// Add to Calendar Function
+// Opens a calendar-picker modal with Google Calendar and Apple Calendar (.ics) options.
+// titulo, ubicacion: plain-text event details
+// inicio, fin: date-time strings in YYYYMMDDTHHMMSS format (local time)
 function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     const encodedTitulo = encodeURIComponent(titulo);
     const encodedUbicacion = encodeURIComponent(ubicacion);
@@ -894,6 +945,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     };
 }
 
+// Removes the calendar picker modal injected by agregarAlCalendario().
 function cerrarModalCalendario() {
     const modal = document.getElementById('calendar-modal-container');
     if (modal) {
@@ -901,7 +953,11 @@ function cerrarModalCalendario() {
     }
 }
 
-// Map Widget – Tab Switching (Google Maps Embeds)
+// ============================================
+// MAP WIDGET – TAB SWITCHING
+// Clicking a .map-tab button swaps the visible Google Maps iframe
+// and updates the bottom info bar (label, sublabel, directions link).
+// ============================================
 (function () {
     const tabs = document.querySelectorAll('.map-tab');
     const allFrames = document.querySelectorAll('.map-frame-wrap iframe');
@@ -937,13 +993,18 @@ function cerrarModalCalendario() {
 }());
 
 
-// Activate a specific map tab programmatically (called from event card buttons)
+// Programmatically activates a map tab by its data-target value.
+// Called from the event-card "Ver mapa" buttons in the HTML.
 function activarMapTab(targetId) {
     const tab = document.querySelector('.map-tab[data-target="' + targetId + '"]');
     if (tab) tab.click();
 }
 
-// Smooth Scroll Link Handler
+// ============================================
+// SMOOTH SCROLL
+// Intercepts clicks on all anchor links (href="#...") and scrolls
+// to the target element smoothly instead of jumping.
+// ============================================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -1112,7 +1173,8 @@ function syncPlayPauseUI() {
     playPauseBtn.setAttribute('aria-label', playingNow ? 'Pausar' : 'Reproducir');
 }
 
-// Load a track
+// Loads a track's UI (title/artist) without fetching any audio bytes.
+// The src is assigned lazily when the user first requests playback.
 function loadTrack(index) {
     if (playlist.length === 0) {
         trackTitle.textContent = "Sin canciones";
@@ -1121,7 +1183,12 @@ function loadTrack(index) {
     }
 
     const track = playlist[index];
-    audioPlayer.src = track.src;
+    // Only update the src if the element already had one (i.e. playback was
+    // in progress) so we don't trigger a network fetch on page load.
+    if (audioPlayer.src && audioPlayer.src !== window.location.href) {
+        audioPlayer.src = track.src;
+        audioPlayer.load();
+    }
     trackTitle.textContent = track.title;
     trackArtist.textContent = track.artist;
 
@@ -1130,11 +1197,16 @@ function loadTrack(index) {
     currentTimeEl.textContent = '0:00';
 }
 
-// Play/pause toggle
+// Toggles playback state. Assigns the src on first play if not yet set.
+// Reads directly from the audio element rather than
+// a separate boolean flag so the state is always authoritative.
 function togglePlayPause() {
     if (playlist.length === 0) return;
 
-    // Don't rely on a separate boolean; use the audio element as source of truth.
+    // Lazy-load: assign src the first time the user presses play.
+    if (!audioPlayer.src || audioPlayer.src === window.location.href) {
+        audioPlayer.src = playlist[currentTrackIndex].src;
+    }
     if (!audioPlayer) return;
 
     if (audioPlayer.paused || audioPlayer.ended) {
@@ -1150,7 +1222,10 @@ function togglePlayPause() {
     }
 }
 
-// Previous track
+// Moves to the previous track, wrapping around to the last track at the start.
+// Pass autoplay=true to keep playing when called from a button during playback.
+// Moves to the previous track, wrapping around to the last track at the start.
+// Pass autoplay=true to keep playing when called from a button during playback.
 function previousTrack(autoplay) {
     if (playlist.length === 0) return;
 
@@ -1158,7 +1233,13 @@ function previousTrack(autoplay) {
     if (currentTrackIndex < 0) {
         currentTrackIndex = playlist.length - 1;
     }
-    loadTrack(currentTrackIndex);
+    // On skip, always assign src immediately (user intent is clear).
+    audioPlayer.src = playlist[currentTrackIndex].src;
+    audioPlayer.load();
+    trackTitle.textContent = playlist[currentTrackIndex].title;
+    trackArtist.textContent = playlist[currentTrackIndex].artist;
+    progressFill.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
     if (autoplay) {
         const playPromise = audioPlayer.play();
         if (playPromise && typeof playPromise.catch === 'function') {
@@ -1167,7 +1248,8 @@ function previousTrack(autoplay) {
     }
 }
 
-// Next track
+// Moves to the next track, wrapping around to the first track at the end.
+// Pass autoplay=true to keep playing when called from a button during playback.
 function nextTrack(autoplay) {
     if (playlist.length === 0) return;
 
@@ -1175,7 +1257,13 @@ function nextTrack(autoplay) {
     if (currentTrackIndex >= playlist.length) {
         currentTrackIndex = 0;
     }
-    loadTrack(currentTrackIndex);
+    // On skip or auto-advance, always assign src immediately.
+    audioPlayer.src = playlist[currentTrackIndex].src;
+    audioPlayer.load();
+    trackTitle.textContent = playlist[currentTrackIndex].title;
+    trackArtist.textContent = playlist[currentTrackIndex].artist;
+    progressFill.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
     if (autoplay) {
         const playPromise = audioPlayer.play();
         if (playPromise && typeof playPromise.catch === 'function') {
@@ -1184,14 +1272,16 @@ function nextTrack(autoplay) {
     }
 }
 
-// Format time
+// Formats a duration in seconds as M:SS (e.g. 183 → "3:03").
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Event Listeners
+// ============================================
+// MUSIC PLAYER – EVENT LISTENERS
+// ============================================
 if (audioPlayer) {
     // When metadata is available
     audioPlayer.addEventListener('loadedmetadata', function () {
@@ -1250,16 +1340,25 @@ if (nextBtn) {
     });
 }
 
-// Load the first track on startup (music will auto-play when the envelope opens)
+// Load the first track's UI on startup — no network request until user plays.
+// Volume is set here; actual playback starts after the envelope opens.
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
     // Set initial volume
     audioPlayer.volume = 0.8;
 }
 
-// Called from openInvitation() after the envelope finishes fading
+// Attempts to start music after the envelope animation completes.
+// Assigns the src lazily on first call, then plays.
+// May be silently blocked by the browser's autoplay policy; in that case
+// the guest can press the play button manually.
 function startMusicAfterEnvelope() {
     if (!audioPlayer || playlist.length === 0) return;
+
+    // Lazy-load: assign src the first time autoplay is attempted.
+    if (!audioPlayer.src || audioPlayer.src === window.location.href) {
+        audioPlayer.src = playlist[currentTrackIndex].src;
+    }
 
     const playPromise = audioPlayer.play();
     if (playPromise && typeof playPromise.catch === 'function') {
@@ -1271,11 +1370,16 @@ function startMusicAfterEnvelope() {
     syncPlayPauseUI();
 }
 
-// ========== Volume Control ==========
+// ============================================
+// VOLUME CONTROL
+// Syncs a range slider with the audio element volume.
+// The mute button toggles between 0 and the last non-zero volume.
+// ============================================
 const volumeSlider = document.getElementById('volume-slider');
 const volumeBtn = document.getElementById('volume-btn');
 let lastVolume = 0.8; // remember volume before muting
 
+// Updates the volume icon to reflect the current level (muted / low / high).
 function updateVolumeIcon() {
     if (!volumeBtn) return;
     const icon = document.getElementById('vol-icon');
@@ -1332,7 +1436,8 @@ document.addEventListener('visibilitychange', syncPlayPauseUI);
 window.addEventListener('pageshow', syncPlayPauseUI);
 window.addEventListener('focus', syncPlayPauseUI);
 
-// Fade-in the music bar on scroll
+// Fades the floating music player bar into view once the user scrolls 80 px down.
+// The listener removes itself after the bar has been shown once.
 (function () {
     var bar = document.getElementById('music-player-bar');
     if (!bar) return;
@@ -1347,7 +1452,9 @@ window.addEventListener('focus', syncPlayPauseUI);
     window.addEventListener('scroll', checkScroll, { passive: true });
 }());
 /* ============================================
-    PHOTO UPLOAD FUNCTIONALITY - GOOGLE APPS SCRIPT
+   PHOTO UPLOAD – GOOGLE APPS SCRIPT INTEGRATION
+   Handles client-side image validation (MIME type, magic bytes, file size)
+   and uploads guest photos to Google Drive via the Apps Script endpoint.
    ============================================ */
 
 const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwvd5pnEPMmxvC9Tk6D0VWf03JJTI2W4rTwUz4x4AsP5a5qMAvysuxg2WJShrJngnU/exec';
@@ -1485,9 +1592,8 @@ if (photoUploadForm) {
     });
 }
 
-/**
- * Upload photos to Google Drive via Google Apps Script
- */
+// Uploads one or more validated image files to Google Drive through the Apps Script.
+// Shows a spinner on the button during upload, then alerts the guest with the result.
 async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
     const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
     const originalBtnText = uploadBtn.innerHTML;
@@ -1550,7 +1656,7 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
             uploadedCount++;
 
         } catch (error) {
-            console.error(`âŒ Error subiendo ${file.name}:`, error);
+            console.error(`Error subiendo ${file.name}:`, error);
             failedCount++;
             failureMessages.push(`${file.name}: ${error && error.message ? error.message : 'Error desconocido'}`);
         }
@@ -1584,9 +1690,7 @@ async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
     }
 }
 
-/**
- * Convert file to base64
- */
+// Reads a File object and returns its contents as a base64 data URL.
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1596,14 +1700,18 @@ function fileToBase64(file) {
     });
 }
 
-/**
- * Load guest photos from Google Drive and display as a paginated polaroid grid
- */
-const POLAROID_INITIAL = 6; // 3 columns × 2 rows
+/* ============================================
+   GUEST PHOTO GALLERY – POLAROID GRID
+   Fetches approved guest photos from Google Drive and renders them as a
+   paginated polaroid grid. Photos load lazily after the page is ready.
+   ============================================ */
+const POLAROID_INITIAL = 6; // initial batch: 3 columns × 2 rows
 let _allGuestPhotos = [];
 let _visibleCount = 0;
 let _polaroidGroupCode = '';
 
+// Fetches the guest photo list from the Apps Script and renders the first batch.
+// Reads the group code from the gallery input or from localStorage as a fallback.
 async function loadGuestPhotos() {
     const grid = document.getElementById('polaroid-grid');
     if (!grid) return;
@@ -1724,6 +1832,7 @@ async function loadMorePolaroids() {
     if (remaining > 0) await _renderPolaroidBatch(grid, remaining);
 }
 
+// Collapses the polaroid grid back to the initial 6 cards and scrolls to the grid.
 function collapsePolaroids() {
     const grid = document.getElementById('polaroid-grid');
     if (!grid) return;
@@ -1739,6 +1848,8 @@ function collapsePolaroids() {
     grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Opens the full-size photo lightbox. Skips photos that are still showing
+// the placeholder (1x1 GIF) while their real image is being fetched.
 function openPhotoLightbox(card) {
     const img = card ? card.querySelector('img') : null;
     if (!img || !img.src || img.src.includes('R0lGODlh')) return; // still loading placeholder
@@ -1751,6 +1862,7 @@ function openPhotoLightbox(card) {
     document.body.style.overflow = 'hidden';
 }
 
+// Hides the photo lightbox and restores page scrolling.
 function closePhotoLightbox() {
     const lightbox = document.getElementById('photo-lightbox');
     if (lightbox) lightbox.classList.remove('active');
@@ -1759,6 +1871,8 @@ function closePhotoLightbox() {
 
 const __galleryImageCache = new Map();
 
+// Fetches a single guest photo from the Apps Script as a base64 data URL.
+// Results are cached in memory so each file is only downloaded once per session.
 async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
     const key = String(fileId || '').trim();
     if (__galleryImageCache.has(key)) return __galleryImageCache.get(key);
@@ -1784,6 +1898,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 1000);
 });
 
+// Hides the RSVP confirmation modal and restores page scrolling.
 function closeRsvpModal() {
     const modal = document.getElementById('rsvp-modal');
     if (modal) {
@@ -1792,6 +1907,7 @@ function closeRsvpModal() {
     }
 }
 
+// Shows the photo upload modal and locks page scrolling.
 function openUploadModal() {
     const modal = document.getElementById('upload-modal');
     if (modal) {
@@ -1800,6 +1916,7 @@ function openUploadModal() {
     }
 }
 
+// Hides the photo upload modal and restores page scrolling.
 function closeUploadModal() {
     const modal = document.getElementById('upload-modal');
     if (modal) {
@@ -1830,7 +1947,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* ============================================
-    ENVELOPE ANIMATION
+   ENVELOPE ANIMATION
+   Three-phase sequence:
+     1. Flap opens (CSS animation, 1.2 s)
+     2. Envelope fades out along with the overlay (1.8 s)
+     3. Overlay is hidden and music starts
    ============================================ */
 function openInvitation() {
     const envelope = document.getElementById('main-envelope');
