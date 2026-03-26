@@ -2,6 +2,35 @@
    WEDDING WEBSITE - MAIN SCRIPTS
    ============================================ */
 
+/* ============================================
+   PRIVATE RSVP SESSION STORE
+   Keeps auth token, session data, and ticket
+   payload out of the global window scope.
+   ============================================ */
+var _rsvpStore = (function () {
+    var _endpoint      = '';
+    var _token         = '';
+    var _email         = '';
+    var _groupCode     = '';
+    var _ticketPayload = null;
+
+    return {
+        getEndpoint:      function ()   { return _endpoint; },
+        setEndpoint:      function (v)  { _endpoint = String(v || ''); },
+        getToken:         function ()   { return _token; },
+        setToken:         function (v)  { _token = String(v || '').trim(); },
+        getEmail:         function ()   { return _email; },
+        setEmail:         function (v)  { _email = String(v || '').trim(); },
+        getGroupCode:     function ()   { return _groupCode; },
+        setGroupCode:     function (v)  { _groupCode = String(v || '').trim(); },
+        getTicketPayload: function ()   { return _ticketPayload; },
+        setTicketPayload: function (v)  { _ticketPayload = v; },
+        updateTicketId:   function (id) { if (_ticketPayload) _ticketPayload.ticketId = String(id || '').trim(); },
+        clearSession:     function ()   { _token = ''; _email = ''; _groupCode = ''; },
+        clearAll:         function ()   { _token = ''; _email = ''; _groupCode = ''; _ticketPayload = null; }
+    };
+}());
+
 $(document).ready(function () {
     // ========== Waypoints Animations ==================
     $('.wp1').waypoint(function () {
@@ -109,15 +138,10 @@ $(document).ready(function () {
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // ========== RSVP Form Handling (Google Sheets via Apps Script) ==========
-    const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec';
-
-    // Expose for global helpers (ticket QR generation lives outside document.ready)
-    window.__RSVP_ENDPOINT = RSVP_ENDPOINT;
-
-    // RSVP security state (email + pre-shared group code)
-    window.__rsvpAuthToken = '';
-    window.__rsvpVerifiedEmail = '';
+    // Initialize the private RSVP session store
+    _rsvpStore.setEndpoint('https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec');
+    _rsvpStore.setToken('');
+    _rsvpStore.setEmail('');
 
     let currentGuests = [];
 
@@ -145,16 +169,14 @@ $(document).ready(function () {
         }
 
         // Reset previous auth state on a new search
-        window.__rsvpAuthToken = '';
-        window.__rsvpVerifiedEmail = '';
-        window.__rsvpGroupCode = '';
+        _rsvpStore.clearSession();
 
         $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
 
         // Use GET with URL params to avoid CORS issues
         $.ajax({
-            url: RSVP_ENDPOINT + '?action=searchGuest&name=' + encodeURIComponent(searchName) + '&email=' + encodeURIComponent(email) + '&groupCode=' + encodeURIComponent(groupCode),
+            url: _rsvpStore.getEndpoint() + '?action=searchGuest&name=' + encodeURIComponent(searchName) + '&email=' + encodeURIComponent(email) + '&groupCode=' + encodeURIComponent(groupCode),
             method: 'GET',
             dataType: 'json'
         })
@@ -162,9 +184,9 @@ $(document).ready(function () {
                 if (response.result === 'success') {
                     // Backward-compatible path (if server returns guests directly)
                     if (response.token) {
-                        window.__rsvpAuthToken = String(response.token || '').trim();
-                        window.__rsvpVerifiedEmail = email;
-                        window.__rsvpGroupCode = groupCode;
+                        _rsvpStore.setToken(response.token);
+                        _rsvpStore.setEmail(email);
+                        _rsvpStore.setGroupCode(groupCode);
                     }
                     currentGuests = response.invitados;
                     displayGuestList(response.grupo, response.invitados);
@@ -228,7 +250,7 @@ $(document).ready(function () {
 
     // Confirm attendance
     $('#confirm-attendance-btn').on('click', function () {
-        if (!window.__rsvpAuthToken) {
+        if (!_rsvpStore.getToken()) {
             $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
             return;
         }
@@ -254,12 +276,12 @@ $(document).ready(function () {
         });
 
         // Store ticket payload for the confirmation modal.
-        window.__rsvpTicketPayload = {
+        _rsvpStore.setTicketPayload({
             groupName: groupName,
             confirmedGuests: confirmedGuestNames.filter(Boolean),
             generatedAt: Date.now(),
             ticketId: ''
-        };
+        });
 
         $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
         $btn.prop('disabled', true);
@@ -268,15 +290,15 @@ $(document).ready(function () {
         const updatesJson = encodeURIComponent(JSON.stringify(updates));
 
         $.ajax({
-            url: RSVP_ENDPOINT + '?action=updateAttendance&updates=' + updatesJson + '&token=' + encodeURIComponent(window.__rsvpAuthToken),
+            url: _rsvpStore.getEndpoint() + '?action=updateAttendance&updates=' + updatesJson + '&token=' + encodeURIComponent(_rsvpStore.getToken()),
             method: 'GET',
             dataType: 'json'
         })
             .done(function (response) {
                 if (response.result === 'success') {
                     // Attach server-issued ticket code (verifiable against the sheet)
-                    if (response.ticketId && window.__rsvpTicketPayload) {
-                        window.__rsvpTicketPayload.ticketId = String(response.ticketId || '').trim();
+                    if (response.ticketId && _rsvpStore.getTicketPayload()) {
+                        _rsvpStore.updateTicketId(response.ticketId);
                     }
                     $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
 
@@ -285,8 +307,9 @@ $(document).ready(function () {
                         $('#rsvp-modal').addClass('active');
 
                         // Add calendar buttons with the same behavior as the events section
-                        const tickets = (window.__rsvpTicketPayload && Array.isArray(window.__rsvpTicketPayload.confirmedGuests))
-                            ? window.__rsvpTicketPayload.confirmedGuests
+                        const _tp = _rsvpStore.getTicketPayload();
+                        const tickets = (_tp && Array.isArray(_tp.confirmedGuests))
+                            ? _tp.confirmedGuests
                             : [];
                         let ticketButtonHtml = '';
                         if (tickets.length > 0) {
@@ -295,7 +318,7 @@ $(document).ready(function () {
                             <button type="button"
                                     onclick="downloadRsvpTickets()"
                                     class="calendar-btn-modal">
-                                <i class="fa fa-ticket" style="font-size:14px;"></i> ${label}
+                                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">confirmation_number</span> ${label}
                             </button>
                         `;
                         }
@@ -304,7 +327,7 @@ $(document).ready(function () {
                         <div style="display: flex; flex-direction: row; gap: 0.75rem; margin-top: 20px;">
                             <button onclick="agregarAlCalendario('Boda Karla &amp; Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
                                     class="calendar-btn-modal">
-                                <i class="fab fa-google" style="font-size:14px;"></i> Añadir al Calendario
+                                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">calendar_month</span> Añadir al Calendario
                             </button>
                             ${ticketButtonHtml}
                         </div>
@@ -331,23 +354,21 @@ $(document).ready(function () {
         $('#rsvp-search-name').val('');
         $('#rsvp-search-email').val('');
         $('#rsvp-group-code').val('');
-        window.__rsvpAuthToken = '';
-        window.__rsvpVerifiedEmail = '';
-        window.__rsvpGroupCode = '';
+        _rsvpStore.clearAll();
         $('#alert-wrapper').html('');
         $('#confirm-alert-wrapper').html('');
     });
 
     // Helper function for alert markup
     function alert_markup(alert_type, msg) {
-        return '<div class="alert alert-' + alert_type + '" role="alert" style="margin-bottom: 20px;">'
+        return '<div class="alert alert-' + alert_type + ' alert-dismissible" role="alert" style="margin-bottom: 20px;">'
             + msg +
-            '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span>&times;</span></button></div>';
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
     }
 });
 
 function downloadRsvpTickets() {
-    const payload = window.__rsvpTicketPayload || null;
+    const payload = _rsvpStore.getTicketPayload();
     const guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
     const groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
     const ticketId = payload && typeof payload.ticketId === 'string' ? payload.ticketId : '';
@@ -379,7 +400,7 @@ function downloadRsvpTickets() {
             downloadDataUrl(dataUrl, filename);
 
             // Also email the ticket details to the verified email.
-            if (window.__rsvpAuthToken) {
+            if (_rsvpStore.getToken()) {
                 sendTicketEmail(dataUrl, filename).catch(function (e) {
                     console.error('Ticket email failed:', e);
                     // Keep UX minimal: only an alert so the user knows it didn't send.
@@ -394,12 +415,12 @@ function downloadRsvpTickets() {
 }
 
 function sendTicketEmail(ticketDataUrl, filename) {
-    const endpoint = window.__RSVP_ENDPOINT || '';
-    if (!endpoint || !window.__rsvpAuthToken) return Promise.reject(new Error('Missing RSVP auth token'));
+    const endpoint = _rsvpStore.getEndpoint();
+    if (!endpoint || !_rsvpStore.getToken()) return Promise.reject(new Error('Missing RSVP auth token'));
 
     const payload = {
         action: 'sendTicketEmail',
-        token: String(window.__rsvpAuthToken),
+        token: String(_rsvpStore.getToken()),
         ticketDataUrl: String(ticketDataUrl || ''),
         filename: String(filename || '')
     };
@@ -440,7 +461,7 @@ function sendTicketEmail(ticketDataUrl, filename) {
 }
 
 function buildVerifyTicketUrl(ticketId) {
-    const endpoint = window.__RSVP_ENDPOINT || '';
+    const endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return '';
     return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 }
@@ -492,7 +513,7 @@ function getQrDataUrlForTicket(ticketId) {
 }
 
 function fetchTicketQrDataUrl(ticketId) {
-    const endpoint = window.__RSVP_ENDPOINT || '';
+    const endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return Promise.reject(new Error('RSVP endpoint not available'));
 
     const url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
@@ -806,7 +827,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
         <div id="calendar-modal-overlay" class="gifts-modal active" style="z-index: 9998;">
             <div onclick="event.stopPropagation()" class="gifts-modal-content calendar-modal-content">
                 <button onclick="cerrarModalCalendario()" class="gifts-modal-close calendar-modal-close">
-                    <i class="fa fa-times"></i>
+                    <span class="material-symbols-outlined">close</span>
                 </button>
                 <span class="registry-eyebrow" style="display:block; text-align:center;">Añadir al Calendario</span>
                 <h3 class="calendar-modal-heading">Elige tu aplicación</h3>
@@ -821,7 +842,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                         <div class="gold-corner bl"></div>
                         <div class="gold-corner br"></div>
                         <div class="registry-card-icon">
-                            <i class="fab fa-google" aria-hidden="true"></i>
+                            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
                         </div>
                         <div class="registry-card-body">
                             <span class="registry-card-name">Google Calendar</span>
@@ -841,7 +862,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
                         <div class="gold-corner bl"></div>
                         <div class="gold-corner br"></div>
                         <div class="registry-card-icon">
-                            <i class="fab fa-apple" aria-hidden="true"></i>
+                            <span class="material-symbols-outlined" aria-hidden="true">phone_iphone</span>
                         </div>
                         <div class="registry-card-body">
                             <span class="registry-card-name">Apple Calendar</span>
@@ -1753,228 +1774,6 @@ async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
     const dataUrl = `data:${contentType};base64,${base64}`;
     __galleryImageCache.set(key, dataUrl);
     return dataUrl;
-}
-
-/**
- * Initialize carousel functionality
- */
-let currentSlide = 0;
-let totalSlides = 0;
-let carouselAutoplay = null;
-
-function initializeCarousel(total) {
-    totalSlides = total;
-    currentSlide = 0;
-    updateCarousel();
-
-    // Event listeners for the controls
-    const prevBtn = document.getElementById('carousel-prev');
-    const nextBtn = document.getElementById('carousel-next');
-
-    if (prevBtn && nextBtn) {
-        prevBtn.onclick = () => {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateCarousel();
-                resetAutoplay();
-            }
-        };
-
-        nextBtn.onclick = () => {
-            if (currentSlide < totalSlides - 1) {
-                currentSlide++;
-                updateCarousel();
-                resetAutoplay();
-            }
-        };
-    }
-
-    // Create indicators
-    createCarouselIndicators();
-
-    // Touch gesture support (swipe)
-    const carousel = document.getElementById('guest-photos-carousel');
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    carousel.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-
-    carousel.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-
-    function handleSwipe() {
-        if (touchEndX < touchStartX - 50 && currentSlide < totalSlides - 1) {
-            // Swipe left - next
-            currentSlide++;
-            updateCarousel();
-            resetAutoplay();
-        }
-        if (touchEndX > touchStartX + 50 && currentSlide > 0) {
-            // Swipe right - previous
-            currentSlide--;
-            updateCarousel();
-            resetAutoplay();
-        }
-    }
-
-    // Keyboard support (arrow keys) — only active while carousel is visible
-    let carouselKeyboardActive = false;
-
-    if ('IntersectionObserver' in window) {
-        const carouselObserver = new IntersectionObserver((entries) => {
-            carouselKeyboardActive = entries[0].isIntersecting;
-        }, { threshold: 0.2 });
-        carouselObserver.observe(carousel);
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (!carouselKeyboardActive) return;
-        if (e.key === 'ArrowLeft' && currentSlide > 0) {
-            currentSlide--;
-            updateCarousel();
-            resetAutoplay();
-        } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
-            currentSlide++;
-            updateCarousel();
-            resetAutoplay();
-        }
-    });
-
-    // Pause autoplay on hover
-    carousel.addEventListener('mouseenter', () => {
-        stopAutoplay();
-    });
-
-    carousel.addEventListener('mouseleave', () => {
-        startAutoplay();
-    });
-
-    // Start autoplay if there are photos
-    if (total > 1) {
-        startAutoplay();
-    }
-}
-
-function createCarouselIndicators() {
-    const carousel = document.getElementById('guest-photos-carousel');
-    let indicatorsContainer = carousel.querySelector('.carousel-indicators');
-
-    // Remove existing indicators if any
-    if (indicatorsContainer) {
-        indicatorsContainer.remove();
-    }
-
-    // Create new indicators
-    if (totalSlides > 1) {
-        indicatorsContainer = document.createElement('div');
-        indicatorsContainer.className = 'carousel-indicators';
-
-        for (let i = 0; i < totalSlides; i++) {
-            const indicator = document.createElement('div');
-            indicator.className = 'carousel-indicator';
-            if (i === 0) indicator.classList.add('active');
-            indicator.onclick = () => {
-                currentSlide = i;
-                updateCarousel();
-                resetAutoplay();
-            };
-            indicatorsContainer.appendChild(indicator);
-        }
-
-        carousel.appendChild(indicatorsContainer);
-    }
-}
-
-function startAutoplay() {
-    if (totalSlides <= 1) return;
-
-    stopAutoplay();
-    carouselAutoplay = setInterval(() => {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        updateCarousel();
-    }, 5000); // Change slide every 5 seconds
-}
-
-function stopAutoplay() {
-    if (carouselAutoplay) {
-        clearInterval(carouselAutoplay);
-        carouselAutoplay = null;
-    }
-}
-
-function resetAutoplay() {
-    stopAutoplay();
-    startAutoplay();
-}
-
-function updateCarousel() {
-    const track = document.getElementById('carousel-track');
-    const offset = -currentSlide * 100;
-    track.style.transform = `translateX(${offset}%)`;
-
-    // Actualizar contador
-    document.getElementById('current-photo').textContent = currentSlide + 1;
-
-    // Actualizar estado de botones
-    const prevBtn = document.getElementById('carousel-prev');
-    const nextBtn = document.getElementById('carousel-next');
-
-    if (prevBtn) {
-        prevBtn.style.opacity = currentSlide === 0 ? '0.3' : '1';
-        prevBtn.style.cursor = currentSlide === 0 ? 'not-allowed' : 'pointer';
-    }
-
-    if (nextBtn) {
-        nextBtn.style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
-        nextBtn.style.cursor = currentSlide === totalSlides - 1 ? 'not-allowed' : 'pointer';
-    }
-
-    // Actualizar indicadores
-    const indicators = document.querySelectorAll('.carousel-indicator');
-    indicators.forEach((indicator, index) => {
-        if (index === currentSlide) {
-            indicator.classList.add('active');
-        } else {
-            indicator.classList.remove('active');
-        }
-    });
-}
-
-/**
- * Convert a Google Drive URL to the correct format for displaying in an <img>
- */
-function convertDriveUrl(url) {
-    // If it's already in the correct format, return as-is
-    if (url.includes('googleusercontent.com')) {
-        return url;
-    }
-
-    // Extract the file ID from different Drive URL formats
-    let fileId = null;
-
-    // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
-    if (url.includes('drive.google.com/uc')) {
-        const match = url.match(/[?&]id=([^&]+)/);
-        if (match) fileId = match[1];
-    }
-
-    // Formato: https://drive.google.com/file/d/FILE_ID/view
-    if (url.includes('drive.google.com/file/d/')) {
-        const match = url.match(/\/file\/d\/([^\/]+)/);
-        if (match) fileId = match[1];
-    }
-
-    // If we found the ID, convert to an <img>-friendly format
-    if (fileId) {
-        return `https://lh3.googleusercontent.com/d/${fileId}=s4000?authuser=0`;
-    }
-
-    // If we couldn't convert it, return the original URL
-    return url;
 }
 
 // Load photos when the page loads

@@ -23,20 +23,18 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
-        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/v4-shims.css"
-        integrity="sha384-TTjEZR8VsD+LjNa98drkrTRYhdUEaS3gAGE7PGnx2qkePR3fZtnVNoAfxPNyf+IQ" crossorigin="anonymous">
+
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/normalize.min.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
 
     <script>
         function loadJsFromCDN(js) {
             if (js === 'jquery.js') {
-                document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+                var s = document.createElement('script');
+                s.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+                document.head.appendChild(s);
             }
         }
     </script>
@@ -115,7 +113,7 @@
         <!-- Hero Content -->
         <div class="container">
             <div class="row">
-                <div class="col-md-10 col-md-offset-1">
+                <div class="col-md-10 offset-md-1">
                     <div class="hero-content text-center">
                         <h1 class="sr-only">Karla y Jose - Invitación de Boda</h1>
                         <img src="img/logo2-dorado.png" alt="Karla & Jose">
@@ -137,11 +135,11 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-4 hidden-xs"></div>
-                <div class="col-sm-4 hidden-xs"></div>
+                <div class="col-sm-4 d-none d-sm-block"></div>
+                <div class="col-sm-4 d-none d-sm-block"></div>
             </div>
         </div>
-        <div class="down-arrow floating-arrow"><a href="#intro"><i class="fa fa-angle-down"></i></a></div>
+        <div class="down-arrow floating-arrow"><a href="#intro"><span class="material-symbols-outlined">keyboard_arrow_down</span></a></div>
     </section>
 
     <!-- Nuestra Historia — Premium Story Section -->
@@ -235,19 +233,19 @@
                 <div class="card-body">
                     <div class="card-header-row">
                         <h3 class="card-title">Ceremonia Religiosa</h3>
-                        <span class="card-icon"><i class="fa fa-church"></i></span>
+                        <span class="card-icon"><span class="material-symbols-outlined">church</span></span>
                     </div>
                     <div class="card-divider"></div>
                     <div class="info-list">
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-clock-o"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">schedule</span></span>
                             <div>
                                 <p class="info-label">6:00 PM</p>
                                 <p class="info-sub">Favor de llegar 15 minutos antes</p>
                             </div>
                         </div>
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-map-marker"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">location_on</span></span>
                             <div>
                                 <p class="info-label">Parroquia Nuestra Señora de Altagracia</p>
                                 <p class="info-sub">esq. con De La Mancha, Real del Monte, Altagracia, 45130 Zapopan,
@@ -255,7 +253,7 @@
                             </div>
                         </div>
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-star"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">star</span></span>
                             <div>
                                 <p class="info-sub">El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.</p>
                             </div>
@@ -264,16 +262,16 @@
                     <div class="card-actions">
                         <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia"
                             class="btn-main" target="_blank" rel="noopener noreferrer">
-                            <i class="fa fa-taxi"></i>
+                            <span class="material-symbols-outlined">local_taxi</span>
                             Reservar Uber
                         </a>
                         <a href="#map" class="btn-main" onclick="activarMapTab('map-ceremony')">
-                            <i class="fa fa-map-marker"></i>
+                            <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
                         <button class="btn-icon" title="Añadir al Calendario"
                             onclick="agregarAlCalendario('Boda Karla &amp; Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')">
-                            <i class="fa fa-calendar"></i>
+                            <span class="material-symbols-outlined">calendar_today</span>
                         </button>
                     </div>
                 </div>
@@ -297,19 +295,19 @@
                 <div class="card-body">
                     <div class="card-header-row">
                         <h3 class="card-title">Recepción y Cena</h3>
-                        <span class="card-icon"><i class="fa fa-glass"></i></span>
+                        <span class="card-icon"><span class="material-symbols-outlined">wine_bar</span></span>
                     </div>
                     <div class="card-divider"></div>
                     <div class="info-list">
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-clock-o"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">schedule</span></span>
                             <div>
                                 <p class="info-label">8:00 PM</p>
                                 <p class="info-sub">Hora de coctel seguida de cena</p>
                             </div>
                         </div>
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-map-marker"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">location_on</span></span>
                             <div>
                                 <p class="info-label">Jardín de Eventos Andira</p>
                                 <p class="info-sub">Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México,
@@ -317,7 +315,7 @@
                             </div>
                         </div>
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-star"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">star</span></span>
                             <div>
                                 <p class="info-sub">Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.</p>
                             </div>
@@ -326,16 +324,16 @@
                     <div class="card-actions">
                         <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira"
                             class="btn-main" target="_blank" rel="noopener noreferrer">
-                            <i class="fa fa-taxi"></i>
+                            <span class="material-symbols-outlined">local_taxi</span>
                             Reservar Uber
                         </a>
                         <a href="#map" class="btn-main" onclick="activarMapTab('map-reception')">
-                            <i class="fa fa-map-marker"></i>
+                            <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
                         <button class="btn-icon" title="Añadir al Calendario"
                             onclick="agregarAlCalendario('Boda Karla &amp; Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')">
-                            <i class="fa fa-calendar"></i>
+                            <span class="material-symbols-outlined">calendar_today</span>
                         </button>
                     </div>
                 </div>
@@ -351,18 +349,18 @@
                 <div class="card-body">
                     <div class="card-header-row">
                         <h3 class="card-title">Código de Vestimenta</h3>
-                        <span class="card-icon"><i class="fa fa-info-circle"></i></span>
+                        <span class="card-icon"><span class="material-symbols-outlined">info</span></span>
                     </div>
                     <div class="card-divider"></div>
                     <div class="info-list">
                         <p class="info-sub"><strong>Etiqueta:</strong> Formal / Cocktail Elegante (Winter Chic)</p>
                         <div class="info-row">                        
-                            <span class="info-icon"><i class="fa fa-female"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">woman</span></span>
                             <div>
                                 <p class="info-label">Mujeres:</p>
                                 <p class="info-sub">Vestido largo elegante. Abrigo o chal formal opcional por el clima.</p>
                             </div>
-                            <span class="info-icon"><i class="fa fa-male"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">man</span></span>
                             <div>
                                 <p class="info-label">Hombres:</p>
                                 <p class="info-sub">Traje oscuro con camisa formal; corbata o moño opcional.</p>                                
@@ -547,7 +545,7 @@
                     <div class="gold-corner bl"></div>
                     <div class="gold-corner br"></div>
                     <div class="registry-card-icon">
-                        <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+                        <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
                     </div>
                     <div class="registry-card-body">
                         <span class="registry-card-name">Liverpool</span>
@@ -570,7 +568,7 @@
                     <div class="gold-corner bl"></div>
                     <div class="gold-corner br"></div>
                     <div class="registry-card-icon">
-                        <i class="fab fa-amazon" aria-hidden="true"></i>
+                        <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
                     </div>
                     <div class="registry-card-body">
                         <span class="registry-card-name">Amazon</span>
@@ -594,7 +592,7 @@
         <div id="rsvp-modal" class="gifts-modal" tabindex="-1" role="dialog">
             <div class="gifts-modal-content rsvp-modal-content">
                 <button type="button" class="gifts-modal-close" onclick="closeRsvpModal();">
-                    <i class="fa fa-times"></i>
+                    <span class="material-symbols-outlined">close</span>
                 </button>
                 <img src="img/logo2-dorado.png" alt="Karla & Jose" class="rsvp-modal-logo">
                 <h3 class="gifts-modal-title">¡Gracias!</h3>
@@ -621,18 +619,18 @@
                         <div class="card-body">
                             <div class="card-header-row">
                                 <h3 class="card-title">Busca tu Invitación</h3>
-                                <span class="card-icon"><i class="fa fa-envelope-o"></i></span>
+                                <span class="card-icon"><span class="material-symbols-outlined">mail</span></span>
                             </div>
                             <div class="card-divider"></div>
                             <div class="info-list">
                                 <div class="info-row">
-                                    <span class="info-icon"><i class="fa fa-info-circle"></i></span>
+                                    <span class="info-icon"><span class="material-symbols-outlined">info</span></span>
                                     <div>
                                         <p class="info-sub">Ingresa tus datos para confirmar tu asistencia.</p>
                                     </div>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-icon"><i class="fa fa-calendar"></i></span>
+                                    <span class="info-icon"><span class="material-symbols-outlined">calendar_today</span></span>
                                     <div>
                                         <p class="info-sub">Confirma a más tardar el <strong class="rsvp-deadline-strong">1° de Octubre</strong>.</p>
                                     </div>
@@ -643,21 +641,21 @@
                                 <div class="row rsvp-form-row">
                                     <div class="col-md-12">
                                         <div class="form-input-group">
-                                            <i class="fa fa-user"></i>
+                                            <span class="material-symbols-outlined">person</span>
                                             <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row rsvp-form-row">
-                                    <div class="col-xs-6">
+                                    <div class="col-6">
                                         <div class="form-input-group">
-                                            <i class="fa fa-envelope"></i>
+                                            <span class="material-symbols-outlined">mail</span>
                                             <input type="email" name="email" id="rsvp-search-email" placeholder="Correo" autocomplete="email" required>
                                         </div>
                                     </div>
-                                    <div class="col-xs-6">
+                                    <div class="col-6">
                                         <div class="form-input-group">
-                                            <i class="fa fa-key"></i>
+                                            <span class="material-symbols-outlined">key</span>
                                             <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código" autocomplete="off" required>
                                         </div>
                                     </div>
@@ -667,7 +665,7 @@
                                 </div>
                                 <div class="card-actions rsvp-card-actions">
                                     <button type="submit" class="rsvp-submit-btn">
-                                        <i class="fa fa-search"></i> Buscar mi Invitación
+                                        <span class="material-symbols-outlined">search</span> Buscar mi Invitación
                                     </button>
                                 </div>
                             </form>
@@ -685,12 +683,12 @@
                         <div class="card-body">
                             <div class="card-header-row">
                                 <h3 class="card-title">Grupo: <span id="group-name"></span></h3>
-                                <span class="card-icon"><i class="fa fa-users"></i></span>
+                                <span class="card-icon"><span class="material-symbols-outlined">group</span></span>
                             </div>
                             <div class="card-divider"></div>
                             <div class="info-list">
                                 <div class="info-row">
-                                    <span class="info-icon"><i class="fa fa-check-square-o"></i></span>
+                                    <span class="info-icon"><span class="material-symbols-outlined">check_box</span></span>
                                     <div>
                                         <p class="info-sub">Marca la asistencia de cada invitado en el grupo.</p>
                                     </div>
@@ -703,10 +701,10 @@
 
                             <div class="card-actions rsvp-card-actions mt-20">
                                 <button id="confirm-attendance-btn" class="rsvp-submit-btn">
-                                    <i class="fa fa-check"></i> Confirmar Asistencias
+                                    <span class="material-symbols-outlined">check</span> Confirmar Asistencias
                                 </button>
                                 <button id="back-to-search-btn" class="rsvp-secondary-btn">
-                                    <i class="fa fa-arrow-left"></i> Buscar Otra
+                                    <span class="material-symbols-outlined">arrow_back</span> Buscar Otra
                                 </button>
                             </div>
                         </div>
@@ -722,11 +720,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 text-center content">
-                    <span class="to-top-wrapper"><a href="#top" class="to-top"><i class="fa fa-angle-up"></i></a></span>
+                    <span class="to-top-wrapper"><a href="#top" class="to-top"><span class="material-symbols-outlined">keyboard_arrow_up</span></a></span>
                     <br>
                     <img src="img/logo2-blanco.png" alt="Karla & Jose" id="logo2-blanco">
                     <p class="footer-credit">
-                        Hecho con <span class="fa fa-heart footer-heart"></span> para Karla, de Jose.
+                        Hecho con <span class="material-symbols-outlined footer-heart">favorite</span> para Karla, de Jose.
                     </p>
                 </div>
             </div>
@@ -739,7 +737,7 @@
             <!-- Close row — never scrolls -->
             <div class="upload-modal-close-row">
                 <button type="button" class="gifts-modal-close" onclick="closeUploadModal()">
-                    <i class="fa fa-times"></i>
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
@@ -755,12 +753,12 @@
                 <div class="card-body">
                     <div class="card-header-row">
                         <h3 class="card-title">Comparte tus Fotos</h3>
-                        <span class="card-icon"><i class="fa fa-camera"></i></span>
+                        <span class="card-icon"><span class="material-symbols-outlined">photo_camera</span></span>
                     </div>
                     <div class="card-divider"></div>
                     <div class="info-list">
                         <div class="info-row">
-                            <span class="info-icon"><i class="fa fa-image"></i></span>
+                            <span class="info-icon"><span class="material-symbols-outlined">image</span></span>
                             <div>
                                 <p class="info-sub">Comparte los momentos que capturaste durante nuestra celebración. Máx. 5 MB por foto (JPG, PNG, WEBP, GIF).</p>
                             </div>
@@ -770,15 +768,15 @@
                     <form id="photo-upload-form" class="upload-form-inner" novalidate>
                         <!-- Nombre y Código -->
                         <div class="row rsvp-form-row">
-                            <div class="col-xs-6">
+                            <div class="col-6">
                                 <div class="form-input-group">
-                                    <i class="fa fa-user"></i>
+                                    <span class="material-symbols-outlined">person</span>
                                     <input type="text" id="guest-name" placeholder="Nombre" required>
                                 </div>
                             </div>
-                            <div class="col-xs-6">
+                            <div class="col-6">
                                 <div class="form-input-group">
-                                    <i class="fa fa-key"></i>
+                                    <span class="material-symbols-outlined">key</span>
                                     <input type="text" id="gallery-group-code" placeholder="Código"
                                         autocomplete="off" required>
 
@@ -790,7 +788,7 @@
                         <div class="row rsvp-form-row">
                             <div class="col-md-12">
                                 <label for="photo-file" class="file-upload-label">
-                                    <i class="fa fa-file-image-o"></i> Seleccionar foto(s)
+                                    <span class="material-symbols-outlined">add_photo_alternate</span> Seleccionar foto(s)
                                     <input type="file" id="photo-file" accept="image/*" multiple>
                                 </label>
                                 <p class="file-info" id="file-info">Ningún archivo seleccionado</p>
@@ -799,7 +797,7 @@
 
                         <div class="card-actions upload-card-actions">
                             <button type="submit" class="upload-submit-btn">
-                                <i class="fa fa-upload"></i> Subir Fotos
+                                <span class="material-symbols-outlined">upload</span> Subir Fotos
                             </button>
                         </div>
                     </form>
@@ -820,7 +818,7 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" onerror="loadJsFromCDN('jquery.js')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Waypoints JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
 
