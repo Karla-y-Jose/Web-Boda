@@ -364,7 +364,7 @@ header nav ul.member-actions li:first-child a:hover:after {
 .hero {
     min-height: 850px;
     background: linear-gradient(135deg, rgba(15, 59, 46, 0.75) 0%, rgba(212, 175, 55, 0.15) 100%),
-        url('../img/1.jpg') center center;
+        url('../img/1.webp') center center;
     background-size: cover;
     background-attachment: fixed;
     background-position: center 20%;

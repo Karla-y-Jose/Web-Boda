@@ -607,9 +607,9 @@ function loadImageForCanvasUntainted(src) {
 
 function getTicketLogoUrl() {
     // Reuse the same logo URL that is already working in the page.
-    const el = document.querySelector('img[src*="logo2.png"]');
+    const el = document.querySelector('img[src*="logo2.webp"]');
     if (el && el.src) return el.src;
-    return 'img/logo2.png';
+    return 'img/logo2.webp';
 }
 
 function drawImageContain(ctx, img, x, y, w, h) {
@@ -756,8 +756,8 @@ function generateRsvpTicketPng(opts) {
 
     // Use the resolved DOM URL first to avoid path issues.
     const logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
-        .catch(function () { return loadImageForCanvasUntainted('img/logo2.png'); })
-        .catch(function () { return loadImageForCanvasUntainted('./img/logo2.png'); })
+        .catch(function () { return loadImageForCanvasUntainted('img/logo2.webp'); })
+        .catch(function () { return loadImageForCanvasUntainted('./img/logo2.webp'); })
         .catch(function () { return null; });
     const qrPromise = qrDataUrl ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; }) : Promise.resolve(null);
 
