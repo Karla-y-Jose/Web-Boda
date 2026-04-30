@@ -35,76 +35,6 @@ var _rsvpStore = (function () {
 }());
 
 $(document).ready(function () {
-    // ========== Scroll-triggered entrance animations (Waypoints) ==========
-    // Elements with .wp1–.wp9 animate in when scrolled into view at 75% of the viewport.
-    // Left/right alternating pattern matches the two-column layout sections.
-    $('.wp1').waypoint(function () {
-        $('.wp1').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp2').waypoint(function () {
-        $('.wp2').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp3').waypoint(function () {
-        $('.wp3').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp4').waypoint(function () {
-        $('.wp4').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp5').waypoint(function () {
-        $('.wp5').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp6').waypoint(function () {
-        $('.wp6').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-    $('.wp7').waypoint(function () {
-        $('.wp7').addClass('animated fadeInUp');
-    }, {
-        offset: '75%'
-    });
-    $('.wp8').waypoint(function () {
-        $('.wp8').addClass('animated fadeInLeft');
-    }, {
-        offset: '75%'
-    });
-    $('.wp9').waypoint(function () {
-        $('.wp9').addClass('animated fadeInRight');
-    }, {
-        offset: '75%'
-    });
-
-    // ========== Family section cards: bidirectional scroll animation ==========
-    // Cards animate in when scrolling down and animate out when scrolling back up.
-    $('.family-fade-left').waypoint(function (direction) {
-        if (direction === 'down') {
-            $(this.element).removeClass('animated-out').addClass('animated');
-        } else {
-            $(this.element).removeClass('animated').addClass('animated-out');
-        }
-    }, {
-        offset: '85%'
-    });
-    $('.family-fade-right').waypoint(function (direction) {
-        if (direction === 'down') {
-            $(this.element).removeClass('animated-out').addClass('animated');
-        } else {
-            $(this.element).removeClass('animated').addClass('animated-out');
-        }
-    }, {
-        offset: '85%'
-    });
-
     // ========== Mobile hamburger menu (Transformicon) ==========
     // Toggles the animated icon state and slides the nav panel open/closed.
     $('.nav-toggle').click(function (e) {
@@ -140,7 +70,11 @@ $(document).ready(function () {
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Set the Apps Script endpoint for all RSVP requests
+    // Apps Script endpoint for all RSVP requests.
+    // NOTE: This URL is visible in the client bundle. Real protection lives server-side:
+    // every action that mutates data (updateAttendance, sendTicketEmail) requires a
+    // short-lived token issued by the server on a successful searchGuest call.
+    // Read-only actions (searchGuest, getPhotos) are intentionally public.
     _rsvpStore.setEndpoint('https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec');
 
     let currentGuests = [];
@@ -934,6 +868,7 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
 
     const modal = document.createElement('div');
     modal.id = 'calendar-modal-container';
+    modal._icsUrl = icsUrl; // store so cerrarModalCalendario can revoke it
     modal.innerHTML = opciones;
     document.body.appendChild(modal);
 
@@ -945,10 +880,14 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
     };
 }
 
-// Removes the calendar picker modal injected by agregarAlCalendario().
+// Removes the calendar picker modal injected by agregarAlCalendario() and
+// revokes the ICS Blob URL to avoid a memory leak.
 function cerrarModalCalendario() {
     const modal = document.getElementById('calendar-modal-container');
     if (modal) {
+        if (modal._icsUrl) {
+            try { URL.revokeObjectURL(modal._icsUrl); } catch (_e) { }
+        }
         modal.remove();
     }
 }
@@ -1004,10 +943,17 @@ function activarMapTab(targetId) {
 // SMOOTH SCROLL
 // Intercepts clicks on all anchor links (href="#...") and scrolls
 // to the target element smoothly instead of jumping.
+// Links with [data-map-tab] also activate the correct map tab before
+// scrolling, so the tab state is set before the viewport moves.
 // ============================================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
+        // If the link carries a map-tab target, activate it first.
+        const mapTab = this.getAttribute('data-map-tab');
+        if (mapTab) {
+            activarMapTab(mapTab);
+        }
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
@@ -1201,13 +1147,12 @@ function loadTrack(index) {
 // Reads directly from the audio element rather than
 // a separate boolean flag so the state is always authoritative.
 function togglePlayPause() {
-    if (playlist.length === 0) return;
+    if (!audioPlayer || playlist.length === 0) return;
 
     // Lazy-load: assign src the first time the user presses play.
     if (!audioPlayer.src || audioPlayer.src === window.location.href) {
         audioPlayer.src = playlist[currentTrackIndex].src;
     }
-    if (!audioPlayer) return;
 
     if (audioPlayer.paused || audioPlayer.ended) {
         const playPromise = audioPlayer.play();
@@ -1222,18 +1167,12 @@ function togglePlayPause() {
     }
 }
 
-// Moves to the previous track, wrapping around to the last track at the start.
-// Pass autoplay=true to keep playing when called from a button during playback.
-// Moves to the previous track, wrapping around to the last track at the start.
-// Pass autoplay=true to keep playing when called from a button during playback.
-function previousTrack(autoplay) {
+// Internal helper: loads a track by index and optionally starts playback.
+// Centralises the repeated src/load/UI update pattern used by previousTrack,
+// nextTrack, and any future callers.
+function _switchTrack(index, autoplay) {
     if (playlist.length === 0) return;
-
-    currentTrackIndex--;
-    if (currentTrackIndex < 0) {
-        currentTrackIndex = playlist.length - 1;
-    }
-    // On skip, always assign src immediately (user intent is clear).
+    currentTrackIndex = index;
     audioPlayer.src = playlist[currentTrackIndex].src;
     audioPlayer.load();
     trackTitle.textContent = playlist[currentTrackIndex].title;
@@ -1248,28 +1187,20 @@ function previousTrack(autoplay) {
     }
 }
 
+// Moves to the previous track, wrapping around to the last track at the start.
+// Pass autoplay=true to keep playing when called from a button during playback.
+function previousTrack(autoplay) {
+    if (playlist.length === 0) return;
+    const prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    _switchTrack(prevIndex, autoplay);
+}
+
 // Moves to the next track, wrapping around to the first track at the end.
 // Pass autoplay=true to keep playing when called from a button during playback.
 function nextTrack(autoplay) {
     if (playlist.length === 0) return;
-
-    currentTrackIndex++;
-    if (currentTrackIndex >= playlist.length) {
-        currentTrackIndex = 0;
-    }
-    // On skip or auto-advance, always assign src immediately.
-    audioPlayer.src = playlist[currentTrackIndex].src;
-    audioPlayer.load();
-    trackTitle.textContent = playlist[currentTrackIndex].title;
-    trackArtist.textContent = playlist[currentTrackIndex].artist;
-    progressFill.style.width = '0%';
-    currentTimeEl.textContent = '0:00';
-    if (autoplay) {
-        const playPromise = audioPlayer.play();
-        if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(function () { syncPlayPauseUI(); });
-        }
-    }
+    const nextIndex = (currentTrackIndex + 1) % playlist.length;
+    _switchTrack(nextIndex, autoplay);
 }
 
 // Formats a duration in seconds as M:SS (e.g. 183 → "3:03").
@@ -1582,12 +1513,6 @@ if (photoUploadForm) {
             }
         }
 
-        // Upload photos to Google Apps Script
-        try {
-            localStorage.setItem('galleryGroupCode', groupCode);
-        } catch (_e) {
-            // ignore
-        }
         uploadPhotosToGoogleDrive(guestName, groupCode, files);
     });
 }
@@ -1708,24 +1633,16 @@ function fileToBase64(file) {
 const POLAROID_INITIAL = 6; // initial batch: 3 columns × 2 rows
 let _allGuestPhotos = [];
 let _visibleCount = 0;
-let _polaroidGroupCode = '';
 
 // Fetches the guest photo list from the Apps Script and renders the first batch.
-// Reads the group code from the gallery input or from localStorage as a fallback.
+// The gallery is publicly visible — no group code required to view photos.
+// A group code is only required when uploading new photos.
 async function loadGuestPhotos() {
     const grid = document.getElementById('polaroid-grid');
     if (!grid) return;
 
-    const groupCode = (galleryGroupCodeInput && String(galleryGroupCodeInput.value || '').trim()) ||
-        (function () {
-            try { return String(localStorage.getItem('galleryGroupCode') || '').trim(); } catch (_e) { return ''; }
-        })();
-
-    if (!groupCode) return;
-    _polaroidGroupCode = groupCode;
-
     try {
-        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados&groupCode=${encodeURIComponent(groupCode)}`);
+        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados`);
         const data = await response.json();
 
         if (data.success && data.photos && data.photos.length > 0) {
@@ -1751,7 +1668,14 @@ async function _renderPolaroidBatch(grid, count) {
     batch.forEach((photo, i) => {
         const index = startIdx + i;
         const fileId = String(photo.fileId || '').trim();
-        const safeName = String(photo.guestName || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Escape all HTML special characters so safeName is safe in both
+        // text content and attribute values (e.g. alt="Foto de ...").
+        const safeName = String(photo.guestName || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
 
         const cardHtml = `
             <div class="polaroid-card" data-file-id="${fileId}" data-index="${index}" onclick="openPhotoLightbox(this)">
@@ -1771,22 +1695,23 @@ async function _renderPolaroidBatch(grid, count) {
 
     _visibleCount += batch.length;
 
-    // Fetch images only for the newly added cards
+    // Fetch all images in the new batch in parallel rather than sequentially.
+    // Each fetch resolves independently so a single failure doesn't block others.
     const allCards = grid.querySelectorAll('.polaroid-card');
     const newCards = Array.from(allCards).slice(startIdx);
-    for (const card of newCards) {
+    await Promise.all(newCards.map(async function (card) {
         const img = card.querySelector('img[data-file-id]');
         const fileId = img ? img.getAttribute('data-file-id') : null;
-        if (!fileId) continue;
+        if (!fileId) return;
         try {
-            const dataUrl = await fetchPrivateGalleryImageDataUrl(fileId, _polaroidGroupCode);
+            const dataUrl = await fetchGalleryImageDataUrl(fileId);
             img.src = dataUrl;
         } catch (e) {
             console.error('Error cargando imagen:', e);
             const wrap = img.closest('.polaroid-photo');
             if (wrap) wrap.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px';
         }
-    }
+    }));
 
     _updatePolaroidButton(grid);
 }
@@ -1873,11 +1798,11 @@ const __galleryImageCache = new Map();
 
 // Fetches a single guest photo from the Apps Script as a base64 data URL.
 // Results are cached in memory so each file is only downloaded once per session.
-async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
+async function fetchGalleryImageDataUrl(fileId) {
     const key = String(fileId || '').trim();
     if (__galleryImageCache.has(key)) return __galleryImageCache.get(key);
 
-    const url = `${GALLERY_SCRIPT_URL}?action=getPhoto&fileId=${encodeURIComponent(key)}&groupCode=${encodeURIComponent(String(groupCode || '').trim())}`;
+    const url = `${GALLERY_SCRIPT_URL}?action=getPhoto&fileId=${encodeURIComponent(key)}`;
     const resp = await fetch(url);
     const json = await resp.json();
     if (!json || !json.success) {
@@ -1890,20 +1815,12 @@ async function fetchPrivateGalleryImageDataUrl(fileId, groupCode) {
     return dataUrl;
 }
 
-// Load photos when the page loads
-document.addEventListener('DOMContentLoaded', function () {
-    // Wait 1 second before loading photos
-    setTimeout(() => {
-        loadGuestPhotos();
-    }, 1000);
-});
-
 // Hides the RSVP confirmation modal and restores page scrolling.
 function closeRsvpModal() {
     const modal = document.getElementById('rsvp-modal');
     if (modal) {
         modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scroll
+        document.body.style.overflow = '';
     }
 }
 
@@ -1925,8 +1842,19 @@ function closeUploadModal() {
     }
 }
 
-// Close modal when clicking outside the content
+// ============================================
+// DOMContentLoaded – one consolidated listener for post-parse setup:
+//   1. Deferred guest photo load (1 s delay to avoid blocking initial render)
+//   2. RSVP modal backdrop click-to-close
+//   3. Global Escape key handler for all modals
+// ============================================
 document.addEventListener('DOMContentLoaded', function () {
+    // 1. Load guest photos after a short delay
+    setTimeout(function () {
+        loadGuestPhotos();
+    }, 1000);
+
+    // 2. Close RSVP modal when clicking the backdrop
     const rsvpModal = document.getElementById('rsvp-modal');
     if (rsvpModal) {
         rsvpModal.addEventListener('click', function (e) {
@@ -1936,7 +1864,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Close modal with the Escape key
+    // 3. Close any open modal with the Escape key
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeRsvpModal();

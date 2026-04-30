@@ -21,10 +21,6 @@
         href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
-    <link rel="stylesheet" 
-        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css"
-        integrity="sha384-7/Tl0k65OTvDSvtuq7aPR7aa0aCz7ZKqHsbMRLxhzueldW+9MZpCe9LB1c5UBuNS"
-        crossorigin="anonymous">
     <!-- CSS -->
     <link rel="stylesheet" 
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -33,6 +29,9 @@
     <link rel="stylesheet" 
         href="css/styles.min.css">
     <!--- JQuery -->
+    <!-- TODO: jQuery is used only for the RSVP form, the hamburger nav, and the
+         scroll-header effect. Migrating those ~40 lines to vanilla JS would allow
+         removing this ~87 KB dependency entirely. -->
     <script>
         // Fallback: load jQuery from a second CDN when the primary (code.jquery.com) fails.
         function loadJsFromCDN(js) {
@@ -310,7 +309,7 @@
                             Reservar Uber
                         </a>
                         <a class="btn-main" 
-                            href="#map"  onclick="activarMapTab('map-ceremony')">
+                            href="#map" data-map-tab="map-ceremony">
                             <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
@@ -381,7 +380,7 @@
                             Reservar Uber
                         </a>
                         <a class="btn-main"
-                            href="#map" onclick="activarMapTab('map-reception')">
+                            href="#map" data-map-tab="map-reception">
                             <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
@@ -644,6 +643,66 @@
                         </svg>
                     </span>
                 </a>
+                <!-- PayPal (Flip Card) -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <!-- Front Face -->
+                        <a class="registry-card flip-card-front"
+                            href="https://www.paypal.com/paypalme/c0rvak" target="_blank" rel="noopener noreferrer">
+                            <div class="gold-corner tl"></div>
+                            <div class="gold-corner tr"></div>
+                            <div class="gold-corner bl"></div>
+                            <div class="gold-corner br"></div>
+                            <div class="registry-card-icon">
+                                <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                            </div>
+                            <div class="registry-card-body">
+                                <span class="registry-card-name">PayPal</span>
+                                <span class="registry-card-sub">Transferencia directa</span>
+                            </div>
+                            <span class="registry-card-cta">
+                                Enviar regalo
+                                <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 8h10M9 4l4 4-4 4"/>
+                                </svg>
+                            </span>
+                        </a>
+                        <!-- Back Face — Debit Card Design -->
+                        <a class="flip-card-back" href="https://www.paypal.com/paypalme/c0rvak" target="_blank" rel="noopener noreferrer">
+                            <div class="debit-card-bg"></div>
+                            <div class="debit-card-content">
+                                <div class="debit-card-top">
+                                    <span class="debit-card-label">GIFT CARD</span>
+                                    <span class="material-symbols-outlined debit-card-contactless">contactless</span>
+                                </div>
+                                <div class="debit-card-chip">
+                                    <svg viewBox="0 0 50 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="1" y="1" width="48" height="38" rx="5" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+                                        <line x1="1" y1="14" x2="49" y2="14" stroke="#b8860b" stroke-width="0.7"/>
+                                        <line x1="1" y1="26" x2="49" y2="26" stroke="#b8860b" stroke-width="0.7"/>
+                                        <line x1="18" y1="1" x2="18" y2="14" stroke="#b8860b" stroke-width="0.7"/>
+                                        <line x1="32" y1="1" x2="32" y2="14" stroke="#b8860b" stroke-width="0.7"/>
+                                        <line x1="18" y1="26" x2="18" y2="39" stroke="#b8860b" stroke-width="0.7"/>
+                                        <line x1="32" y1="26" x2="32" y2="39" stroke="#b8860b" stroke-width="0.7"/>
+                                    </svg>
+                                </div>
+                                <div class="debit-card-number">
+                                    <span>••••</span><span>••••</span><span>••••</span><span>2026</span>
+                                </div>
+                                <div class="debit-card-bottom">
+                                    <div class="debit-card-holder">
+                                        <span class="debit-card-holder-label">CARDHOLDER</span>
+                                        <span class="debit-card-holder-name">KARLA & JOSE</span>
+                                    </div>
+                                    <div class="debit-card-logo">
+                                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -892,10 +951,6 @@
         onerror="loadJsFromCDN('jquery.js')"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-    <!-- Waypoints JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"
-        integrity="sha384-hKAOvu4SRkR5UhOl+rvozhqPNh0VgjTz0sydNTzye3vkV6VzpbLACSgthC2bhXeV"
         crossorigin="anonymous"></script>
     <!-- QR Code Generator JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"

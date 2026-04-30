@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    WEDDING WEBSITE STYLESHEET
    ============================================ */
 
@@ -220,6 +220,26 @@ header nav ul.primary-nav li a {
     margin: 0 13px;
     transition: all 300ms ease-in-out;
     position: relative;
+}
+
+header nav ul.primary-nav li a:after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #d4af37;
+    transform: translateX(-50%);
+    transition: width 300ms ease-in-out;
+}
+
+header nav ul.primary-nav li a:hover {
+    color: #d4af37;
+}
+
+header nav ul.primary-nav li a:hover:after {
+    width: 100%;
 }
 
 header nav ul.member-actions {
@@ -912,40 +932,6 @@ body.envelope-visible {
 }
 
 /* ============================================
-   Waypoints
-   ============================================ */
-
-.wp1,
-.wp2,
-.wp3,
-.wp4,
-.wp5,
-.wp6,
-.wp7,
-.wp8,
-.wp9 {
-    visibility: hidden;
-}
-
-.wp1.animated,
-.wp2.animated,
-.wp3.animated,
-.wp4.animated,
-.wp5.animated,
-.wp6.animated,
-.wp7.animated,
-.wp8.animated,
-.wp9.animated {
-    visibility: visible;
-}
-
-/* Smooth out Animate.css entrance animations (Waypoints) */
-.animated {
-    animation-duration: 1.15s !important;
-    animation-timing-function: var(--motion-ease) !important;
-}
-
-/* ============================================
    Shared Section Styles
    ============================================ */
 
@@ -1223,72 +1209,6 @@ section.section-padding:not(#rsvp)::after {
 
     .story-families {
         margin-top: 32px;
-    }
-}
-
-/* ── Family & Story Animations ──────────────────────────────── */
-
-.family-fade-left.animated {
-    animation: fadeInLeft 0.95s var(--motion-ease) forwards;
-}
-
-.family-fade-right.animated {
-    animation: fadeInRight 0.95s var(--motion-ease) forwards;
-}
-
-.family-fade-left.animated-out {
-    animation: fadeOutLeft 0.95s var(--motion-ease) forwards;
-}
-
-.family-fade-right.animated-out {
-    animation: fadeOutRight 0.95s var(--motion-ease) forwards;
-}
-
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-28px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(28px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeOutLeft {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateX(-28px);
-    }
-}
-
-@keyframes fadeOutRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateX(28px);
     }
 }
 
@@ -2973,6 +2893,191 @@ button.gallery-item {
 
 .registry-card:hover .registry-card-arrow {
     transform: translateX(4px);
+}
+
+/* ── PayPal Flip Card ──────────────────────────────────────── */
+
+.flip-card {
+    perspective: 1000px;
+    position: relative;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Override the base registry-card styles that break 3D transforms */
+.flip-card .flip-card-front.registry-card {
+    overflow: visible;
+    transition: none;
+}
+
+.flip-card .flip-card-front:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.flip-card-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotateY(180deg);
+    z-index: 1;
+    display: flex;
+    text-decoration: none;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* ── Debit Card Visual ─────────────────────────────────────── */
+
+.debit-card-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #0f3b2e 0%, #1a5a42 40%, #0a2820 100%);
+    z-index: 0;
+}
+
+/* Subtle texture/shimmer overlay */
+.debit-card-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+    z-index: 1;
+}
+
+/* Outer gold border */
+.debit-card-bg::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 7px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.debit-card-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1.75rem 1.5rem;
+}
+
+/* Top row: label + contactless icon */
+.debit-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.debit-card-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #d4af37;
+}
+
+.debit-card-contactless {
+    color: rgba(212, 175, 55, 0.6);
+    font-size: 22px;
+    transform: rotate(90deg);
+}
+
+/* Chip SVG */
+.debit-card-chip {
+    margin-top: 1.25rem;
+    width: 46px;
+    height: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.debit-card-chip svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Card number row */
+.debit-card-number {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Bottom row: cardholder + logo */
+.debit-card-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 1.25rem;
+}
+
+.debit-card-holder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.debit-card-holder-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 7px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(212, 188, 141, 0.5);
+}
+
+.debit-card-holder-name {
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #fff;
+}
+
+.debit-card-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.debit-card-logo .material-symbols-outlined {
+    font-size: 22px;
+    color: #d4af37;
 }
 
 /* ============================================
