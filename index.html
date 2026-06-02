@@ -1,7 +1,20 @@
 <!doctype html>
 <html class="no-js" lang="es">
+
 <head>
     <meta charset="utf-8">
+    <!-- Content Security Policy  -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com script.googleusercontent.com *.googleapis.com;
+        style-src  'self' 'unsafe-inline' fonts.googleapis.com cdn.jsdelivr.net;
+        font-src   'self' fonts.gstatic.com;
+        img-src    'self' data: blob: *.googleapis.com;
+        frame-src  'self' *.google.com *.googleapis.com;
+        connect-src 'self' script.google.com script.googleusercontent.com cdn.jsdelivr.net *.googleapis.com;
+        object-src 'none';
+        base-uri   'self';
+    ">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Karla & Jose - Boda 2026</title>
     <meta name="description" content="¡Te invitamos a celebrar nuestro matrimonio el 18 de Diciembre de 2026!">
@@ -17,33 +30,17 @@
     <link rel="apple-touch-icon" sizes="180x180" href="img/logo-dorado.webp">
     <link rel="icon" type="image/x-icon" href="img/logo-dorado.ico">
     <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <!-- Single combined font request: Crimson Pro + Manrope + Material Symbols -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@300;400;600;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
     <!-- CSS -->
-    <link rel="stylesheet" 
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous">
-    <link rel="stylesheet" 
-        href="css/styles.min.css">
-    <!--- JQuery -->
-    <!-- TODO: jQuery is used only for the RSVP form, the hamburger nav, and the
-         scroll-header effect. Migrating those ~40 lines to vanilla JS would allow
-         removing this ~87 KB dependency entirely. -->
-    <script>
-        // Fallback: load jQuery from a second CDN when the primary (code.jquery.com) fails.
-        function loadJsFromCDN(js) {
-            if (js === 'jquery.js') {
-                var s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js';
-                s.integrity = 'sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK';
-                s.crossOrigin = 'anonymous';
-                document.head.appendChild(s);
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.min.css">
 </head>
 
 <body id="top" class="envelope-visible">
@@ -59,7 +56,7 @@
         <!-- Foliage corner ornaments -->
         <div class="foliage-frame frame-top"><img src="img/slazzer-preview-8y1fu.webp" alt="Decoración floral"></div>
         <div class="foliage-frame frame-bottom"><img src="img/slazzer-preview-8y1fu.webp" alt="Decoración floral"></div>
-        <div class="envelope-wrapper" id="envelope-wrapper" onclick="openInvitation()">
+        <div class="envelope-wrapper" id="envelope-wrapper" role="button" tabindex="0" aria-label="Abrir invitación">
             <div class="envelope linen-texture" id="main-envelope">
                 <!-- Back of the envelope (base) -->
                 <div class="envelope-base linen-texture"></div>
@@ -85,7 +82,7 @@
             </div>
             <div class="open-prompt" id="open-prompt">
                 <span>
-                    Una invitación te espera.<br> 
+                    Una invitación te espera.<br>
                     Haz click para abrir.
                 </span>
             </div>
@@ -98,7 +95,8 @@
         <div class="navigation">
             <header>
                 <div class="header-content">
-                    <div class="logo"><a href="#top"><img src="img/logo-blanco2.webp" alt="Karla & Jose" loading="lazy"></a></div>
+                    <div class="logo"><a href="#top"><img src="img/logo-blanco2.webp" alt="Karla & Jose"
+                                loading="lazy"></a></div>
                     <div class="header-nav">
                         <nav>
                             <ul class="primary-nav">
@@ -173,7 +171,7 @@
             <!-- Imagen de la pareja -->
             <div class="story-image-col">
                 <div class="story-image-frame">
-                    <img src="img/5.webp" alt="Karla y Jose" class="story-image" loading="lazy"/>
+                    <img src="img/5.webp" alt="Karla y Jose" class="story-image" loading="lazy" />
                 </div>
             </div>
             <div class="story-text-col">
@@ -181,7 +179,7 @@
                     Con Amor
                 </p>
                 <h2 class="story-title">
-                    Nuestra<br/>
+                    Nuestra<br />
                     Historia.
                 </h2>
                 <!-- Texto de la historia -->
@@ -230,7 +228,7 @@
                             Laura Sánchez Lozano
                         </p>
                         <p class="story-family-names">
-                            Salvador Martín Morales Castillo
+                            Salvador Martín Morales
                         </p>
                     </div>
                 </div>
@@ -256,7 +254,8 @@
                 <div class="gold-corner bl"></div>
                 <div class="gold-corner br"></div>
                 <div class="card-image">
-                    <img src="img/Parroquia-Altagracia.webp" alt="Parroquia Nuestra Señora de Altagracia" loading="lazy"/>
+                    <img src="img/Parroquia-Altagracia.webp" alt="Parroquia Nuestra Señora de Altagracia"
+                        loading="lazy" />
                     <div class="date-badge">
                         <span class="month">Dic</span>
                         <span class="day">18</span>
@@ -297,24 +296,24 @@
                             <span class="info-icon"><span class="material-symbols-outlined">star</span></span>
                             <div>
                                 <p class="info-sub">
-                                    El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y amigos.
+                                    El momento más importante donde diremos "Sí, Acepto" ante Dios, nuestras familias y
+                                    amigos.
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div class="card-actions">
-                        <a class="btn-main" rel="noopener noreferrer" 
-                            href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia" target="_blank" >
+                        <a class="btn-main" rel="noopener noreferrer"
+                            href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.744395&dropoff[longitude]=-103.3928862&dropoff[nickname]=Parroquia%20de%20Nuestra%20Se%C3%B1ora%20de%20Altagracia"
+                            target="_blank">
                             <span class="material-symbols-outlined">local_taxi</span>
                             Reservar Uber
                         </a>
-                        <a class="btn-main" 
-                            href="#map" data-map-tab="map-ceremony">
+                        <a class="btn-main" href="#map" data-map-tab="map-ceremony">
                             <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
-                        <button class="btn-icon" title="Añadir al Calendario"
-                            onclick="agregarAlCalendario('Boda Karla &amp; Jose - Ceremonia', 'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.', '20261218T180000', '20261218T190000')">
+                        <button class="btn-icon" title="Añadir al Calendario" id="cal-btn-ceremony">
                             <span class="material-symbols-outlined">calendar_today</span>
                         </button>
                     </div>
@@ -327,7 +326,7 @@
                 <div class="gold-corner bl"></div>
                 <div class="gold-corner br"></div>
                 <div class="card-image">
-                    <img src="img/Andira.webp" alt="Jardín de Eventos Andira" loading="lazy"/>
+                    <img src="img/Andira.webp" alt="Jardín de Eventos Andira" loading="lazy" />
                     <div class="date-badge">
                         <span class="month">Dic</span>
                         <span class="day">18</span>
@@ -368,24 +367,24 @@
                             <span class="info-icon"><span class="material-symbols-outlined">star</span></span>
                             <div>
                                 <p class="info-sub">
-                                    Una noche llena de alegría, música, baile y celebración con nuestras personas más queridas.
+                                    Una noche llena de alegría, música, baile y celebración con nuestras personas más
+                                    queridas.
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div class="card-actions">
                         <a class="btn-main"
-                            href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira" target="_blank" rel="noopener noreferrer">
+                            href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=20.7784148&dropoff[longitude]=-103.4550886&dropoff[nickname]=Jardin%20de%20Eventos%20Andira"
+                            target="_blank" rel="noopener noreferrer">
                             <span class="material-symbols-outlined">local_taxi</span>
                             Reservar Uber
                         </a>
-                        <a class="btn-main"
-                            href="#map" data-map-tab="map-reception">
+                        <a class="btn-main" href="#map" data-map-tab="map-reception">
                             <span class="material-symbols-outlined">location_on</span>
                             Ubicación
                         </a>
-                        <button class="btn-icon" title="Añadir al Calendario"
-                            onclick="agregarAlCalendario('Boda Karla &amp; Jose - Recepción', 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.', '20261218T200000', '20261219T020000')">
+                        <button class="btn-icon" title="Añadir al Calendario" id="cal-btn-reception">
                             <span class="material-symbols-outlined">calendar_today</span>
                         </button>
                     </div>
@@ -409,7 +408,7 @@
                         <p class="info-sub">
                             <strong>Etiqueta:</strong> Formal / Cocktail Elegante (Winter Chic)
                         </p>
-                        <div class="info-row">                        
+                        <div class="info-row">
                             <span class="info-icon"><span class="material-symbols-outlined">woman</span></span>
                             <div>
                                 <p class="info-label">
@@ -426,11 +425,12 @@
                                 </p>
                                 <p class="info-sub">
                                     Traje oscuro con camisa formal; corbata o moño opcional.
-                                </p>                                
+                                </p>
                             </div>
                         </div>
                         <p class="info-sub protocols-note">
-                            "Recomendamos colores oscuros o tonos invernales y evitar tonos en blanco para no opacar a la novia."
+                            "Recomendamos colores oscuros o tonos invernales y evitar tonos en blanco para no opacar a
+                            la novia."
                         </p>
                     </div>
                 </div>
@@ -472,7 +472,7 @@
             </div>
             <!-- Upload for Guest photos -->
             <div class="upload-trigger-row">
-                <button class="upload-trigger-wrap" onclick="openUploadModal()">
+                <button class="upload-trigger-wrap" id="upload-trigger-btn">
                     <p class="upload-eyebrow">
                         Contribuye a nuestro álbum
                     </p>
@@ -499,7 +499,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Venue Map -->
     <section id="map" class="section-padding">
         <div class="map-section-container">
@@ -520,22 +520,21 @@
                         data-btn-text="Abrir en Google Maps"
                         data-btn-href="https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Se%C3%B1ora+de+Altagracia+Zapopan"
                         data-icon-class="primary">
-                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 10h14v11H5z" />
                             <path d="M5 10l7-5 7 5" />
                             <path d="M9 21V15a3 3 0 0 1 6 0v6" />
                         </svg>
                         Ceremonia
                     </button>
-                    <button class="map-tab" data-target="map-reception"
-                        data-label="Andira Jardín de Eventos"
+                    <button class="map-tab" data-target="map-reception" data-label="Andira Jardín de Eventos"
                         data-sublabel="Av. de las Calandrias 32, Villas de la Loma, Zapopan, Jal."
                         data-btn-text="Abrir en Google Maps"
                         data-btn-href="https://www.google.com/maps/search/?api=1&query=Andira+Jardin+de+Eventos+Zapopan+Calandrias"
                         data-icon-class="accent">
-                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
                             <circle cx="12" cy="10" r="3" />
                         </svg>
@@ -544,14 +543,12 @@
                 </div>
                 <!-- Iframes -->
                 <div class="map-frame-wrap">
-                    <iframe id="map-ceremony" class="visible"
-                        title="Parroquia Nuestra Señora de Altagracia, Zapopan"
+                    <iframe id="map-ceremony" class="visible" title="Parroquia Nuestra Señora de Altagracia, Zapopan"
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3731.16335618101!2d-103.3929933!3d20.744172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8428af9005555555%3A0x3c08c0cd647484cc!2sParroquia%20Nuestra%20Se%C3%B1ora%20de%20la%20Altagracia!5e0!3m2!1ses-419!2smx!4v1774281961308!5m2!1ses-419!2smx"
                         allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
-                    <iframe id="map-reception"
-                        title="Andira Jardín de Eventos, Zapopan"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3730.3181049848126!2d-103.4550886!3d20.778414800000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8428a7987fd0982f%3A0x7dfadc7da621ad98!2sAndira%20Jard%C3%ADn%20de%20Eventos!5e0!3m2!1ses-419!2smx!4v1774282040136!5m2!1ses-419!2smx"
+                    <iframe id="map-reception" title="Andira Jardín de Eventos, Zapopan"
+                        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3730.3181049848126!2d-103.4550886!3d20.778414800000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8428a7987fd0982f%3A0x7dfadc7da621ad98!2sAndira%20Jard%C3%ADn%20de%20Eventos!5e0!3m2!1ses-419!2smx!4v1774282040136!5m2!1ses-419!2smx"
                         allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 </div>
@@ -559,8 +556,8 @@
                 <div class="map-bar">
                     <div class="map-info">
                         <div class="map-icon" id="bar-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#004d08"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#004d08" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
                                 <circle cx="12" cy="10" r="3" />
                             </svg>
@@ -575,7 +572,8 @@
                         </div>
                     </div>
                     <a class="map-btn-link" id="bar-btn"
-                        href="https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Se%C3%B1ora+de+Altagracia+Zapopan" target="_blank" rel="noopener noreferrer">
+                        href="https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Se%C3%B1ora+de+Altagracia+Zapopan"
+                        target="_blank" rel="noopener noreferrer">
                         Abrir en Google Maps
                     </a>
                 </div>
@@ -600,8 +598,8 @@
             <!-- Registry cards -->
             <div class="registry-grid">
                 <!-- Liverpool -->
-                <a class="registry-card"
-                    href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771" target="_blank" rel="noopener noreferrer">
+                <a class="registry-card" href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51898771"
+                    target="_blank" rel="noopener noreferrer">
                     <div class="gold-corner tl"></div>
                     <div class="gold-corner tr"></div>
                     <div class="gold-corner bl"></div>
@@ -615,15 +613,15 @@
                     </div>
                     <span class="registry-card-cta">
                         Ver Registro
-                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 8h10M9 4l4 4-4 4"/>
+                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 8h10M9 4l4 4-4 4" />
                         </svg>
                     </span>
                 </a>
                 <!-- Amazon -->
-                <a class="registry-card"
-                    href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT" target="_blank" rel="noopener noreferrer">
+                <a class="registry-card" href="https://www.amazon.com.mx/wedding/guest-view/CTFWNBTH76RT"
+                    target="_blank" rel="noopener noreferrer">
                     <div class="gold-corner tl"></div>
                     <div class="gold-corner tr"></div>
                     <div class="gold-corner bl"></div>
@@ -637,9 +635,9 @@
                     </div>
                     <span class="registry-card-cta">
                         Ver Registro
-                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 8h10M9 4l4 4-4 4"/>
+                        <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 8h10M9 4l4 4-4 4" />
                         </svg>
                     </span>
                 </a>
@@ -647,8 +645,8 @@
                 <div class="flip-card">
                     <div class="flip-card-inner">
                         <!-- Front Face -->
-                        <a class="registry-card flip-card-front"
-                            href="https://www.paypal.com/paypalme/c0rvak" target="_blank" rel="noopener noreferrer">
+                        <a class="registry-card flip-card-front" href="https://www.paypal.com/paypalme/joseYkarla181226"
+                            target="_blank" rel="noopener noreferrer">
                             <div class="gold-corner tl"></div>
                             <div class="gold-corner tr"></div>
                             <div class="gold-corner bl"></div>
@@ -662,14 +660,15 @@
                             </div>
                             <span class="registry-card-cta">
                                 Enviar regalo
-                                <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 8h10M9 4l4 4-4 4"/>
+                                <svg class="registry-card-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 8h10M9 4l4 4-4 4" />
                                 </svg>
                             </span>
                         </a>
                         <!-- Back Face — Debit Card Design -->
-                        <a class="flip-card-back" href="https://www.paypal.com/paypalme/c0rvak" target="_blank" rel="noopener noreferrer">
+                        <a class="flip-card-back" href="https://www.paypal.com/paypalme/joseYkarla181226"
+                            target="_blank" rel="noopener noreferrer">
                             <div class="debit-card-bg"></div>
                             <div class="debit-card-content">
                                 <div class="debit-card-top">
@@ -678,13 +677,14 @@
                                 </div>
                                 <div class="debit-card-chip">
                                     <svg viewBox="0 0 50 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="1" y="1" width="48" height="38" rx="5" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
-                                        <line x1="1" y1="14" x2="49" y2="14" stroke="#b8860b" stroke-width="0.7"/>
-                                        <line x1="1" y1="26" x2="49" y2="26" stroke="#b8860b" stroke-width="0.7"/>
-                                        <line x1="18" y1="1" x2="18" y2="14" stroke="#b8860b" stroke-width="0.7"/>
-                                        <line x1="32" y1="1" x2="32" y2="14" stroke="#b8860b" stroke-width="0.7"/>
-                                        <line x1="18" y1="26" x2="18" y2="39" stroke="#b8860b" stroke-width="0.7"/>
-                                        <line x1="32" y1="26" x2="32" y2="39" stroke="#b8860b" stroke-width="0.7"/>
+                                        <rect x="1" y="1" width="48" height="38" rx="5" fill="#d4af37" stroke="#b8860b"
+                                            stroke-width="1" />
+                                        <line x1="1" y1="14" x2="49" y2="14" stroke="#b8860b" stroke-width="0.7" />
+                                        <line x1="1" y1="26" x2="49" y2="26" stroke="#b8860b" stroke-width="0.7" />
+                                        <line x1="18" y1="1" x2="18" y2="14" stroke="#b8860b" stroke-width="0.7" />
+                                        <line x1="32" y1="1" x2="32" y2="14" stroke="#b8860b" stroke-width="0.7" />
+                                        <line x1="18" y1="26" x2="18" y2="39" stroke="#b8860b" stroke-width="0.7" />
+                                        <line x1="32" y1="26" x2="32" y2="39" stroke="#b8860b" stroke-width="0.7" />
                                     </svg>
                                 </div>
                                 <div class="debit-card-number">
@@ -710,13 +710,14 @@
     <!-- RSVP Section -->
     <section id="rsvp" class="rsvp-section">
         <!-- RSVP Confirmation Modal -->
-        <div id="rsvp-modal" class="gifts-modal" tabindex="-1" role="dialog">
+        <div id="rsvp-modal" class="gifts-modal" tabindex="-1" role="dialog" aria-labelledby="rsvp-modal-title"
+            aria-modal="true">
             <div class="gifts-modal-content rsvp-modal-content">
-                <button type="button" class="gifts-modal-close" onclick="closeRsvpModal();">
+                <button type="button" class="gifts-modal-close" id="close-rsvp-modal-btn">
                     <span class="material-symbols-outlined">close</span>
                 </button>
                 <img src="img/logo2-dorado.webp" alt="Karla & Jose" class="rsvp-modal-logo">
-                <h3 class="gifts-modal-title">
+                <h3 id="rsvp-modal-title" class="gifts-modal-title" tabindex="-1">
                     ¡Gracias!
                 </h3>
                 <p class="gifts-modal-subtitle">
@@ -758,10 +759,14 @@
                                     </div>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-icon"><span class="material-symbols-outlined">calendar_today</span></span>
+                                    <span class="info-icon"><span
+                                            class="material-symbols-outlined">calendar_today</span></span>
                                     <div>
                                         <p class="info-sub">
-                                            Confirma a más tardar el <strong class="rsvp-deadline-strong">1° de Octubre</strong>.
+                                            Confirma a más tardar el <strong class="rsvp-deadline-strong">1° de
+                                                Octubre</strong>.
+                                            <span id="rsvp-deadline-countdown" class="rsvp-deadline-countdown"
+                                                aria-live="polite"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -771,7 +776,8 @@
                                     <div class="col-md-12">
                                         <div class="form-input-group">
                                             <span class="material-symbols-outlined">person</span>
-                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre" required>
+                                            <input type="text" name="name" id="rsvp-search-name" placeholder="Nombre"
+                                                required>
                                         </div>
                                     </div>
                                 </div>
@@ -779,13 +785,15 @@
                                     <div class="col-6">
                                         <div class="form-input-group">
                                             <span class="material-symbols-outlined">mail</span>
-                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo" autocomplete="email" required>
+                                            <input type="email" name="email" id="rsvp-search-email" placeholder="Correo"
+                                                autocomplete="email" required>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-input-group">
                                             <span class="material-symbols-outlined">key</span>
-                                            <input type="text" name="groupCode" id="rsvp-group-code" placeholder="Código" autocomplete="off" required>
+                                            <input type="text" name="groupCode" id="rsvp-group-code"
+                                                placeholder="Código" autocomplete="off" required>
                                         </div>
                                     </div>
                                 </div>
@@ -818,7 +826,8 @@
                             <div class="card-divider"></div>
                             <div class="info-list">
                                 <div class="info-row">
-                                    <span class="info-icon"><span class="material-symbols-outlined">check_box</span></span>
+                                    <span class="info-icon"><span
+                                            class="material-symbols-outlined">check_box</span></span>
                                     <div>
                                         <p class="info-sub">
                                             Marca la asistencia de cada invitado en el grupo.
@@ -848,11 +857,13 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 text-center content">
-                    <span class="to-top-wrapper"><a href="#top" class="to-top"><span class="material-symbols-outlined">keyboard_arrow_up</span></a></span>
+                    <span class="to-top-wrapper"><a href="#top" class="to-top"><span
+                                class="material-symbols-outlined">keyboard_arrow_up</span></a></span>
                     <br>
                     <img src="img/logo2-blanco.webp" alt="Karla & Jose" id="logo2-blanco">
                     <p class="footer-credit">
-                        Hecho con <span class="material-symbols-outlined footer-heart">favorite</span> para Karla, de Jose.
+                        Hecho con <span class="material-symbols-outlined footer-heart">favorite</span> para Karla, de
+                        Jose.
                     </p>
                 </div>
             </div>
@@ -860,11 +871,12 @@
     </footer>
 
     <!-- Upload Photos Modal -->
-    <div id="upload-modal" class="gifts-modal" tabindex="-1" role="dialog" onclick="if(event.target===this)closeUploadModal()">
-        <div class="gifts-modal-content upload-modal-content" onclick="event.stopPropagation()">
+    <div id="upload-modal" class="gifts-modal" tabindex="-1" role="dialog" aria-labelledby="upload-modal-title"
+        aria-modal="true">
+        <div class="gifts-modal-content upload-modal-content">
             <!-- Close row — never scrolls -->
             <div class="upload-modal-close-row">
-                <button type="button" class="gifts-modal-close" onclick="closeUploadModal()">
+                <button type="button" class="gifts-modal-close" id="close-upload-modal-btn">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -878,7 +890,7 @@
                     <div class="gold-corner br"></div>
                     <div class="card-body">
                         <div class="card-header-row">
-                            <h3 class="card-title">
+                            <h3 id="upload-modal-title" class="card-title" tabindex="-1">
                                 Comparte tus Fotos
                             </h3>
                             <span class="card-icon"><span class="material-symbols-outlined">photo_camera</span></span>
@@ -889,7 +901,8 @@
                                 <span class="info-icon"><span class="material-symbols-outlined">image</span></span>
                                 <div>
                                     <p class="info-sub">
-                                        Comparte los momentos que capturaste durante nuestra celebración. Máx. 5 MB por foto (JPG, PNG, WEBP, GIF).
+                                        Comparte los momentos que capturaste durante nuestra celebración. Máx. 5 MB por
+                                        foto (JPG, PNG, WEBP, GIF).
                                     </p>
                                 </div>
                             </div>
@@ -903,7 +916,7 @@
                                         <input type="text" id="guest-name" placeholder="Nombre" required>
                                     </div>
                                 </div>
-                                    <div class="col-6">
+                                <div class="col-6">
                                     <div class="form-input-group">
                                         <span class="material-symbols-outlined">key</span>
                                         <input type="text" id="gallery-group-code" placeholder="Código"
@@ -915,7 +928,8 @@
                             <div class="row rsvp-form-row">
                                 <div class="col-md-12">
                                     <label for="photo-file" class="file-upload-label">
-                                        <span class="material-symbols-outlined">add_photo_alternate</span> Seleccionar foto(s)
+                                        <span class="material-symbols-outlined">add_photo_alternate</span> Seleccionar
+                                        foto(s)
                                         <input type="file" id="photo-file" accept="image/*" multiple>
                                     </label>
                                     <p class="file-info" id="file-info">
@@ -923,6 +937,7 @@
                                     </p>
                                 </div>
                             </div>
+                            <div id="upload-alert" role="alert" aria-live="polite"></div>
                             <div class="card-actions upload-card-actions">
                                 <button type="submit" class="upload-submit-btn">
                                     <span class="material-symbols-outlined">upload</span> Subir Fotos
@@ -936,22 +951,19 @@
     </div>
 
     <!-- Photo lightbox -->
-    <div id="photo-lightbox" class="photo-lightbox" onclick="if(event.target===this)closePhotoLightbox()">
-        <button class="lightbox-close" onclick="closePhotoLightbox()">×</button>
-        <div class="lightbox-content" onclick="event.stopPropagation()">
+    <div id="photo-lightbox" class="photo-lightbox" role="dialog" aria-modal="true" aria-label="Visor de fotos">
+        <button class="lightbox-close" id="lightbox-close-btn" aria-label="Cerrar visor de fotos">×</button>
+        <div class="lightbox-content">
+            <!-- alt is set dynamically in openPhotoLightbox() -->
             <img id="lightbox-img" src="" alt="">
-            <p id="lightbox-caption" class="lightbox-caption"></p>
+            <p id="lightbox-caption" class="lightbox-caption" aria-live="polite"></p>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK"
-        crossorigin="anonymous"
-        onerror="loadJsFromCDN('jquery.js')"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"
+        defer></script>
     <!-- QR Code Generator JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"
         integrity="sha384-mZT2gIty7ZDdOGkxfP6joZcYdMW1Jvj9dRlfpTmaJAKKXTqzygtB22k7FLe+KZC1"
@@ -966,20 +978,20 @@
                 <span class="material-symbols-outlined">music_note</span>
             </div>
             <div class="mpb-track-text">
-                <span id="track-title">Sin canción</span>
+                <span id="track-title" aria-live="polite" aria-atomic="true">Sin canción</span>
                 <span id="track-artist">Selecciona una canción</span>
             </div>
         </div>
         <!-- Controls + progress -->
         <div class="mpb-controls">
             <div class="mpb-buttons">
-                <button class="mpb-btn mpb-btn-sec" id="prev-btn" title="Anterior">
+                <button class="mpb-btn mpb-btn-sec" id="prev-btn" title="Anterior" aria-label="Canción anterior">
                     <span class="material-symbols-outlined">skip_previous</span>
                 </button>
-                <button class="mpb-btn mpb-btn-play" id="play-pause-btn" title="Reproducir">
+                <button class="mpb-btn mpb-btn-play" id="play-pause-btn" title="Reproducir" aria-label="Reproducir">
                     <span class="material-symbols-outlined">play_circle</span>
                 </button>
-                <button class="mpb-btn mpb-btn-sec" id="next-btn" title="Siguiente">
+                <button class="mpb-btn mpb-btn-sec" id="next-btn" title="Siguiente" aria-label="Siguiente canción">
                     <span class="material-symbols-outlined">skip_next</span>
                 </button>
             </div>
@@ -993,14 +1005,16 @@
         </div>
         <!-- Volume -->
         <div class="mpb-volume">
-            <button class="mpb-btn" id="volume-btn" title="Silenciar">
+            <button class="mpb-btn" id="volume-btn" title="Silenciar" aria-label="Silenciar">
                 <span id="vol-icon" class="material-symbols-outlined">volume_up</span>
             </button>
-            <input type="range" id="volume-slider" class="mpb-vol-slider" min="0" max="100" value="50">
+            <input type="range" id="volume-slider" class="mpb-vol-slider" min="0" max="100" value="50"
+                aria-label="Volumen">
         </div>
 
     </div>
 
     <script src="js/scripts.min.js"></script>
 </body>
+
 </html>

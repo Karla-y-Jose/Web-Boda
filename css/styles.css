@@ -747,7 +747,7 @@ body.envelope-visible {
 .hero {
     min-height: 850px;
     background: linear-gradient(135deg, rgba(15, 59, 46, 0.75) 0%, rgba(212, 175, 55, 0.15) 100%),
-        url('../img/1.webp') center center;
+        url('../img/pedida1.webp') center center;
     background-size: cover;
     background-attachment: fixed;
     background-position: center 20%;
@@ -2701,6 +2701,69 @@ button.gallery-item {
     border-color: #ffc107;
 }
 
+/* Keyboard focus ring on attendance radio cards.
+   Uses :focus-visible so it only shows for keyboard navigation,
+   not for mouse clicks. */
+.attendance-option input[type="radio"]:focus-visible + span,
+.attendance-option label:focus-within {
+    outline: 2px solid #2E8B57;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+
+/* RSVP deadline countdown pill */
+.rsvp-deadline-countdown {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: middle;
+    background: #e8f5e9;
+    color: #2E8B57;
+    border: 1px solid #2E8B57;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.rsvp-deadline-countdown.urgent {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffc107;
+}
+
+.rsvp-deadline-countdown.overdue {
+    background: #f8d7da;
+    color: #842029;
+    border-color: #dc3545;
+}
+
+
+/* RSVP guest list loading skeleton */
+.guest-skeleton {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.skeleton-line {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+    margin-bottom: 8px;
+}
+
+.skeleton-line.wide  { width: 60%; }
+.skeleton-line.mid   { width: 40%; }
+.skeleton-line.short { width: 80%; height: 32px; border-radius: 8px; margin-bottom: 0; }
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* ============================================
    Buttons
    ============================================ */
@@ -3496,7 +3559,7 @@ footer p {
     .mpb-vol-slider  { width: 70px; }
 }
 
-/* Mobile (~560px) — hide volume, stack controls on top */
+/* Mobile (~560px) — shrink volume, stack controls on top */
 @media (max-width: 560px) {
     body { padding-bottom: 100px; }
     #music-player-bar {
@@ -3514,17 +3577,24 @@ footer p {
         flex: 1 1 auto;
         min-width: 0;
     }
-    .mpb-volume { display: none; }
+    .mpb-volume { 
+        flex: 1;
+        justify-content: center;
+        gap: 6px;
+    }
+    .mpb-vol-slider { width: 50px; }
     .mpb-progress-row { width: 100%; }
     #track-title { max-width: 140px; font-size: 13px; }
-    .mpb-buttons { gap: 14px; }
+    .mpb-buttons { gap: 10px; }
     .mpb-btn-play .material-symbols-outlined { font-size: 34px; }
+    .mpb-btn-sec .material-symbols-outlined { font-size: 22px; }
 }
 
 /* Very small (~360px) */
 @media (max-width: 360px) {
     #track-title { max-width: 100px; font-size: 12px; }
-    .mpb-btn-sec { display: none; }
+    .mpb-vol-slider { width: 40px; }
+    .mpb-btn-sec .material-symbols-outlined { font-size: 18px; }
 }
 
 

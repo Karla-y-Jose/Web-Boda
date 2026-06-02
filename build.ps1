@@ -34,7 +34,9 @@ function Invoke-MinifyCSS ([string]$src) {
 
 # ── JS minifier ──────────────────────────────────────────────────────────────
 # Conservative: strips block comments and collapses blank lines.
-# Does NOT mangle names (safe for jQuery-based code without a full parser).
+# Does NOT mangle variable names — safe for vanilla JS without a full AST parser.
+# For stronger minification consider replacing this script with esbuild:
+#   npx esbuild js/scripts.js --bundle --minify --outfile=js/scripts.min.js
 function Invoke-MinifyJS ([string]$src) {
     $js = Get-Content $src -Raw -Encoding UTF8
 
@@ -47,7 +49,7 @@ function Invoke-MinifyJS ([string]$src) {
     # 3) Collapse 3+ consecutive blank lines to one
     $js = $js -replace '(\r?\n){3,}', "`n`n"
 
-    # 4) Collapse leading whitespace on each line to a single space (preserves indentation intent but saves bytes)
+    # 4) Trim trailing whitespace on each line (preserves indentation intent but saves bytes)
     $js = ($js -split '\r?\n' | ForEach-Object { $_.TrimEnd() }) -join "`n"
 
     return $js.Trim()

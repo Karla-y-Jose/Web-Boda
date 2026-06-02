@@ -3,70 +3,255 @@
    ============================================ */
 
 /* ============================================
+   SITE CONFIGURATION
+   All dates, venue details, and couple info
+   live here. Update once — propagates everywhere.
+   ============================================ */
+var CONFIG = {
+    // Wedding date & time (used by countdown, ticket canvas, calendar links)
+    weddingDate:      new Date('2026-12-18T18:00:00'),
+
+    // RSVP confirmation deadline (displayed in RSVP section)
+    rsvpDeadline:     new Date('2026-10-01'),
+    rsvpDeadlineText: '1° de Octubre',
+
+    // Couple names
+    coupleNames:   'Karla & Jose',
+    coupleTitle:   'Boda de Karla & Jose',
+
+    // Ceremony
+    ceremonyTitle:    'Boda Karla & Jose - Ceremonia',
+    ceremonyAddress:  'Parroquia Nuestra Señora de Altagracia, esquina con, De La Mancha, Real del Monte, Altagracia, 45130 Zapopan, Jal.',
+    ceremonyShort:    'Parroquia Nuestra Señora de Altagracia, Zapopan, Jal.',
+    ceremonyStart:    '20261218T180000',
+    ceremonyEnd:      '20261218T190000',
+
+    // Reception
+    receptionTitle:   'Boda Karla & Jose - Recepción',
+    receptionAddress: 'Jardin de Eventos Andira, Av. de las Calandrias 32, Villas de La Loma, 45134 Nuevo México, Jal.',
+    receptionShort:   'Jardin de Eventos Andira, Nuevo México, Jal.',
+    receptionStart:   '20261218T200000',
+    receptionEnd:     '20261219T020000',
+
+    // Full-day calendar event (used in the RSVP confirmation modal)
+    calendarTitle:    'Boda Karla & Jose',
+    calendarAddress:  'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.',
+    calendarStart:    '20261218T180000',
+    calendarEnd:      '20261219T020000',
+
+    // Ticket canvas display strings
+    ticketDateText:   '18 de diciembre, 2026',
+
+    // Max file size for photo uploads (bytes)
+    maxUploadBytes:   5 * 1024 * 1024,
+};
+
+/* ============================================
    PRIVATE RSVP SESSION STORE
    Keeps auth token, session data, and ticket
    payload out of the global window scope.
    ============================================ */
 var _rsvpStore = (function () {
-    var _endpoint      = '';
-    var _token         = '';
-    var _email         = '';
-    var _groupCode     = '';
-    var _ticketPayload = null;
-    var _lastSubmit    = 0;
+    var _endpoint          = '';
+    var _galleryScriptUrl  = '';
+    var _token             = '';
+    var _email             = '';
+    var _groupCode         = '';
+    var _ticketPayload     = null;
+    var _lastSubmit        = 0;
 
     return {
-        getEndpoint:      function ()   { return _endpoint; },
-        setEndpoint:      function (v)  { _endpoint = String(v || ''); },
-        getToken:         function ()   { return _token; },
-        setToken:         function (v)  { _token = String(v || '').trim(); },
-        getEmail:         function ()   { return _email; },
-        setEmail:         function (v)  { _email = String(v || '').trim(); },
-        getGroupCode:     function ()   { return _groupCode; },
-        setGroupCode:     function (v)  { _groupCode = String(v || '').trim(); },
-        getTicketPayload: function ()   { return _ticketPayload; },
-        setTicketPayload: function (v)  { _ticketPayload = v; },
-        updateTicketId:   function (id) { if (_ticketPayload) _ticketPayload.ticketId = String(id || '').trim(); },
-        canSubmit:        function (ms) { return (Date.now() - _lastSubmit) >= (ms || 15000); },
-        recordSubmit:     function ()   { _lastSubmit = Date.now(); },
-        clearSession:     function ()   { _token = ''; _email = ''; _groupCode = ''; },
-        clearAll:         function ()   { _token = ''; _email = ''; _groupCode = ''; _ticketPayload = null; }
+        getEndpoint:         function ()   { return _endpoint; },
+        setEndpoint:         function (v)  { _endpoint = String(v || ''); },
+        getGalleryScriptUrl: function ()   { return _galleryScriptUrl; },
+        setGalleryScriptUrl: function (v)  { _galleryScriptUrl = String(v || ''); },
+        getToken:            function ()   { return _token; },
+        setToken:            function (v)  { _token = String(v || '').trim(); },
+        getEmail:            function ()   { return _email; },
+        setEmail:            function (v)  { _email = String(v || '').trim(); },
+        getGroupCode:        function ()   { return _groupCode; },
+        setGroupCode:        function (v)  { _groupCode = String(v || '').trim(); },
+        getTicketPayload:    function ()   { return _ticketPayload; },
+        setTicketPayload:    function (v)  { _ticketPayload = v; },
+        updateTicketId:      function (id) { if (_ticketPayload) _ticketPayload.ticketId = String(id || '').trim(); },
+        canSubmit:           function (ms) { return (Date.now() - _lastSubmit) >= (ms || 15000); },
+        recordSubmit:        function ()   { _lastSubmit = Date.now(); },
+        clearSession:        function ()   { _token = ''; _email = ''; _groupCode = ''; },
+        clearAll:            function ()   { _token = ''; _email = ''; _groupCode = ''; _ticketPayload = null; }
     };
 }());
 
-$(document).ready(function () {
+// ─── Tiny DOM helpers (replace jQuery's most-used patterns) ──────────────────
+
+// Set innerHTML of a selector target (replaces $(sel).html(str))
+function _setHtml(sel, html) {
+    var el = (typeof sel === 'string') ? document.querySelector(sel) : sel;
+    if (el) el.innerHTML = html;
+}
+
+// Show an element (replaces $(sel).show())
+function _show(sel) {
+    var el = (typeof sel === 'string') ? document.querySelector(sel) : sel;
+    if (el) {
+        el.style.display = 'block';
+    }
+}
+
+// Hide an element (replaces $(sel).hide())
+function _hide(sel) {
+    var el = (typeof sel === 'string') ? document.querySelector(sel) : sel;
+    if (el) {
+        el.style.display = 'none';
+    }
+}
+
+// Toggle a class on an element (replaces $(sel).toggleClass(cls))
+function _toggleClass(sel, cls) {
+    var el = (typeof sel === 'string') ? document.querySelector(sel) : sel;
+    if (el) el.classList.toggle(cls);
+}
+
+// Escapes the five HTML-special characters so a server-supplied string can be
+// safely interpolated into an innerHTML/insertAdjacentHTML template.
+// Use this for EVERY string that comes from an API response before injecting it
+// into the DOM. Strings used only with textContent do NOT need this.
+var _escHtmlDiv = document.createElement('div');
+function _escHtml(str) {
+    _escHtmlDiv.textContent = String(str == null ? '' : str);
+    return _escHtmlDiv.innerHTML;
+}
+
+// Builds a Bootstrap-style dismissible alert banner.
+// alert_type: 'success' | 'danger' | 'warning' | 'info'
+function alert_markup(alert_type, msg) {
+    return '<div class="alert alert-' + alert_type + ' alert-dismissible" role="alert" style="margin-bottom: 20px;">'
+        + msg
+        + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+}
+
+// Displays an inline alert inside a container element.
+// type: 'success' | 'danger' | 'warning' | 'info'
+function _showInlineMsg(containerId, type, msg) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = alert_markup(type, _escHtml(msg));
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ─── Focus trap utility ───────────────────────────────────────────────────────
+// Traps Tab / Shift+Tab inside a modal element so keyboard focus cannot
+// escape to elements behind the overlay.
+// Returns a cleanup function that removes the listener.
+function _trapFocus(modalEl) {
+    var FOCUSABLE = [
+        'a[href]', 'button:not([disabled])', 'input:not([disabled])',
+        'select:not([disabled])', 'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+
+    function getFocusable() {
+        return Array.from(modalEl.querySelectorAll(FOCUSABLE))
+            .filter(function (el) { return !el.closest('[hidden]'); });
+    }
+
+    function handler(e) {
+        if (e.key !== 'Tab') return;
+        var focusable = getFocusable();
+        if (!focusable.length) { e.preventDefault(); return; }
+        var first = focusable[0];
+        var last  = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+            if (document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            }
+        } else {
+            if (document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    }
+    modalEl.addEventListener('keydown', handler);
+    return function cleanup() { modalEl.removeEventListener('keydown', handler); };
+}
+
+
+// Shows N animated skeleton rows in the guests container while the search
+// request is in flight. Replaced by real content in displayGuestList().
+function _showGuestSkeleton(count) {
+    var container = document.getElementById('guests-container');
+    if (!container) return;
+
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < (count || 3); i++) {
+        var row = document.createElement('div');
+        row.className = 'guest-skeleton';
+        ['wide', 'mid', 'short'].forEach(function(cls) {
+            var line = document.createElement('div');
+            line.className = 'skeleton-line ' + cls;
+            row.appendChild(line);
+        });
+        fragment.appendChild(row);
+    }
+    container.innerHTML = '';
+    container.appendChild(fragment);
+}
+
+// ─── Initialisation (replaces $(document).ready()) ───────────────────────────
+// Scripts.js is loaded at the end of <body>, so the DOM is already ready.
+// We use DOMContentLoaded as a belt-and-suspenders fallback.
+(function init() {
+
     // ========== Mobile hamburger menu (Transformicon) ==========
     // Toggles the animated icon state and slides the nav panel open/closed.
-    $('.nav-toggle').click(function (e) {
-        $(this).toggleClass('active');
-        $('.header-nav').toggleClass('open');
-        e.preventDefault();
-    });
+    var navToggle = document.querySelector('.nav-toggle');
+    var headerNav = document.querySelector('.header-nav');
 
-    // Also close the nav when the user taps any menu link
-    $('.header-nav li a').click(function () {
-        $('.nav-toggle').toggleClass('active');
-        $('.header-nav').toggleClass('open');
-    });
+    if (navToggle && headerNav) {
+        navToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            navToggle.classList.toggle('active');
+            headerNav.classList.toggle('open');
+        });
+
+        // Also close the nav when the user taps any menu link
+        headerNav.querySelectorAll('li a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                navToggle.classList.toggle('active');
+                headerNav.classList.toggle('open');
+            });
+        });
+    }
 
     // ========== Header BG Scroll ==================
-    // Pins the nav bar and collapses the header padding once the user scrolls past 20px
-    $(window).scroll(function () {
-        const scroll = $(window).scrollTop();
+    // Pins the nav bar and collapses the header padding once the user scrolls past 20px.
+    var navigationEl = document.querySelector('.navigation');
+    var headerEl     = document.querySelector('header');
 
-        if (scroll >= 20) {
-            $('.navigation').addClass('fixed');
+    window.addEventListener('scroll', function () {
+        var scrollY = window.scrollY || window.pageYOffset;
+
+        if (scrollY >= 20) {
+            if (navigationEl) navigationEl.classList.add('fixed');
             // Collapse header padding and hide the decorative keyline (header::after)
-            $('header').addClass('scrolled').css({ "padding": "35px 0" });
+            if (headerEl) {
+                headerEl.classList.add('scrolled');
+                headerEl.style.padding = '35px 0';
+            }
         } else {
-            $('.navigation').removeClass('fixed');
+            if (navigationEl) navigationEl.classList.remove('fixed');
             // Restore full header padding and show the decorative keyline
-            $('header').removeClass('scrolled').css({ "padding": "50px 0" });
+            if (headerEl) {
+                headerEl.classList.remove('scrolled');
+                headerEl.style.padding = '50px 0';
+            }
         }
-    });
+    }, { passive: true });
 
     // ========== Countdown timer ==========
     // Tick immediately so the display is populated on page load, then update every second.
+    updateDeadlineCountdown();
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
@@ -75,273 +260,461 @@ $(document).ready(function () {
     // every action that mutates data (updateAttendance, sendTicketEmail) requires a
     // short-lived token issued by the server on a successful searchGuest call.
     // Read-only actions (searchGuest, getPhotos) are intentionally public.
-    _rsvpStore.setEndpoint('https://script.google.com/macros/s/AKfycbx_6CBQaLmuFTzuG9_gi2nGU7nDN0YieWlcgHS92TevwYralGueUGUq3Keuoh6gF29DMA/exec');
+    _rsvpStore.setEndpoint('https://script.google.com/macros/s/AKfycbyhpyTZIsYGVzv2zbNMyTvW1ZX0Unoz8iwhV__gXfVi5xuW7erTy8scjCpM71UUC39bqw/exec');
+    _rsvpStore.setGalleryScriptUrl('https://script.google.com/macros/s/AKfycbxbEAnYtm2MBjrDkkKBJ0phsWnE2VizAK5Up5oQJLp5PPi3T8ZpnGqTVI-FvN-NF_67/exec');
 
-    let currentGuests = [];
+    var currentGuests = [];
 
     // ========== RSVP: Step 1 – search for a guest by name, email and group code ==========
     // On submit, clears any previous session and fires a GET request to the Apps Script.
     // A successful response populates currentGuests and shows the attendance selection UI.
-    $('#rsvp-search-form').on('submit', function (e) {
-        e.preventDefault();
-        const searchName = $('#rsvp-search-name').val().trim();
-        const email = String($('#rsvp-search-email').val() || '').trim();
-        const groupCode = String($('#rsvp-group-code').val() || '').trim();
-        const $btn = $(this).find('button[type="submit"]');
+    var rsvpSearchForm = document.getElementById('rsvp-search-form');
+    if (rsvpSearchForm) {
+        rsvpSearchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        if (!searchName) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu nombre.'));
-            return;
-        }
+            var searchName = document.getElementById('rsvp-search-name').value.trim();
+            var email      = String(document.getElementById('rsvp-search-email').value || '').trim();
+            var groupCode  = String(document.getElementById('rsvp-group-code').value || '').trim();
+            var btn        = rsvpSearchForm.querySelector('button[type="submit"]');
 
-        if (!email) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu correo.'));
-            return;
-        }
+            if (!searchName) {
+                _setHtml('#alert-wrapper', alert_markup('warning', 'Por favor ingresa tu nombre.'));
+                return;
+            }
+            if (!email) {
+                _setHtml('#alert-wrapper', alert_markup('warning', 'Por favor ingresa tu correo.'));
+                return;
+            }
+            if (!groupCode) {
+                _setHtml('#alert-wrapper', alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
+                return;
+            }
 
-        if (!groupCode) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor ingresa tu código de grupo.'));
-            return;
-        }
+            // Client-side rate limit: enforce a 15-second cooldown between search attempts
+            if (!_rsvpStore.canSubmit(15000)) {
+                _setHtml('#alert-wrapper', alert_markup('warning', 'Por favor espera unos segundos antes de intentar de nuevo.'));
+                return;
+            }
+            _rsvpStore.recordSubmit();
 
-        // Client-side rate limit: enforce a 15-second cooldown between search attempts
-        if (!_rsvpStore.canSubmit(15000)) {
-            $('#alert-wrapper').html(alert_markup('warning', 'Por favor espera unos segundos antes de intentar de nuevo.'));
-            return;
-        }
-        _rsvpStore.recordSubmit();
+            // Reset previous auth state on a new search
+            _rsvpStore.clearSession();
 
-        // Reset previous auth state on a new search
-        _rsvpStore.clearSession();
+            _setHtml('#alert-wrapper', alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
+            if (btn) btn.disabled = true;
 
-        $('#alert-wrapper').html(alert_markup('info', '<strong>Buscando...</strong> Por favor espera.'));
-        $btn.prop('disabled', true);
+            // Show skeleton immediately so the UI doesn't look frozen on slow connections
+            _hide('#rsvp-search-container');
+            _show('#rsvp-guest-list');
+            _showGuestSkeleton(3);
 
-        // Use GET with URL params to avoid CORS issues
-        $.ajax({
-            url: _rsvpStore.getEndpoint() + '?action=searchGuest&name=' + encodeURIComponent(searchName) + '&email=' + encodeURIComponent(email) + '&groupCode=' + encodeURIComponent(groupCode),
-            method: 'GET',
-            dataType: 'json'
-        })
-            .done(function (response) {
-                if (response.result === 'success') {
-                    // Backward-compatible path (if server returns guests directly)
-                    if (response.token) {
-                        _rsvpStore.setToken(response.token);
-                        _rsvpStore.setEmail(email);
-                        _rsvpStore.setGroupCode(groupCode);
+            // Use GET with URL params to avoid CORS issues
+            var url = _rsvpStore.getEndpoint()
+                + '?action=searchGuest'
+                + '&name='      + encodeURIComponent(searchName)
+                + '&email='     + encodeURIComponent(email)
+                + '&groupCode=' + encodeURIComponent(groupCode);
+
+            fetch(url)
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return resp.json();
+                })
+                .then(function (response) {
+                    if (response.result === 'success') {
+                        // Store token when server returns one
+                        if (response.token) {
+                            _rsvpStore.setToken(response.token);
+                            _rsvpStore.setEmail(email);
+                            _rsvpStore.setGroupCode(groupCode);
+                        }
+                        currentGuests = response.invitados;
+                        try {
+                            displayGuestList(response.grupo, response.invitados);
+                        } catch (err) {
+                            console.error('Error displaying guest list:', err);
+                            _hide('#rsvp-guest-list');
+                            _show('#rsvp-search-container');
+                            _setHtml('#alert-wrapper', alert_markup('danger', '<strong>Error:</strong> No se pudo cargar la lista de invitados. ' + err.message));
+                        }
+                    } else if (response.result === 'not_found') {
+                        _hide('#rsvp-guest-list');
+                        _show('#rsvp-search-container');
+                        _setHtml('#alert-wrapper', alert_markup('warning', _escHtml(response.message)));
+                    } else {
+                        _hide('#rsvp-guest-list');
+                        _show('#rsvp-search-container');
+                        _setHtml('#alert-wrapper', alert_markup('danger', '<strong>Error:</strong> ' + _escHtml(response.message)));
                     }
-                    currentGuests = response.invitados;
-                    displayGuestList(response.grupo, response.invitados);
-                } else if (response.result === 'not_found') {
-                    $('#alert-wrapper').html(alert_markup('warning', response.message));
-                } else {
-                    $('#alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
-                }
-            })
-            .fail(function (err) {
-                console.error('Search error:', err);
-                $('#alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
-            })
-            .always(function () {
-                $btn.prop('disabled', false);
-            });
-    });
+                })
+                .catch(function (err) {
+                    console.error('Search error:', err);
+                    _hide('#rsvp-guest-list');
+                    _show('#rsvp-search-container');
+                    _setHtml('#alert-wrapper', alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
+                })
+                .finally(function () {
+                    if (btn) btn.disabled = false;
+                });
+        });
+    }
 
     // ========== RSVP: Build guest list UI ==========
     // Renders a radio-button card for each guest showing their current attendance state.
     function displayGuestList(groupName, guests) {
-        $('#alert-wrapper').html('');
-        $('#rsvp-search-container').hide();
-        $('#rsvp-guest-list').show();
-        $('#group-name').text(groupName);
+        _setHtml('#alert-wrapper', '');
+        _hide('#rsvp-search-container');
+        _show('#rsvp-guest-list');
 
-        let guestsHtml = '';
+        var groupNameEl = document.getElementById('group-name');
+        if (groupNameEl) {
+            groupNameEl.textContent = groupName;
+        } else {
+            console.error('group-name element not found');
+        }
+
+        var guestsContainer = document.getElementById('guests-container');
+        if (!guestsContainer) {
+            console.error('guests-container element not found in DOM');
+            return;
+        }
+
+        // Build DOM nodes instead of raw HTML to prevent XSS from server-supplied names
+        var fragment = document.createDocumentFragment();
+
         guests.forEach(function (guest, index) {
-            const currentState = guest.estado || 'Pendiente';
-            guestsHtml += `
-                <div class="guest-item" data-row-index="${guest.rowIndex}">
-                    <div class="guest-name">
-                        <span class="material-symbols-outlined">person</span>
-                        ${guest.nombre} ${guest.apellido}
-                    </div>
-                    <div class="attendance-options">
-                        <div class="attendance-option confirmed">
-                            <label>
-                                <input type="radio" name="guest_${index}" value="Confirmado" ${currentState === 'Confirmado' ? 'checked' : ''}>
-                                <span><span class="material-symbols-outlined">check_circle</span> Confirmar</span>
-                            </label>
-                        </div>
-                        <div class="attendance-option not-attending">
-                            <label>
-                                <input type="radio" name="guest_${index}" value="No Asiste" ${currentState === 'No Asiste' ? 'checked' : ''}>
-                                <span><span class="material-symbols-outlined">cancel</span> No Asistirá</span>
-                            </label>
-                        </div>
-                        <div class="attendance-option pending">
-                            <label>
-                                <input type="radio" name="guest_${index}" value="Pendiente" ${currentState === 'Pendiente' ? 'checked' : ''}>
-                                <span><span class="material-symbols-outlined">schedule</span> Pendiente</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            `;
+            var currentState = guest.estado || 'Pendiente';
+
+            var item = document.createElement('div');
+            item.className = 'guest-item';
+            item.dataset.rowIndex = guest.rowIndex;
+
+            // Guest name row
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'guest-name';
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'material-symbols-outlined';
+            iconSpan.textContent = 'person';
+            nameDiv.appendChild(iconSpan);
+            nameDiv.appendChild(document.createTextNode(' ' + String(guest.nombre || '') + ' ' + String(guest.apellido || '')));
+            item.appendChild(nameDiv);
+
+            // Attendance options
+            var optionsDiv = document.createElement('div');
+            optionsDiv.className = 'attendance-options';
+
+            var options = [
+                { cls: 'confirmed',    value: 'Confirmado', icon: 'check_circle', label: 'Confirmar' },
+                { cls: 'not-attending', value: 'No Asiste',  icon: 'cancel',       label: 'No Asistirá' },
+                { cls: 'pending',      value: 'Pendiente',  icon: 'schedule',     label: 'Pendiente' }
+            ];
+
+            options.forEach(function (opt) {
+                var optDiv = document.createElement('div');
+                optDiv.className = 'attendance-option ' + opt.cls;
+
+                var label = document.createElement('label');
+                var input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'guest_' + index;
+                input.value = opt.value;
+                if (currentState === opt.value) input.checked = true;
+
+                var span = document.createElement('span');
+                var ic = document.createElement('span');
+                ic.className = 'material-symbols-outlined';
+                ic.textContent = opt.icon;
+                span.appendChild(ic);
+                span.appendChild(document.createTextNode(' ' + opt.label));
+
+                label.appendChild(input);
+                label.appendChild(span);
+                optDiv.appendChild(label);
+                optionsDiv.appendChild(optDiv);
+            });
+
+            item.appendChild(optionsDiv);
+            fragment.appendChild(item);
         });
 
-        $('#guests-container').html(guestsHtml);
+        guestsContainer.innerHTML = '';
+        guestsContainer.appendChild(fragment);
     }
 
     // ========== RSVP: Step 2 – confirm attendance for each guest in the group ==========
     // Collects the selected radio state for every guest item, builds an update list,
     // stores a ticket payload, and sends the changes to the Apps Script via GET.
     // On success, displays the confirmation modal with calendar and ticket buttons.
-    $('#confirm-attendance-btn').on('click', function () {
-        if (!_rsvpStore.getToken()) {
-            $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
-            return;
-        }
-
-        const $btn = $(this);
-        const updates = [];
-        const confirmedGuestNames = [];
-        const groupName = String($('#group-name').text() || '').trim();
-
-        $('.guest-item').each(function (index) {
-            const rowIndex = $(this).data('row-index');
-            const selectedState = $(this).find('input[type="radio"]:checked').val();
-
-            if (selectedState === 'Confirmado' && Array.isArray(currentGuests) && currentGuests[index]) {
-                const g = currentGuests[index];
-                confirmedGuestNames.push(String((g.nombre || '') + ' ' + (g.apellido || '')).trim());
+    var confirmBtn = document.getElementById('confirm-attendance-btn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            if (!_rsvpStore.getToken()) {
+                _setHtml('#confirm-alert-wrapper', alert_markup('danger', '<strong>Error:</strong> Primero realiza la búsqueda con tu código para continuar.'));
+                return;
             }
 
-            updates.push({
-                rowIndex: rowIndex,
-                estado: selectedState
-            });
-        });
+            var btn = confirmBtn;
+            var updates = [];
+            var confirmedGuestNames = [];
+            var groupNameEl = document.getElementById('group-name');
+            var groupName = groupNameEl ? String(groupNameEl.textContent || '').trim() : '';
 
-        // Store ticket payload for the confirmation modal.
-        _rsvpStore.setTicketPayload({
-            groupName: groupName,
-            confirmedGuests: confirmedGuestNames.filter(Boolean),
-            generatedAt: Date.now(),
-            ticketId: ''
-        });
+            document.querySelectorAll('.guest-item').forEach(function (item, index) {
+                var rowIndex = item.dataset.rowIndex;
+                var checkedInput = item.querySelector('input[type="radio"]:checked');
+                var selectedState = checkedInput ? checkedInput.value : undefined;
 
-        $('#confirm-alert-wrapper').html(alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
-        $btn.prop('disabled', true);
-        _rsvpStore.recordSubmit();
-
-        // Serialize updates to JSON and URL-encode for the query string
-        const updatesJson = encodeURIComponent(JSON.stringify(updates));
-
-        $.ajax({
-            url: _rsvpStore.getEndpoint() + '?action=updateAttendance&updates=' + updatesJson + '&token=' + encodeURIComponent(_rsvpStore.getToken()),
-            method: 'GET',
-            dataType: 'json'
-        })
-            .done(function (response) {
-                if (response.result === 'success') {
-                    // Attach server-issued ticket code (verifiable against the sheet)
-                    if (response.ticketId && _rsvpStore.getTicketPayload()) {
-                        _rsvpStore.updateTicketId(response.ticketId);
-                    }
-                    $('#confirm-alert-wrapper').html(alert_markup('success', '<strong>¡Listo!</strong> ' + response.message));
-
-                    // Show confirmation modal
-                    setTimeout(function () {
-                        $('#rsvp-modal').addClass('active');
-
-                        // Add calendar buttons with the same behavior as the events section
-                        const _tp = _rsvpStore.getTicketPayload();
-                        const tickets = (_tp && Array.isArray(_tp.confirmedGuests))
-                            ? _tp.confirmedGuests
-                            : [];
-                        let ticketButtonHtml = '';
-                        if (tickets.length > 0) {
-                            const label = tickets.length === 1 ? 'Descargar boleto' : 'Descargar boletos';
-                            ticketButtonHtml = `
-                            <button type="button"
-                                    onclick="downloadRsvpTickets()"
-                                    class="calendar-btn-modal">
-                                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">confirmation_number</span> ${label}
-                            </button>
-                        `;
-                        }
-
-                        const calendarButtons = `
-                        <div style="display: flex; flex-direction: row; gap: 0.75rem; margin-top: 20px;">
-                            <button onclick="agregarAlCalendario('Boda Karla &amp; Jose', 'Ceremonia: Parroquia Nuestra Señora de Altagracia, Zapopan, Jal. | Recepción: Jardin de Eventos Andira, Nuevo México, Jal.', '20261218T180000', '20261219T020000')" 
-                                    class="calendar-btn-modal">
-                                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">calendar_month</span> Añadir al Calendario
-                            </button>
-                            ${ticketButtonHtml}
-                        </div>
-                    `;
-                        $('#add-to-cal').html(calendarButtons);
-                    }, 1500);
-                } else {
-                    $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error:</strong> ' + response.message));
+                if (selectedState === 'Confirmado' && Array.isArray(currentGuests) && currentGuests[index]) {
+                    var g = currentGuests[index];
+                    confirmedGuestNames.push(String((g.nombre || '') + ' ' + (g.apellido || '')).trim());
                 }
-            })
-            .fail(function (err) {
-                console.error('Update error:', err);
-                $('#confirm-alert-wrapper').html(alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
-            })
-            .always(function () {
-                $btn.prop('disabled', false);
+
+                updates.push({ rowIndex: rowIndex, estado: selectedState });
             });
-    });
+
+            // Store ticket payload for the confirmation modal
+            _rsvpStore.setTicketPayload({
+                groupName: groupName,
+                confirmedGuests: confirmedGuestNames.filter(Boolean),
+                generatedAt: Date.now(),
+                ticketId: ''
+            });
+
+            _setHtml('#confirm-alert-wrapper', alert_markup('info', '<strong>Guardando...</strong> Por favor espera.'));
+            btn.disabled = true;
+            _rsvpStore.recordSubmit();
+
+            // POST with application/x-www-form-urlencoded (simple request — no CORS preflight).
+            // Token and guest row data must never travel in a URL: they appear in server
+            // logs, referrer headers, and browser history.
+            fetch(_rsvpStore.getEndpoint(), {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action:  'updateAttendance',
+                    updates: JSON.stringify(updates),
+                    token:   _rsvpStore.getToken()
+                })
+            })
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return resp.json();
+                })
+                .then(function (response) {
+                    if (response.result === 'success') {
+                        // Attach server-issued ticket code (verifiable against the sheet)
+                        if (response.ticketId && _rsvpStore.getTicketPayload()) {
+                            _rsvpStore.updateTicketId(response.ticketId);
+                        }
+                        _setHtml('#confirm-alert-wrapper', alert_markup('success', '<strong>¡Listo!</strong> ' + _escHtml(response.message)));
+
+                        // Show confirmation modal
+                        setTimeout(function () {
+                            var rsvpModal = document.getElementById('rsvp-modal');
+                            if (rsvpModal) rsvpModal.classList.add('active');
+
+                            // Build calendar + ticket buttons using DOM API (no innerHTML)
+                            var _tp = _rsvpStore.getTicketPayload();
+                            var tickets = (_tp && Array.isArray(_tp.confirmedGuests)) ? _tp.confirmedGuests : [];
+
+                            var addToCal = document.getElementById('add-to-cal');
+                            if (!addToCal) return;
+                            addToCal.innerHTML = ''; // clear any previous buttons
+
+                            var btnRow = document.createElement('div');
+                            btnRow.style.cssText = 'display:flex;flex-direction:row;gap:0.75rem;margin-top:20px;';
+
+                            // Calendar button
+                            var calBtn = document.createElement('button');
+                            calBtn.className = 'calendar-btn-modal';
+                            calBtn.addEventListener('click', function () {
+                                agregarAlCalendario(
+                                    CONFIG.calendarTitle,
+                                    CONFIG.calendarAddress,
+                                    CONFIG.calendarStart,
+                                    CONFIG.calendarEnd
+                                );
+                            });
+                            var calIcon = document.createElement('span');
+                            calIcon.className = 'material-symbols-outlined';
+                            calIcon.style.cssText = 'font-size:18px;vertical-align:middle;';
+                            calIcon.textContent = 'calendar_month';
+                            calBtn.appendChild(calIcon);
+                            calBtn.appendChild(document.createTextNode(' Añadir al Calendario'));
+                            btnRow.appendChild(calBtn);
+
+                            // Ticket download button (only when there are confirmed guests)
+                            if (tickets.length > 0) {
+                                var label = tickets.length === 1 ? 'Descargar boleto' : 'Descargar boletos';
+                                var ticketBtn = document.createElement('button');
+                                ticketBtn.type = 'button';
+                                ticketBtn.className = 'calendar-btn-modal';
+                                ticketBtn.addEventListener('click', downloadRsvpTickets);
+                                var ticketIcon = document.createElement('span');
+                                ticketIcon.className = 'material-symbols-outlined';
+                                ticketIcon.style.cssText = 'font-size:18px;vertical-align:middle;';
+                                ticketIcon.textContent = 'confirmation_number';
+                                ticketBtn.appendChild(ticketIcon);
+                                ticketBtn.appendChild(document.createTextNode(' ' + label));
+                                btnRow.appendChild(ticketBtn);
+                            }
+
+                            addToCal.appendChild(btnRow);
+                        }, 1500);
+                    } else {
+                        _setHtml('#confirm-alert-wrapper', alert_markup('danger', '<strong>Error:</strong> ' + _escHtml(response.message)));
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Update error:', err);
+                    _setHtml('#confirm-alert-wrapper', alert_markup('danger', '<strong>Error de conexión.</strong> Por favor intenta más tarde.'));
+                })
+                .finally(function () {
+                    btn.disabled = false;
+                });
+        });
+    }
 
     // ========== RSVP: Back button – reset to the search step ==========
     // Hides the guest list, clears all form fields, and wipes the session store
     // so the next search starts with a clean state.
-    $('#back-to-search-btn').on('click', function () {
-        $('#rsvp-guest-list').hide();
-        $('#rsvp-search-container').show();
-        $('#rsvp-search-name').val('');
-        $('#rsvp-search-email').val('');
-        $('#rsvp-group-code').val('');
-        _rsvpStore.clearAll();
-        $('#alert-wrapper').html('');
-        $('#confirm-alert-wrapper').html('');
-    });
-
-    // Builds a Bootstrap-style dismissible alert banner.
-    // alert_type: 'success' | 'danger' | 'warning' | 'info'
-    function alert_markup(alert_type, msg) {
-        return '<div class="alert alert-' + alert_type + ' alert-dismissible" role="alert" style="margin-bottom: 20px;">'
-            + msg +
-            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+    var backBtn = document.getElementById('back-to-search-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function () {
+            _hide('#rsvp-guest-list');
+            _show('#rsvp-search-container');
+            var nameEl  = document.getElementById('rsvp-search-name');
+            var emailEl = document.getElementById('rsvp-search-email');
+            var codeEl  = document.getElementById('rsvp-group-code');
+            if (nameEl)  nameEl.value  = '';
+            if (emailEl) emailEl.value = '';
+            if (codeEl)  codeEl.value  = '';
+            _rsvpStore.clearAll();
+            _setHtml('#alert-wrapper', '');
+            _setHtml('#confirm-alert-wrapper', '');
+        });
     }
-});
+
+
+
+    // ========== Listeners wired here to replace inline onclick= attributes ==========
+    // These replace every onclick="..." removed from index.html so the CSP
+    // can enforce script-src 'self' without needing 'unsafe-inline'.
+
+    // Envelope – open invitation on click AND on Enter/Space (keyboard a11y)
+    var envelopeWrapper = document.getElementById('envelope-wrapper');
+    if (envelopeWrapper) {
+        envelopeWrapper.addEventListener('click', openInvitation);
+        envelopeWrapper.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openInvitation();
+            }
+        });
+    }
+
+    // Ceremony calendar button
+    var calBtnCeremony = document.getElementById('cal-btn-ceremony');
+    if (calBtnCeremony) {
+        calBtnCeremony.addEventListener('click', function () {
+            agregarAlCalendario(
+                CONFIG.ceremonyTitle,
+                CONFIG.ceremonyAddress,
+                CONFIG.ceremonyStart,
+                CONFIG.ceremonyEnd
+            );
+        });
+    }
+
+    // Reception calendar button
+    var calBtnReception = document.getElementById('cal-btn-reception');
+    if (calBtnReception) {
+        calBtnReception.addEventListener('click', function () {
+            agregarAlCalendario(
+                CONFIG.receptionTitle,
+                CONFIG.receptionAddress,
+                CONFIG.receptionStart,
+                CONFIG.receptionEnd
+            );
+        });
+    }
+
+    // Upload modal trigger
+    var uploadTriggerBtn = document.getElementById('upload-trigger-btn');
+    if (uploadTriggerBtn) {
+        uploadTriggerBtn.addEventListener('click', openUploadModal);
+    }
+
+    // Close RSVP modal button (X button inside modal)
+    var closeRsvpModalBtn = document.getElementById('close-rsvp-modal-btn');
+    if (closeRsvpModalBtn) {
+        closeRsvpModalBtn.addEventListener('click', closeRsvpModal);
+    }
+
+    // Upload modal: close when clicking the backdrop, stop propagation from inner content
+    var uploadModal = document.getElementById('upload-modal');
+    if (uploadModal) {
+        uploadModal.addEventListener('click', function (e) {
+            if (e.target === uploadModal) closeUploadModal();
+        });
+        var uploadModalContent = uploadModal.querySelector('.upload-modal-content');
+        if (uploadModalContent) {
+            uploadModalContent.addEventListener('click', function (e) { e.stopPropagation(); });
+        }
+    }
+
+    // Close upload modal button (X button inside modal)
+    var closeUploadModalBtn = document.getElementById('close-upload-modal-btn');
+    if (closeUploadModalBtn) {
+        closeUploadModalBtn.addEventListener('click', closeUploadModal);
+    }
+
+    // Photo lightbox: close when clicking backdrop, stop propagation from image content
+    var photoLightbox = document.getElementById('photo-lightbox');
+    if (photoLightbox) {
+        photoLightbox.addEventListener('click', function (e) {
+            if (e.target === photoLightbox) closePhotoLightbox();
+        });
+        var lightboxContent = photoLightbox.querySelector('.lightbox-content');
+        if (lightboxContent) {
+            lightboxContent.addEventListener('click', function (e) { e.stopPropagation(); });
+        }
+    }
+
+    // Lightbox close button
+    var lightboxCloseBtn = document.getElementById('lightbox-close-btn');
+    if (lightboxCloseBtn) {
+        lightboxCloseBtn.addEventListener('click', closePhotoLightbox);
+    }
+
+}()); // end init()
+
+// ─── Functions below are called from outside the init IIFE ───────────────────
 
 // Triggered by the "Descargar boleto(s)" button inside the RSVP confirmation modal.
 // Generates a PNG ticket via canvas, triggers a browser download, and e-mails
 // a copy to the guest's verified address.
 function downloadRsvpTickets() {
-    const payload = _rsvpStore.getTicketPayload();
-    const guests = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
-    const groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
-    const ticketId = payload && typeof payload.ticketId === 'string' ? payload.ticketId : '';
+    var payload   = _rsvpStore.getTicketPayload();
+    var guests    = payload && Array.isArray(payload.confirmedGuests) ? payload.confirmedGuests : [];
+    var groupName = payload && typeof payload.groupName === 'string' ? payload.groupName : '';
+    var ticketId  = payload && typeof payload.ticketId  === 'string' ? payload.ticketId  : '';
 
     if (!guests.length) {
-        alert('No hay boletos disponibles para descargar.');
+        _showInlineMsg('add-to-cal', 'warning', 'No hay boletos disponibles para descargar.');
         return;
     }
 
-    const safeGroup = String(groupName || 'grupo')
+    var safeGroup = String(groupName || 'grupo')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
         .toLowerCase();
-    const filename = guests.length === 1
-        ? ('boleto-' + safeGroup + '.png')
+    var filename = guests.length === 1
+        ? ('boleto-'  + safeGroup + '.png')
         : ('boletos-' + safeGroup + '.png');
 
     // Canvas drawing needs assets loaded, so ticket generation is async.
-    let qrPromise = Promise.resolve('');
+    var qrPromise = Promise.resolve('');
     if (ticketId) {
         qrPromise = getQrDataUrlForTicket(ticketId).catch(function () { return ''; });
     }
@@ -357,56 +730,35 @@ function downloadRsvpTickets() {
             if (_rsvpStore.getToken()) {
                 sendTicketEmail(dataUrl, filename).catch(function (e) {
                     console.error('Ticket email failed:', e);
-                    // Keep UX minimal: only an alert so the user knows it didn't send.
-                    alert('No se pudo enviar el boleto por correo. Intenta de nuevo.');
+                    _showInlineMsg('add-to-cal', 'warning', 'No se pudo enviar el boleto por correo. Intenta de nuevo.');
                 });
             }
         })
         .catch(function (e) {
             console.error('Ticket generation failed:', e);
-            alert('No se pudo generar el boleto. Intenta de nuevo.');
+            _showInlineMsg('add-to-cal', 'danger', 'No se pudo generar el boleto. Intenta de nuevo.');
         });
 }
 
 // POSTs the generated ticket PNG (as a base64 data URL) to the Apps Script so it
 // can e-mail a copy to the address that was verified during the RSVP search.
-// Uses jQuery $.ajax if available, falls back to the Fetch API otherwise.
+// Uses fetch with application/x-www-form-urlencoded to avoid CORS preflight.
 function sendTicketEmail(ticketDataUrl, filename) {
-    const endpoint = _rsvpStore.getEndpoint();
+    var endpoint = _rsvpStore.getEndpoint();
     if (!endpoint || !_rsvpStore.getToken()) return Promise.reject(new Error('Missing RSVP auth token'));
 
-    const payload = {
-        action: 'sendTicketEmail',
-        token: String(_rsvpStore.getToken()),
+    var payload = {
+        action:       'sendTicketEmail',
+        token:        String(_rsvpStore.getToken()),
         ticketDataUrl: String(ticketDataUrl || ''),
-        filename: String(filename || '')
+        filename:     String(filename || '')
     };
 
-    // Use application/x-www-form-urlencoded (simple request) to avoid CORS preflight that Apps Script doesn't handle.
-    if (typeof window.$ === 'function' && $.ajax) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: endpoint,
-                method: 'POST',
-                dataType: 'json',
-                data: payload
-            })
-                .done(function (json) {
-                    if (!json || json.result !== 'success') {
-                        reject(new Error((json && json.message) ? json.message : 'Email failed'));
-                        return;
-                    }
-                    resolve(json);
-                })
-                .fail(function (_xhr, _status, err) {
-                    reject(err || new Error('Email request failed'));
-                });
-        });
-    }
-
+    // Use application/x-www-form-urlencoded (simple request) to avoid CORS preflight
+    // that Apps Script doesn't handle.
     return fetch(endpoint, {
         method: 'POST',
-        body: new URLSearchParams(payload)
+        body:   new URLSearchParams(payload)
     })
         .then(function (resp) { return resp.json(); })
         .then(function (json) {
@@ -420,7 +772,7 @@ function sendTicketEmail(ticketDataUrl, filename) {
 // Returns the Apps Script URL that verifies a ticket code.
 // Used as the QR code payload so event staff can scan and validate attendance.
 function buildVerifyTicketUrl(ticketId) {
-    const endpoint = _rsvpStore.getEndpoint();
+    var endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return '';
     return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 }
@@ -432,31 +784,31 @@ function generateQrDataUrlLocal(text, sizePx) {
     if (typeof qrcode !== 'function') {
         throw new Error('QR library not loaded');
     }
-    const size = Number(sizePx) > 0 ? Number(sizePx) : 240;
-    const qr = qrcode(0, 'M');
+    var size = Number(sizePx) > 0 ? Number(sizePx) : 240;
+    var qr = qrcode(0, 'M');
     qr.addData(String(text || ''));
     qr.make();
 
-    const count = qr.getModuleCount();
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
+    var count  = qr.getModuleCount();
+    var canvas = document.createElement('canvas');
+    canvas.width  = size;
     canvas.height = size;
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = '#000000';
 
-    const tileW = size / count;
-    const tileH = size / count;
+    var tileW = size / count;
+    var tileH = size / count;
 
-    for (let row = 0; row < count; row++) {
-        for (let col = 0; col < count; col++) {
+    for (var row = 0; row < count; row++) {
+        for (var col = 0; col < count; col++) {
             if (!qr.isDark(row, col)) continue;
-            const x = Math.round(col * tileW);
-            const y = Math.round(row * tileH);
-            const w = Math.ceil(tileW);
-            const h = Math.ceil(tileH);
+            var x = Math.round(col * tileW);
+            var y = Math.round(row * tileH);
+            var w = Math.ceil(tileW);
+            var h = Math.ceil(tileH);
             ctx.fillRect(x, y, w, h);
         }
     }
@@ -468,10 +820,9 @@ function generateQrDataUrlLocal(text, sizePx) {
 // Tries to fetch a pre-rendered QR from the server first; falls back to
 // generating one locally if the server call fails.
 function getQrDataUrlForTicket(ticketId) {
-    // Prefer server-side QR if available; fall back to local QR generation.
     return fetchTicketQrDataUrl(ticketId)
         .catch(function () {
-            const verifyUrl = buildVerifyTicketUrl(ticketId);
+            var verifyUrl = buildVerifyTicketUrl(ticketId);
             if (!verifyUrl) return '';
             return generateQrDataUrlLocal(verifyUrl, 240);
         });
@@ -480,34 +831,12 @@ function getQrDataUrlForTicket(ticketId) {
 // Fetches a server-generated QR code PNG (as a data URL) from the Apps Script.
 // Rejects if the endpoint is unavailable or the server returns an error.
 function fetchTicketQrDataUrl(ticketId) {
-    const endpoint = _rsvpStore.getEndpoint();
+    var endpoint = _rsvpStore.getEndpoint();
     if (!endpoint) return Promise.reject(new Error('RSVP endpoint not available'));
 
-    const url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
+    var url = endpoint + '?action=getTicketQr&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 
-    // Prefer jQuery Ajax (already used elsewhere in this site) for consistent behavior.
-    if (typeof window.$ === 'function' && $.ajax) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: url,
-                method: 'GET',
-                dataType: 'json'
-            })
-                .done(function (json) {
-                    if (!json || json.result !== 'success' || !json.qrDataUrl) {
-                        reject(new Error((json && json.message) ? json.message : 'QR unavailable'));
-                        return;
-                    }
-                    resolve(String(json.qrDataUrl));
-                })
-                .fail(function (_xhr, _status, err) {
-                    reject(err || new Error('QR request failed'));
-                });
-        });
-    }
-
-    // Fallback: fetch
-    return fetch(url, { method: 'GET' })
+    return fetch(url)
         .then(function (resp) { return resp.json(); })
         .then(function (json) {
             if (!json || json.result !== 'success' || !json.qrDataUrl) {
@@ -531,9 +860,9 @@ function resolveAssetUrl(path) {
 // Returns a Promise that resolves with the loaded image or rejects on error.
 function loadImageForCanvas(src) {
     return new Promise(function (resolve, reject) {
-        const img = new Image();
+        var img = new Image();
         // Do not force crossOrigin here; it can break loads in some local hosting setups.
-        img.onload = function () { resolve(img); };
+        img.onload  = function () { resolve(img); };
         img.onerror = function () { reject(new Error('Failed to load image: ' + src)); };
         img.src = resolveAssetUrl(src);
     });
@@ -543,7 +872,7 @@ function loadImageForCanvas(src) {
 // Data/blob URLs are loaded directly; other URLs are fetched as a blob first
 // so that canvas.toDataURL() can be called without a SecurityError.
 function loadImageForCanvasUntainted(src) {
-    const resolved = resolveAssetUrl(src);
+    var resolved = resolveAssetUrl(src);
 
     // Data/blob URLs are safe to draw.
     if (/^(data:|blob:)/i.test(resolved)) {
@@ -551,38 +880,33 @@ function loadImageForCanvasUntainted(src) {
     }
 
     // Best effort: fetch as a blob and draw from a same-origin blob: URL.
-    // This avoids canvas tainting when the image would otherwise be treated as cross-origin.
-    if (typeof fetch === 'function') {
-        return fetch(resolved, { cache: 'no-store' })
-            .then(function (resp) {
-                if (!resp.ok) throw new Error('Image fetch failed: ' + resp.status);
-                return resp.blob();
-            })
-            .then(function (blob) {
-                const objUrl = URL.createObjectURL(blob);
-                return loadImageForCanvas(objUrl)
-                    .then(function (img) {
-                        try { URL.revokeObjectURL(objUrl); } catch (_e) { }
-                        return img;
-                    })
-                    .catch(function (e) {
-                        try { URL.revokeObjectURL(objUrl); } catch (_e) { }
-                        throw e;
-                    });
-            })
-            .catch(function () {
-                // Fallback to direct load
-                return loadImageForCanvas(resolved);
-            });
-    }
-
-    return loadImageForCanvas(resolved);
+    return fetch(resolved, { cache: 'no-store' })
+        .then(function (resp) {
+            if (!resp.ok) throw new Error('Image fetch failed: ' + resp.status);
+            return resp.blob();
+        })
+        .then(function (blob) {
+            var objUrl = URL.createObjectURL(blob);
+            return loadImageForCanvas(objUrl)
+                .then(function (img) {
+                    try { URL.revokeObjectURL(objUrl); } catch (_e) { }
+                    return img;
+                })
+                .catch(function (e) {
+                    try { URL.revokeObjectURL(objUrl); } catch (_e) { }
+                    throw e;
+                });
+        })
+        .catch(function () {
+            // Fallback to direct load
+            return loadImageForCanvas(resolved);
+        });
 }
 
 // Returns the URL of the wedding logo that is already loaded in the page DOM.
 // Falls back to the known relative path when no img element is found.
 function getTicketLogoUrl() {
-    const el = document.querySelector('img[src*="logo2.webp"]');
+    var el = document.querySelector('img[src*="logo2.webp"]');
     if (el && el.src) return el.src;
     return 'img/logo2.webp';
 }
@@ -590,14 +914,14 @@ function getTicketLogoUrl() {
 // Draws an image centred and scaled to fit inside the (x, y, w, h) rectangle
 // using the "contain" strategy (no cropping, letter-boxing preserved).
 function drawImageContain(ctx, img, x, y, w, h) {
-    const iw = img.naturalWidth || img.width;
-    const ih = img.naturalHeight || img.height;
+    var iw = img.naturalWidth || img.width;
+    var ih = img.naturalHeight || img.height;
     if (!iw || !ih) return;
-    const scale = Math.min(w / iw, h / ih);
-    const dw = Math.round(iw * scale);
-    const dh = Math.round(ih * scale);
-    const dx = Math.round(x + (w - dw) / 2);
-    const dy = Math.round(y + (h - dh) / 2);
+    var scale = Math.min(w / iw, h / ih);
+    var dw = Math.round(iw * scale);
+    var dh = Math.round(ih * scale);
+    var dx = Math.round(x + (w - dw) / 2);
+    var dy = Math.round(y + (h - dh) / 2);
     ctx.drawImage(img, dx, dy, dw, dh);
 }
 
@@ -605,21 +929,21 @@ function drawImageContain(ctx, img, x, y, w, h) {
 // opts: { groupName, guests[], ticketId, qrDataUrl }
 // Returns a Promise<string> (PNG data URL).
 function generateRsvpTicketPng(opts) {
-    const groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
-    const guests = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
-    const ticketId = (opts && opts.ticketId) ? String(opts.ticketId).trim() : '';
-    const qrDataUrl = (opts && opts.qrDataUrl) ? String(opts.qrDataUrl) : '';
+    var groupName = (opts && opts.groupName) ? String(opts.groupName) : '';
+    var guests    = (opts && Array.isArray(opts.guests)) ? opts.guests.map(String).filter(Boolean) : [];
+    var ticketId  = (opts && opts.ticketId)  ? String(opts.ticketId).trim()  : '';
+    var qrDataUrl = (opts && opts.qrDataUrl) ? String(opts.qrDataUrl)        : '';
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 1400;
+    var canvas  = document.createElement('canvas');
+    canvas.width  = 1400;
     canvas.height = 800;
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
 
     // Palette matches existing site colors.
-    const greenDark = '#0F3B2E';
-    const green = '#2E8B57';
-    const gold = '#d4af37';
-    const grayText = '#4a4a4a';
+    var greenDark = '#0F3B2E';
+    var green     = '#2E8B57';
+    var gold      = '#d4af37';
+    var grayText  = '#4a4a4a';
 
     function drawTicket(logoImg, qrImg) {
         function drawBackgroundAndWatermark() {
@@ -646,7 +970,7 @@ function generateRsvpTicketPng(opts) {
             ctx.textBaseline = 'alphabetic';
             ctx.fillText('BOLETO', 70, 92);
             ctx.font = '500 30px Manrope, Arial, sans-serif';
-            ctx.fillText('Boda de Karla & Jose', 70, 125);
+            ctx.fillText(CONFIG.coupleTitle, 70, 125);
 
             ctx.fillStyle = grayText;
             ctx.font = '600 30px Manrope, Arial, sans-serif';
@@ -657,7 +981,7 @@ function generateRsvpTicketPng(opts) {
             ctx.fillText('Fecha:', 70, 265);
             ctx.fillStyle = grayText;
             ctx.font = '400 26px Manrope, Arial, sans-serif';
-            ctx.fillText('18 de diciembre, 2026', 155, 265);
+            ctx.fillText(CONFIG.ticketDateText, 155, 265);
 
             ctx.fillStyle = green;
             ctx.font = '600 26px Manrope, Arial, sans-serif';
@@ -672,10 +996,10 @@ function generateRsvpTicketPng(opts) {
 
             ctx.fillStyle = grayText;
             ctx.font = '400 26px Manrope, Arial, sans-serif';
-            const startY = 415;
-            const lineHeight = 34;
-            const maxLines = 8;
-            for (let i = 0; i < Math.min(guests.length, maxLines); i++) {
+            var startY     = 415;
+            var lineHeight = 34;
+            var maxLines   = 8;
+            for (var i = 0; i < Math.min(guests.length, maxLines); i++) {
                 ctx.fillText('• ' + guests[i], 90, startY + (i * lineHeight));
             }
             if (guests.length > maxLines) {
@@ -694,9 +1018,9 @@ function generateRsvpTicketPng(opts) {
             }
 
             if (ticketId && qrImg) {
-                const qrSize = 220;
-                const qrX = canvas.width - (qrSize + 80);
-                const qrY = canvas.height - (qrSize + 110);
+                var qrSize = 220;
+                var qrX    = canvas.width - (qrSize + 80);
+                var qrY    = canvas.height - (qrSize + 110);
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
                 drawImageContain(ctx, qrImg, qrX, qrY, qrSize, qrSize);
@@ -717,14 +1041,13 @@ function generateRsvpTicketPng(opts) {
             return canvas.toDataURL('image/png');
         } catch (e) {
             if (String(e && e.name) === 'SecurityError') {
-                console.warn('Ticket canvas was tainted; exporting without images.');
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.globalAlpha = 1;
                 ctx.globalCompositeOperation = 'source-over';
                 if ('filter' in ctx) ctx.filter = 'none';
 
                 logoImg = null;
-                qrImg = null;
+                qrImg   = null;
                 drawBackgroundAndWatermark();
                 drawTextAndQRCode();
 
@@ -735,23 +1058,25 @@ function generateRsvpTicketPng(opts) {
     }
 
     // Use the resolved DOM URL first to avoid path issues.
-    const logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
+    var logoPromise = loadImageForCanvasUntainted(getTicketLogoUrl())
         .catch(function () { return loadImageForCanvasUntainted('img/logo2.webp'); })
         .catch(function () { return loadImageForCanvasUntainted('./img/logo2.webp'); })
         .catch(function () { return null; });
-    const qrPromise = qrDataUrl ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; }) : Promise.resolve(null);
+    var qrPromise = qrDataUrl
+        ? loadImageForCanvasUntainted(qrDataUrl).catch(function () { return null; })
+        : Promise.resolve(null);
 
     return Promise.all([logoPromise, qrPromise]).then(function (results) {
-        const logoImg = results[0] || null;
-        const qrImg = results[1] || null;
+        var logoImg = results[0] || null;
+        var qrImg   = results[1] || null;
         return drawTicket(logoImg, qrImg);
     });
 }
 
 // Triggers a browser download for a data URL with the given filename.
 function downloadDataUrl(dataUrl, filename) {
-    const a = document.createElement('a');
-    a.href = dataUrl;
+    var a = document.createElement('a');
+    a.href     = dataUrl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
@@ -761,20 +1086,45 @@ function downloadDataUrl(dataUrl, filename) {
 // Calculates the remaining time until the wedding and updates the hero countdown
 // elements (days, hours, minutes, seconds). Shows a celebration message when
 // the target date has passed.
-function updateCountdown() {
-    const weddingDate = new Date('December 18, 2026 18:00:00').getTime();
-    const now = new Date().getTime();
-    const diff = weddingDate - now;
+// Updates the RSVP deadline pill with "X días para confirmar".
+// Runs once on page load — the deadline doesn't change second-by-second.
+function updateDeadlineCountdown() {
+    var el = document.getElementById('rsvp-deadline-countdown');
+    if (!el) return;
+
+    var now  = Date.now();
+    var diff = CONFIG.rsvpDeadline.getTime() - now;
 
     if (diff <= 0) {
-        $('#countdown-hero').html('<p style="color: #2E8B57;">¡El gran día ha llegado!</p>');
+        el.textContent = '¡Plazo vencido!';
+        el.className = 'rsvp-deadline-countdown overdue';
         return;
     }
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
+    var days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    var label = days === 1 ? '1 día restante' : days + ' días restantes';
+    el.textContent = label;
+    // Amber warning when fewer than 14 days remain
+    el.className = 'rsvp-deadline-countdown' + (days < 14 ? ' urgent' : '');
+}
+
+function updateCountdown() {
+    var weddingDate = CONFIG.weddingDate.getTime();
+    var now         = new Date().getTime();
+    var diff        = weddingDate - now;
+
+    if (diff <= 0) {
+        var heroEl = document.getElementById('countdown-hero');
+        if (heroEl) {
+            heroEl.innerHTML = '<p style="color: #2E8B57;">¡El gran día ha llegado!</p>';
+        }
+        return;
+    }
+
+    var days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours   = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+    var seconds = Math.floor((diff / 1000) % 60);
 
     document.getElementById('d-hero').textContent = String(days).padStart(2, '0');
     document.getElementById('h-hero').textContent = String(hours).padStart(2, '0');
@@ -786,14 +1136,17 @@ function updateCountdown() {
 // titulo, ubicacion: plain-text event details
 // inicio, fin: date-time strings in YYYYMMDDTHHMMSS format (local time)
 function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
-    const encodedTitulo = encodeURIComponent(titulo);
-    const encodedUbicacion = encodeURIComponent(ubicacion);
+    // Guard against double-injection from rapid clicks
+    if (document.getElementById('calendar-modal-container')) return;
+
+    var encodedTitulo    = encodeURIComponent(titulo);
+    var encodedUbicacion = encodeURIComponent(ubicacion);
 
     // Generate an ICS file for Apple Calendar
-    const icsContent = [
+    var icsContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//Boda Karla & Jose//ES',
+        'PRODID:-//' + CONFIG.coupleNames + '//ES',
         'BEGIN:VEVENT',
         'DTSTART:' + inicio,
         'DTEND:' + fin,
@@ -805,13 +1158,13 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
         'END:VCALENDAR'
     ].join('\r\n');
 
-    const icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const icsUrl = URL.createObjectURL(icsBlob);
+    var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    var icsUrl  = URL.createObjectURL(icsBlob);
 
-    const opciones = `
+    var opciones = `
         <div id="calendar-modal-overlay" class="gifts-modal active" style="z-index: 9998;">
-            <div onclick="event.stopPropagation()" class="gifts-modal-content calendar-modal-content">
-                <button onclick="cerrarModalCalendario()" class="gifts-modal-close calendar-modal-close">
+            <div class="gifts-modal-content calendar-modal-content">
+                <button id="calendar-modal-close-btn" class="gifts-modal-close calendar-modal-close" aria-label="Cerrar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
                 <span class="registry-eyebrow" style="display:block; text-align:center;">Añadir al Calendario</span>
@@ -866,24 +1219,34 @@ function agregarAlCalendario(titulo, ubicacion, inicio, fin) {
         </div>
     `;
 
-    const modal = document.createElement('div');
+    var modal = document.createElement('div');
     modal.id = 'calendar-modal-container';
     modal._icsUrl = icsUrl; // store so cerrarModalCalendario can revoke it
     modal.innerHTML = opciones;
     document.body.appendChild(modal);
 
-    // Close when clicking on the overlay
-    document.getElementById('calendar-modal-overlay').onclick = function (e) {
-        if (e.target.id === 'calendar-modal-overlay') {
-            cerrarModalCalendario();
-        }
-    };
+    // Wire close button and backdrop — no inline handlers needed
+    var _cmOverlay = document.getElementById('calendar-modal-overlay');
+    var _cmContent = _cmOverlay ? _cmOverlay.querySelector('.gifts-modal-content') : null;
+    var _cmCloseBtn = document.getElementById('calendar-modal-close-btn');
+
+    if (_cmCloseBtn) {
+        _cmCloseBtn.addEventListener('click', cerrarModalCalendario);
+    }
+    if (_cmContent) {
+        _cmContent.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+    if (_cmOverlay) {
+        _cmOverlay.addEventListener('click', function (e) {
+            if (e.target === _cmOverlay) cerrarModalCalendario();
+        });
+    }
 }
 
 // Removes the calendar picker modal injected by agregarAlCalendario() and
 // revokes the ICS Blob URL to avoid a memory leak.
 function cerrarModalCalendario() {
-    const modal = document.getElementById('calendar-modal-container');
+    var modal = document.getElementById('calendar-modal-container');
     if (modal) {
         if (modal._icsUrl) {
             try { URL.revokeObjectURL(modal._icsUrl); } catch (_e) { }
@@ -898,12 +1261,12 @@ function cerrarModalCalendario() {
 // and updates the bottom info bar (label, sublabel, directions link).
 // ============================================
 (function () {
-    const tabs = document.querySelectorAll('.map-tab');
-    const allFrames = document.querySelectorAll('.map-frame-wrap iframe');
-    const barLabel = document.getElementById('bar-label');
-    const barSublabel = document.getElementById('bar-sublabel');
-    const barBtn = document.getElementById('bar-btn');
-    const barIcon = document.getElementById('bar-icon');
+    var tabs      = document.querySelectorAll('.map-tab');
+    var allFrames = document.querySelectorAll('.map-frame-wrap iframe');
+    var barLabel    = document.getElementById('bar-label');
+    var barSublabel = document.getElementById('bar-sublabel');
+    var barBtn      = document.getElementById('bar-btn');
+    var barIcon     = document.getElementById('bar-icon');
 
     if (!tabs.length) return;
 
@@ -913,18 +1276,26 @@ function cerrarModalCalendario() {
             tabs.forEach(function (t) { t.classList.remove('active'); });
             tab.classList.add('active');
 
-            // Show correct iframe
+            // Show correct iframe — lazy-load it on first reveal
             allFrames.forEach(function (f) {
-                f.classList.toggle('visible', f.id === tab.dataset.target);
+                var isTarget = f.id === tab.dataset.target;
+                f.classList.toggle('visible', isTarget);
+                // Hydrate data-src → src the first time the iframe becomes visible.
+                // This prevents the hidden map from fetching ~300 KB of Maps JS on
+                // page load before the user has ever opened that tab.
+                if (isTarget && f.dataset.src && !f.src) {
+                    f.src = f.dataset.src;
+                    delete f.dataset.src;
+                }
             });
 
             // Update bottom bar
-            if (barLabel) barLabel.textContent = tab.dataset.label;
+            if (barLabel)    barLabel.textContent    = tab.dataset.label;
             if (barSublabel) barSublabel.textContent = tab.dataset.sublabel;
             if (barBtn) {
                 barBtn.textContent = tab.dataset.btnText;
-                barBtn.href = tab.dataset.btnHref;
-                barBtn.className = 'map-btn-link';
+                barBtn.href        = tab.dataset.btnHref;
+                barBtn.className   = 'map-btn-link';
             }
             if (barIcon) barIcon.className = 'map-icon ' + tab.dataset.iconClass;
         });
@@ -935,7 +1306,7 @@ function cerrarModalCalendario() {
 // Programmatically activates a map tab by its data-target value.
 // Called from the event-card "Ver mapa" buttons in the HTML.
 function activarMapTab(targetId) {
-    const tab = document.querySelector('.map-tab[data-target="' + targetId + '"]');
+    var tab = document.querySelector('.map-tab[data-target="' + targetId + '"]');
     if (tab) tab.click();
 }
 
@@ -946,17 +1317,21 @@ function activarMapTab(targetId) {
 // Links with [data-map-tab] also activate the correct map tab before
 // scrolling, so the tab state is set before the viewport moves.
 // ============================================
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         // If the link carries a map-tab target, activate it first.
-        const mapTab = this.getAttribute('data-map-tab');
+        var mapTab = this.getAttribute('data-map-tab');
         if (mapTab) {
             activarMapTab(mapTab);
         }
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
+        var href = this.getAttribute('href');
+        // Only proceed if href is not just '#' or empty
+        if (href && href !== '#') {
+            var target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
         }
     });
 });
@@ -968,11 +1343,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     // Collect all gallery item sources in DOM order
     function getGalleryImages() {
         return Array.from(document.querySelectorAll('.gallery-item[data-src]'))
-            .map(btn => btn.dataset.src);
+            .map(function (btn) { return btn.dataset.src; });
     }
 
     // Build lightbox DOM once
-    const lb = document.createElement('div');
+    var lb = document.createElement('div');
     lb.id = 'gallery-lightbox';
     lb.setAttribute('role', 'dialog');
     lb.setAttribute('aria-modal', 'true');
@@ -986,15 +1361,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     `;
     document.body.appendChild(lb);
 
-    const lbImg = lb.querySelector('.lb-img');
-    const lbCounter = lb.querySelector('.lb-counter');
-    let lbImages = [];
-    let lbIndex = 0;
-    let lbTouchStartX = 0;
+    var lbImg     = lb.querySelector('.lb-img');
+    var lbCounter = lb.querySelector('.lb-counter');
+    var lbImages  = [];
+    var lbIndex   = 0;
+    var lbTouchStartX = 0;
 
     function lbOpen(index) {
         lbImages = getGalleryImages();
-        lbIndex = index;
+        lbIndex  = index;
         lbShow();
         lb.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1009,7 +1384,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
     function lbShow() {
         lbImg.src = lbImages[lbIndex];
-        lbCounter.textContent = `${lbIndex + 1} / ${lbImages.length}`;
+        lbCounter.textContent = (lbIndex + 1) + ' / ' + lbImages.length;
         lb.querySelector('.lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
         lb.querySelector('.lb-next').style.display = lbImages.length > 1 ? '' : 'none';
     }
@@ -1019,10 +1394,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
     // Delegate clicks on gallery buttons
     document.addEventListener('click', function (e) {
-        const btn = e.target.closest('.gallery-item[data-src]');
+        var btn = e.target.closest('.gallery-item[data-src]');
         if (btn) {
-            const srcs = getGalleryImages();
-            const idx = srcs.indexOf(btn.dataset.src);
+            var srcs = getGalleryImages();
+            var idx  = srcs.indexOf(btn.dataset.src);
             lbOpen(idx >= 0 ? idx : 0);
         }
     });
@@ -1039,17 +1414,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     // Keyboard: Escape closes, arrows navigate
     document.addEventListener('keydown', function (e) {
         if (!lb.classList.contains('active')) return;
-        if (e.key === 'Escape') lbClose();
-        if (e.key === 'ArrowLeft') lbPrev();
+        if (e.key === 'Escape')     lbClose();
+        if (e.key === 'ArrowLeft')  lbPrev();
         if (e.key === 'ArrowRight') lbNext();
     });
 
     // Touch swipe
     lb.addEventListener('touchstart', function (e) { lbTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
     lb.addEventListener('touchend', function (e) {
-        const dx = e.changedTouches[0].screenX - lbTouchStartX;
+        var dx = e.changedTouches[0].screenX - lbTouchStartX;
         if (dx < -50) lbNext();
-        if (dx > 50) lbPrev();
+        if (dx >  50) lbPrev();
     });
 }());
 
@@ -1060,49 +1435,49 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Playlist - add your MP3 files here
 const playlist = [
     {
-        title: "How Deep Is Your Love",
+        title:  "How Deep Is Your Love",
         artist: "Bee Gees",
-        src: "mp3/How Deep Is Your Love - Bee Gees.mp3"
+        src:    "mp3/How Deep Is Your Love - Bee Gees.mp3"
     },
     {
-        title: "Patadas de Ahogado",
+        title:  "Patadas de Ahogado",
         artist: "LATIN MAFIA",
-        src: "mp3/Patadas de Ahogado - LATIN MAFIA.mp3"
+        src:    "mp3/Patadas de Ahogado - LATIN MAFIA.mp3"
     },
     {
-        title: "Del Altar a la Tumba",
+        title:  "Del Altar a la Tumba",
         artist: "José José",
-        src: "mp3/Del Altar a la Tumba - José José.mp3"
+        src:    "mp3/Del Altar a la Tumba - José José.mp3"
     },
     {
-        title: "Morfina",
+        title:  "Morfina",
         artist: "HUMBE",
-        src: "mp3/Morfina - HUMBE.mp3"
+        src:    "mp3/Morfina - HUMBE.mp3"
     },
     {
-        title: "Sólo Tú y Yo",
+        title:  "Sólo Tú y Yo",
         artist: "José José",
-        src: "mp3/Sólo Tú y Yo - José José.mp3"
+        src:    "mp3/Sólo Tú y Yo - José José.mp3"
     },
     {
-        title: "Por Favor",
+        title:  "Por Favor",
         artist: "HUMBE",
-        src: "mp3/Por Favor - HUMBE.mp3"
+        src:    "mp3/Por Favor - HUMBE.mp3"
     },
 ];
 
 let currentTrackIndex = 0;
 
-const audioPlayer = document.getElementById('audio-player');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const trackTitle = document.getElementById('track-title');
-const trackArtist = document.getElementById('track-artist');
-const progressFill = document.getElementById('progress-fill');
+const audioPlayer   = document.getElementById('audio-player');
+const playPauseBtn  = document.getElementById('play-pause-btn');
+const prevBtn       = document.getElementById('prev-btn');
+const nextBtn       = document.getElementById('next-btn');
+const trackTitle    = document.getElementById('track-title');
+const trackArtist   = document.getElementById('track-artist');
+const progressFill  = document.getElementById('progress-fill');
 const currentTimeEl = document.getElementById('current-time');
-const durationEl = document.getElementById('duration');
-const progressBar = document.querySelector('#music-player-bar .mpb-progress-track');
+const durationEl    = document.getElementById('duration');
+const progressBar   = document.querySelector('#music-player-bar .mpb-progress-track');
 
 function isAudioPlaying() {
     return !!(audioPlayer && !audioPlayer.paused && !audioPlayer.ended);
@@ -1110,12 +1485,12 @@ function isAudioPlaying() {
 
 function syncPlayPauseUI() {
     if (!audioPlayer || !playPauseBtn) return;
-    const icon = playPauseBtn.querySelector('.material-symbols-outlined');
+    var icon = playPauseBtn.querySelector('.material-symbols-outlined');
     if (!icon) return;
 
-    const playingNow = isAudioPlaying();
+    var playingNow = isAudioPlaying();
     icon.textContent = playingNow ? 'pause_circle' : 'play_circle';
-    playPauseBtn.setAttribute('title', playingNow ? 'Pausar' : 'Reproducir');
+    playPauseBtn.setAttribute('title',      playingNow ? 'Pausar' : 'Reproducir');
     playPauseBtn.setAttribute('aria-label', playingNow ? 'Pausar' : 'Reproducir');
 }
 
@@ -1123,29 +1498,27 @@ function syncPlayPauseUI() {
 // The src is assigned lazily when the user first requests playback.
 function loadTrack(index) {
     if (playlist.length === 0) {
-        trackTitle.textContent = "Sin canciones";
+        trackTitle.textContent  = "Sin canciones";
         trackArtist.textContent = "Agrega archivos MP3 a la carpeta 'mp3'";
         return;
     }
 
-    const track = playlist[index];
+    var track = playlist[index];
     // Only update the src if the element already had one (i.e. playback was
     // in progress) so we don't trigger a network fetch on page load.
     if (audioPlayer.src && audioPlayer.src !== window.location.href) {
         audioPlayer.src = track.src;
         audioPlayer.load();
     }
-    trackTitle.textContent = track.title;
+    trackTitle.textContent  = track.title;
     trackArtist.textContent = track.artist;
 
     // Reset progress
-    progressFill.style.width = '0%';
-    currentTimeEl.textContent = '0:00';
+    progressFill.style.width    = '0%';
+    currentTimeEl.textContent   = '0:00';
 }
 
 // Toggles playback state. Assigns the src on first play if not yet set.
-// Reads directly from the audio element rather than
-// a separate boolean flag so the state is always authoritative.
 function togglePlayPause() {
     if (!audioPlayer || playlist.length === 0) return;
 
@@ -1155,12 +1528,9 @@ function togglePlayPause() {
     }
 
     if (audioPlayer.paused || audioPlayer.ended) {
-        const playPromise = audioPlayer.play();
+        var playPromise = audioPlayer.play();
         if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(function () {
-                // If autoplay/user-gesture restrictions block play, keep UI consistent.
-                syncPlayPauseUI();
-            });
+            playPromise.catch(function () { syncPlayPauseUI(); });
         }
     } else {
         audioPlayer.pause();
@@ -1168,19 +1538,17 @@ function togglePlayPause() {
 }
 
 // Internal helper: loads a track by index and optionally starts playback.
-// Centralises the repeated src/load/UI update pattern used by previousTrack,
-// nextTrack, and any future callers.
 function _switchTrack(index, autoplay) {
     if (playlist.length === 0) return;
     currentTrackIndex = index;
     audioPlayer.src = playlist[currentTrackIndex].src;
     audioPlayer.load();
-    trackTitle.textContent = playlist[currentTrackIndex].title;
+    trackTitle.textContent  = playlist[currentTrackIndex].title;
     trackArtist.textContent = playlist[currentTrackIndex].artist;
-    progressFill.style.width = '0%';
+    progressFill.style.width  = '0%';
     currentTimeEl.textContent = '0:00';
     if (autoplay) {
-        const playPromise = audioPlayer.play();
+        var playPromise = audioPlayer.play();
         if (playPromise && typeof playPromise.catch === 'function') {
             playPromise.catch(function () { syncPlayPauseUI(); });
         }
@@ -1188,76 +1556,63 @@ function _switchTrack(index, autoplay) {
 }
 
 // Moves to the previous track, wrapping around to the last track at the start.
-// Pass autoplay=true to keep playing when called from a button during playback.
 function previousTrack(autoplay) {
     if (playlist.length === 0) return;
-    const prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    var prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
     _switchTrack(prevIndex, autoplay);
 }
 
 // Moves to the next track, wrapping around to the first track at the end.
-// Pass autoplay=true to keep playing when called from a button during playback.
 function nextTrack(autoplay) {
     if (playlist.length === 0) return;
-    const nextIndex = (currentTrackIndex + 1) % playlist.length;
+    var nextIndex = (currentTrackIndex + 1) % playlist.length;
     _switchTrack(nextIndex, autoplay);
 }
 
 // Formats a duration in seconds as M:SS (e.g. 183 → "3:03").
 function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    var mins = Math.floor(seconds / 60);
+    var secs = Math.floor(seconds % 60);
+    return mins + ':' + (secs < 10 ? '0' : '') + secs;
 }
 
 // ============================================
 // MUSIC PLAYER – EVENT LISTENERS
 // ============================================
 if (audioPlayer) {
-    // When metadata is available
     audioPlayer.addEventListener('loadedmetadata', function () {
         durationEl.textContent = formatTime(audioPlayer.duration);
     });
 
-    // Update progress
     audioPlayer.addEventListener('timeupdate', function () {
         if (!isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
-        const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        progressFill.style.width = progress + '%';
+        var progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        progressFill.style.width  = progress + '%';
         currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
     });
 
-    // When the track ends
     audioPlayer.addEventListener('ended', function () {
-        // Auto-advance and keep playing when a track ends naturally.
         nextTrack(true);
         syncPlayPauseUI();
     });
 
-    // Keep UI in sync even when audio state changes externally
-    audioPlayer.addEventListener('play', syncPlayPauseUI);
-    audioPlayer.addEventListener('pause', syncPlayPauseUI);
+    audioPlayer.addEventListener('play',    syncPlayPauseUI);
+    audioPlayer.addEventListener('pause',   syncPlayPauseUI);
     audioPlayer.addEventListener('playing', syncPlayPauseUI);
     audioPlayer.addEventListener('emptied', syncPlayPauseUI);
 
-    // Click on the progress bar
     if (progressBar) {
         progressBar.addEventListener('click', function (e) {
             if (playlist.length === 0) return;
-
-            const rect = progressBar.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const percentage = clickX / width;
+            var rect       = progressBar.getBoundingClientRect();
+            var clickX     = e.clientX - rect.left;
+            var percentage = clickX / rect.width;
             audioPlayer.currentTime = percentage * audioPlayer.duration;
         });
     }
 }
 
-// Control buttons
-if (playPauseBtn) {
-    playPauseBtn.addEventListener('click', togglePlayPause);
-}
+if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
 
 if (prevBtn) {
     prevBtn.addEventListener('click', function () {
@@ -1272,51 +1627,39 @@ if (nextBtn) {
 }
 
 // Load the first track's UI on startup — no network request until user plays.
-// Volume is set here; actual playback starts after the envelope opens.
 if (playlist.length > 0) {
     loadTrack(currentTrackIndex);
-    // Set initial volume
     audioPlayer.volume = 0.8;
 }
 
 // Attempts to start music after the envelope animation completes.
-// Assigns the src lazily on first call, then plays.
-// May be silently blocked by the browser's autoplay policy; in that case
-// the guest can press the play button manually.
 function startMusicAfterEnvelope() {
     if (!audioPlayer || playlist.length === 0) return;
 
-    // Lazy-load: assign src the first time autoplay is attempted.
     if (!audioPlayer.src || audioPlayer.src === window.location.href) {
         audioPlayer.src = playlist[currentTrackIndex].src;
     }
 
-    const playPromise = audioPlayer.play();
+    var playPromise = audioPlayer.play();
     if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(function () {
-            // Autoplay blocked by browser — user can press play manually
-            syncPlayPauseUI();
-        });
+        playPromise.catch(function () { syncPlayPauseUI(); });
     }
     syncPlayPauseUI();
 }
 
 // ============================================
 // VOLUME CONTROL
-// Syncs a range slider with the audio element volume.
-// The mute button toggles between 0 and the last non-zero volume.
 // ============================================
-const volumeSlider = document.getElementById('volume-slider');
-const volumeBtn = document.getElementById('volume-btn');
-let lastVolume = 0.8; // remember volume before muting
+var volumeSlider = document.getElementById('volume-slider');
+var volumeBtn    = document.getElementById('volume-btn');
+var lastVolume   = 0.8;
 
-// Updates the volume icon to reflect the current level (muted / low / high).
 function updateVolumeIcon() {
     if (!volumeBtn) return;
-    const icon = document.getElementById('vol-icon');
+    var icon = document.getElementById('vol-icon');
     if (!icon) return;
 
-    const vol = audioPlayer ? audioPlayer.volume : 1;
+    var vol = audioPlayer ? audioPlayer.volume : 1;
     if (vol === 0) {
         icon.textContent = 'volume_off';
         volumeBtn.setAttribute('title', 'Activar sonido');
@@ -1331,7 +1674,7 @@ function updateVolumeIcon() {
 
 if (volumeSlider && audioPlayer) {
     volumeSlider.addEventListener('input', function () {
-        const vol = parseInt(this.value, 10) / 100;
+        var vol = parseInt(this.value, 10) / 100;
         audioPlayer.volume = vol;
         lastVolume = vol > 0 ? vol : lastVolume;
         updateVolumeIcon();
@@ -1352,23 +1695,18 @@ if (volumeBtn && audioPlayer) {
     });
 }
 
-// Sync slider if volume changes externally
 if (audioPlayer) {
     audioPlayer.addEventListener('volumechange', function () {
-        if (volumeSlider) {
-            volumeSlider.value = Math.round(audioPlayer.volume * 100);
-        }
+        if (volumeSlider) volumeSlider.value = Math.round(audioPlayer.volume * 100);
         updateVolumeIcon();
     });
 }
 
-// Extra safety: resync button state after returning to the page/tab.
 document.addEventListener('visibilitychange', syncPlayPauseUI);
-window.addEventListener('pageshow', syncPlayPauseUI);
-window.addEventListener('focus', syncPlayPauseUI);
+window.addEventListener('pageshow',           syncPlayPauseUI);
+window.addEventListener('focus',              syncPlayPauseUI);
 
 // Fades the floating music player bar into view once the user scrolls 80 px down.
-// The listener removes itself after the bar has been shown once.
 (function () {
     var bar = document.getElementById('music-player-bar');
     if (!bar) return;
@@ -1382,27 +1720,25 @@ window.addEventListener('focus', syncPlayPauseUI);
     }
     window.addEventListener('scroll', checkScroll, { passive: true });
 }());
+
 /* ============================================
    PHOTO UPLOAD – GOOGLE APPS SCRIPT INTEGRATION
-   Handles client-side image validation (MIME type, magic bytes, file size)
-   and uploads guest photos to Google Drive via the Apps Script endpoint.
    ============================================ */
 
-const GALLERY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwvd5pnEPMmxvC9Tk6D0VWf03JJTI2W4rTwUz4x4AsP5a5qMAvysuxg2WJShrJngnU/exec';
+// Note: GALLERY_SCRIPT_URL is now stored dynamically via _rsvpStore.setGalleryScriptUrl()
+// This allows it to be injected at runtime or changed without code modification
 
 // Show selected file names
 const photoFileInput = document.getElementById('photo-file');
-const fileInfo = document.getElementById('file-info');
+const fileInfo       = document.getElementById('file-info');
 
 if (photoFileInput && fileInfo) {
     photoFileInput.addEventListener('change', function () {
-        const files = this.files;
+        var files = this.files;
         if (files.length > 0) {
-            if (files.length === 1) {
-                fileInfo.textContent = `${files[0].name}`;
-            } else {
-                fileInfo.textContent = `${files.length} archivos seleccionados`;
-            }
+            fileInfo.textContent = files.length === 1
+                ? files[0].name
+                : files.length + ' archivos seleccionados';
             fileInfo.style.color = '#2E8B57';
         } else {
             fileInfo.textContent = 'Ningún archivo seleccionado';
@@ -1412,23 +1748,22 @@ if (photoFileInput && fileInfo) {
 }
 
 // Handle the photo upload form
-const photoUploadForm = document.getElementById('photo-upload-form');
+const photoUploadForm       = document.getElementById('photo-upload-form');
 const galleryGroupCodeInput = document.getElementById('gallery-group-code');
 
 // Strict client-side validation to reduce non-image uploads.
-// Note: real validation also happens in Apps Script.
 const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const DISALLOWED_EXTENSIONS = new Set(['svg']);
+const DISALLOWED_EXTENSIONS    = new Set(['svg']);
 
 function getFileExtensionLower(name) {
-    const parts = String(name || '').split('.');
+    var parts = String(name || '').split('.');
     if (parts.length < 2) return '';
     return parts.pop().toLowerCase();
 }
 
 async function readFirstBytes(file, byteCount) {
-    const slice = file.slice(0, byteCount);
-    const buffer = await slice.arrayBuffer();
+    var slice  = file.slice(0, byteCount);
+    var buffer = await slice.arrayBuffer();
     return new Uint8Array(buffer);
 }
 
@@ -1443,33 +1778,30 @@ function hasPngMagic(bytes) {
 }
 
 function hasGifMagic(bytes) {
-    // GIF87a / GIF89a
     return bytes.length >= 6 &&
         bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 &&
         (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61;
 }
 
 function hasWebpMagic(bytes) {
-    // RIFF .... WEBP
     return bytes.length >= 12 &&
         bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
         bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
 }
 
 async function validateImageFile(file) {
-    const extension = getFileExtensionLower(file.name);
+    var extension = getFileExtensionLower(file.name);
     if (DISALLOWED_EXTENSIONS.has(extension) || String(file.type || '').toLowerCase() === 'image/svg+xml') {
         return { ok: false, reason: 'No se permiten archivos SVG.' };
     }
 
-    // Some browsers may send an empty type; validate via magic bytes.
-    const mime = String(file.type || '').toLowerCase();
+    var mime = String(file.type || '').toLowerCase();
     if (mime && !ALLOWED_IMAGE_MIME_TYPES.has(mime)) {
         return { ok: false, reason: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.' };
     }
 
-    const bytes = await readFirstBytes(file, 16);
-    const looksLikeImage = hasJpegMagic(bytes) || hasPngMagic(bytes) || hasGifMagic(bytes) || hasWebpMagic(bytes);
+    var bytes          = await readFirstBytes(file, 16);
+    var looksLikeImage = hasJpegMagic(bytes) || hasPngMagic(bytes) || hasGifMagic(bytes) || hasWebpMagic(bytes);
     if (!looksLikeImage) {
         return { ok: false, reason: 'El archivo no parece ser una imagen válida.' };
     }
@@ -1481,34 +1813,32 @@ if (photoUploadForm) {
     photoUploadForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const guestName = document.getElementById('guest-name').value.trim();
-        const groupCode = galleryGroupCodeInput ? String(galleryGroupCodeInput.value || '').trim() : '';
-        const files = photoFileInput.files;
+        var guestName = document.getElementById('guest-name').value.trim();
+        var groupCode = galleryGroupCodeInput ? String(galleryGroupCodeInput.value || '').trim() : '';
+        var files     = photoFileInput.files;
 
         if (!guestName || !groupCode || files.length === 0) {
-            alert('Por favor, completa todos los campos');
+            _showInlineMsg('upload-alert', 'warning', 'Por favor, completa todos los campos.');
             return;
         }
 
-        // Validate file size (max 5MB per photo)
-        for (let file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert(`La foto "${file.name}" es demasiado grande. Tamaño máximo: 5MB`);
+        for (var file of files) {
+            if (file.size > CONFIG.maxUploadBytes) {
+                _showInlineMsg('upload-alert', 'warning', 'La foto "' + file.name + '" es demasiado grande. Tamaño máximo: ' + Math.round(CONFIG.maxUploadBytes / 1024 / 1024) + 'MB.');
                 return;
             }
         }
 
-        // Strict validation (MIME/extension/magic bytes)
-        for (let file of files) {
+        for (var file of files) {
             try {
-                const result = await validateImageFile(file);
+                var result = await validateImageFile(file);
                 if (!result.ok) {
-                    alert(`"${file.name}": ${result.reason}`);
+                    _showInlineMsg('upload-alert', 'warning', '"' + file.name + '": ' + result.reason);
                     return;
                 }
             } catch (err) {
                 console.error('Error validando archivo:', err);
-                alert(`No se pudo validar "${file.name}". Intenta con otra imagen.`);
+                _showInlineMsg('upload-alert', 'warning', 'No se pudo validar "' + file.name + '". Intenta con otra imagen.');
                 return;
             }
         }
@@ -1518,138 +1848,170 @@ if (photoUploadForm) {
 }
 
 // Uploads one or more validated image files to Google Drive through the Apps Script.
-// Shows a spinner on the button during upload, then alerts the guest with the result.
 async function uploadPhotosToGoogleDrive(guestName, groupCode, files) {
-    const uploadBtn = photoUploadForm.querySelector('button[type="submit"]');
-    const originalBtnText = uploadBtn.innerHTML;
+    var uploadBtn       = photoUploadForm.querySelector('button[type="submit"]');
+    var originalBtnText = uploadBtn.innerHTML;
 
-    uploadBtn.innerHTML = '<span class="material-symbols-outlined rotating">progress_activity</span> Subiendo...';
+    var totalFiles = files.length;
+    function _setUploadProgress(current, total) {
+        uploadBtn.innerHTML = '<span class="material-symbols-outlined rotating">progress_activity</span> Subiendo ' + current + ' de ' + total + '...';
+    }
+    _setUploadProgress(1, totalFiles);
     uploadBtn.disabled = true;
 
-    let uploadedCount = 0;
-    let failedCount = 0;
-    const failureMessages = [];
+    var uploadedCount    = 0;
+    var failedCount      = 0;
+    var failureMessages  = [];
+    var galleryScriptUrl = _rsvpStore.getGalleryScriptUrl();
 
-    // Process each file
-    for (let file of files) {
-        // Extra defense (already validated before submit)
-        const ext = getFileExtensionLower(file.name);
+    for (var file of files) {
+        var ext = getFileExtensionLower(file.name);
         if (ext === 'svg' || String(file.type || '').toLowerCase() === 'image/svg+xml') {
             failedCount++;
             continue;
         }
 
         try {
-            // Convert file to base64
-            const base64Data = await fileToBase64(file);
+            var base64Data = await fileToBase64(file);
 
-            // Send to Google Apps Script
-            const response = await fetch(GALLERY_SCRIPT_URL, {
-                method: 'POST',
-                headers: {
-                    // Use a simple request to avoid CORS preflight.
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                },
-                body: new URLSearchParams({
-                    action: 'uploadPhoto',
-                    guestName: guestName,
-                    groupCode: String(groupCode || ''),
-                    photoData: base64Data,
-                    fileName: file.name,
-                    section: 'invitados'
-                }),
-                redirect: 'follow',
-                cache: 'no-store'
-            });
+            // Upload with timeout and retry logic
+            var uploadSuccess = false;
+            var lastError = null;
+            var maxRetries = 1; // Allow one retry on network failure
+            
+            for (var attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    var controller = new AbortController();
+                    var timeoutId = setTimeout(function() { controller.abort(); }, 60000); // 60s timeout per upload
+                    
+                    var response = await fetch(galleryScriptUrl, {
+                        method:   'POST',
+                        headers:  { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                        body:     new URLSearchParams({
+                            action:    'uploadPhoto',
+                            guestName: guestName,
+                            groupCode: String(groupCode || ''),
+                            photoData: base64Data,
+                            fileName:  file.name,
+                            section:   'invitados'
+                        }),
+                        signal:   controller.signal,
+                        redirect: 'follow',
+                        cache:    'no-store'
+                    });
+                    
+                    clearTimeout(timeoutId);
 
-            let payload = null;
-            try {
-                payload = await response.json();
-            } catch (_e) {
-                // If the response isn't JSON (or CORS blocks reading), treat as failure.
+                    var payload = null;
+                    try { payload = await response.json(); } catch (_e) { }
+
+                    if (!response.ok) {
+                        throw new Error((payload && payload.message) ? payload.message : 'HTTP ' + response.status);
+                    }
+                    if (!payload || payload.success !== true) {
+                        throw new Error((payload && payload.message) ? payload.message : 'Respuesta inválida del servidor');
+                    }
+
+                    uploadSuccess = true;
+                    break; // Success, exit retry loop
+                    
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    lastError = error;
+                    
+                    // Retry on network/timeout errors, but not on validation errors
+                    if (attempt < maxRetries && (error.name === 'AbortError' || error instanceof TypeError)) {
+                        console.warn('Retry ' + (attempt + 1) + ' for ' + file.name + ' after: ' + error.message);
+                        await new Promise(function(resolve) { setTimeout(resolve, 500); }); // Wait 500ms before retry
+                        continue;
+                    }
+                    
+                    throw error;
+                }
             }
-
-            if (!response.ok) {
-                const msg = (payload && payload.message) ? payload.message : `HTTP ${response.status}`;
-                throw new Error(msg);
-            }
-            if (!payload || payload.success !== true) {
-                const msg = (payload && payload.message) ? payload.message : 'Respuesta inválida del servidor';
-                throw new Error(msg);
+            
+            if (!uploadSuccess && lastError) {
+                throw lastError;
             }
 
             uploadedCount++;
+            // Update the button label so the user sees file-by-file progress
+            if (uploadedCount + failedCount < totalFiles) {
+                _setUploadProgress(uploadedCount + failedCount + 1, totalFiles);
+            }
 
         } catch (error) {
-            console.error(`Error subiendo ${file.name}:`, error);
+            console.error('Error subiendo ' + file.name + ':', error);
             failedCount++;
-            failureMessages.push(`${file.name}: ${error && error.message ? error.message : 'Error desconocido'}`);
+            var errorMsg = error && error.message ? error.message : 'Error desconocido';
+            if (error && error.name === 'AbortError') {
+                errorMsg = 'Tiempo de espera agotado (>60s)';
+            }
+            failureMessages.push(file.name + ': ' + errorMsg);
         }
     }
 
-    // Restore button
-    uploadBtn.innerHTML = originalBtnText;
-    uploadBtn.disabled = false;
+    uploadBtn.innerHTML = originalBtnText; // safe: restored from hardcoded initial HTML
+    uploadBtn.disabled  = false;
 
-    // Reset form
     photoUploadForm.reset();
-    fileInfo.textContent = 'Ningún archivo seleccionado';
-    fileInfo.style.color = '#999';
-
-    // Close the upload modal
-    closeUploadModal();
-
-    // Show result
-    if (uploadedCount > 0) {
-        alert(`¡Gracias por compartir tus fotos! 📸\n\n${uploadedCount} foto(s) se enviaron correctamente.\n\nNota: Por seguridad, las fotos se mostrarán en la galería después de ser aprobadas.`);
-
-        // Reload gallery after 2 seconds
-        setTimeout(() => {
-            loadGuestPhotos();
-        }, 2000);
+    if (fileInfo) {
+        fileInfo.textContent  = 'Ningún archivo seleccionado';
+        fileInfo.style.color  = '#999';
     }
 
-    if (failedCount > 0) {
-        const details = failureMessages.length ? `\n\nDetalle:\n- ${failureMessages.join('\n- ')}` : '';
-        alert(`Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.${details}`);
+    if (uploadedCount > 0) {
+        _showInlineMsg('upload-alert', 'success', '¡Gracias por compartir tus fotos! 📸 ' + uploadedCount + ' foto(s) enviadas. Las fotos aparecerán en la galería después de ser aprobadas.');
+        setTimeout(function () { 
+            loadGuestPhotos();
+        }, 2000);
+        // Keep modal open for 4 seconds so user can see the message
+        setTimeout(function () { closeUploadModal(); }, 4000);
+    } else if (failedCount > 0) {
+        var details = failureMessages.length ? '\n\nDetalle:\n- ' + failureMessages.join('\n- ') : '';
+        _showInlineMsg('upload-alert', 'danger', 'Algunas fotos no se pudieron subir. Por favor, intenta de nuevo.' + details);
+        console.error('Upload failed:', failedCount, 'photos failed');
+        // Keep modal open for 4 seconds so user can see the error
+        setTimeout(function () { closeUploadModal(); }, 4000);
+    } else {
+        // No files were uploaded
+        closeUploadModal();
     }
 }
 
 // Reads a File object and returns its contents as a base64 data URL.
 function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+    return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload  = function () { resolve(reader.result); };
+        reader.onerror = function (error) { reject(error); };
         reader.readAsDataURL(file);
     });
 }
 
 /* ============================================
    GUEST PHOTO GALLERY – POLAROID GRID
-   Fetches approved guest photos from Google Drive and renders them as a
-   paginated polaroid grid. Photos load lazily after the page is ready.
    ============================================ */
-const POLAROID_INITIAL = 6; // initial batch: 3 columns × 2 rows
+const POLAROID_INITIAL = 6;
 let _allGuestPhotos = [];
-let _visibleCount = 0;
+let _visibleCount   = 0;
 
-// Fetches the guest photo list from the Apps Script and renders the first batch.
-// The gallery is publicly visible — no group code required to view photos.
-// A group code is only required when uploading new photos.
 async function loadGuestPhotos() {
-    const grid = document.getElementById('polaroid-grid');
-    if (!grid) return;
+    var grid = document.getElementById('polaroid-grid');
+    if (!grid) {
+        return;
+    }
 
     try {
-        const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getPhotos&section=invitados`);
-        const data = await response.json();
+        var response = await fetch(_rsvpStore.getGalleryScriptUrl() + '?action=getPhotos&section=invitados');
+        
+        var data     = await response.json();
 
         if (data.success && data.photos && data.photos.length > 0) {
             _allGuestPhotos = data.photos;
-            _visibleCount = 0;
-            grid.innerHTML = '';
-            const old = document.getElementById('polaroid-more-wrap');
+            _visibleCount   = 0;
+            grid.innerHTML  = '';
+            var old = document.getElementById('polaroid-more-wrap');
             if (old) old.remove();
 
             await _renderPolaroidBatch(grid, POLAROID_INITIAL);
@@ -1660,55 +2022,57 @@ async function loadGuestPhotos() {
 }
 
 async function _renderPolaroidBatch(grid, count) {
-    const batch = _allGuestPhotos.slice(_visibleCount, _visibleCount + count);
+    var batch = _allGuestPhotos.slice(_visibleCount, _visibleCount + count);
     if (batch.length === 0) return;
 
-    const startIdx = _visibleCount;
+    var startIdx = _visibleCount;
 
-    batch.forEach((photo, i) => {
-        const index = startIdx + i;
-        const fileId = String(photo.fileId || '').trim();
-        // Escape all HTML special characters so safeName is safe in both
-        // text content and attribute values (e.g. alt="Foto de ...").
-        const safeName = String(photo.guestName || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+    batch.forEach(function (photo, i) {
+        var index  = startIdx + i;
+        var fileId = String(photo.fileId || '').trim();
+        // Build polaroid card via DOM API to avoid XSS from server-supplied fileId / guestName
+        var card = document.createElement('div');
+        card.className = 'polaroid-card';
+        card.dataset.fileId = fileId;    // dataset assignment is always safe — no HTML parsing
+        card.dataset.index  = String(index);
+        card.addEventListener('click', function () { openPhotoLightbox(this); });
 
-        const cardHtml = `
-            <div class="polaroid-card" data-file-id="${fileId}" data-index="${index}" onclick="openPhotoLightbox(this)">
-                <div class="polaroid-photo">
-                    <img data-file-id="${fileId}"
-                         src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
-                         alt="Foto de ${safeName}"
-                         loading="lazy">
-                </div>
-                <div class="polaroid-caption">
-                    <p class="polaroid-author">${safeName}</p>
-                </div>
-            </div>
-        `;
-        grid.insertAdjacentHTML('beforeend', cardHtml);
+        var photoDiv = document.createElement('div');
+        photoDiv.className = 'polaroid-photo';
+
+        var img = document.createElement('img');
+        img.dataset.fileId = fileId;
+        img.src     = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+        img.alt     = 'Foto de ' + String(photo.guestName || '');  // textContent-equivalent
+        img.loading = 'lazy';
+        photoDiv.appendChild(img);
+
+        var captionDiv = document.createElement('div');
+        captionDiv.className = 'polaroid-caption';
+        var authorP = document.createElement('p');
+        authorP.className   = 'polaroid-author';
+        authorP.textContent = String(photo.guestName || '');        // textContent — XSS-safe
+        captionDiv.appendChild(authorP);
+
+        card.appendChild(photoDiv);
+        card.appendChild(captionDiv);
+        grid.appendChild(card);
     });
 
     _visibleCount += batch.length;
 
-    // Fetch all images in the new batch in parallel rather than sequentially.
-    // Each fetch resolves independently so a single failure doesn't block others.
-    const allCards = grid.querySelectorAll('.polaroid-card');
-    const newCards = Array.from(allCards).slice(startIdx);
+    var allCards = grid.querySelectorAll('.polaroid-card');
+    var newCards = Array.from(allCards).slice(startIdx);
     await Promise.all(newCards.map(async function (card) {
-        const img = card.querySelector('img[data-file-id]');
-        const fileId = img ? img.getAttribute('data-file-id') : null;
+        var img    = card.querySelector('img[data-file-id]');
+        var fileId = img ? img.getAttribute('data-file-id') : null;
         if (!fileId) return;
         try {
-            const dataUrl = await fetchGalleryImageDataUrl(fileId);
+            var dataUrl = await fetchGalleryImageDataUrl(fileId);
             img.src = dataUrl;
         } catch (e) {
             console.error('Error cargando imagen:', e);
-            const wrap = img.closest('.polaroid-photo');
+            var wrap = img.closest('.polaroid-photo');
             if (wrap) wrap.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px';
         }
     }));
@@ -1717,150 +2081,160 @@ async function _renderPolaroidBatch(grid, count) {
 }
 
 function _updatePolaroidButton(grid) {
-    let moreWrap = document.getElementById('polaroid-more-wrap');
-    const total = _allGuestPhotos.length;
+    var moreWrap = document.getElementById('polaroid-more-wrap');
+    var total    = _allGuestPhotos.length;
 
     if (total <= POLAROID_INITIAL) {
-        // Never need a button — remove if exists
         if (moreWrap) moreWrap.remove();
         return;
     }
 
     if (!moreWrap) {
         moreWrap = document.createElement('div');
-        moreWrap.id = 'polaroid-more-wrap';
+        moreWrap.id        = 'polaroid-more-wrap';
         moreWrap.className = 'polaroid-more-wrap';
         grid.insertAdjacentElement('afterend', moreWrap);
     }
 
+    // Build the button via DOM API — no onclick= attribute, CSP-safe
+    moreWrap.innerHTML = '';
+    var _moreBtn = document.createElement('button');
+    _moreBtn.className = 'polaroid-more-btn';
+    var _moreBtnIcon = document.createElement('span');
+    _moreBtnIcon.className = 'material-symbols-outlined';
+
     if (_visibleCount < total) {
-        // Still photos to show — "Ver más"
-        const remaining = total - _visibleCount;
-        moreWrap.innerHTML = `<button class="polaroid-more-btn" onclick="loadMorePolaroids()">
-            Ver más fotos (${remaining})
-            <span class="material-symbols-outlined">expand_more</span>
-        </button>`;
+        var remaining = total - _visibleCount;
+        _moreBtn.appendChild(document.createTextNode('Ver más fotos (' + remaining + ')'));
+        _moreBtnIcon.textContent = 'expand_more';
+        _moreBtn.appendChild(_moreBtnIcon);
+        _moreBtn.addEventListener('click', loadMorePolaroids);
     } else {
-        // All shown — "Ver menos"
-        moreWrap.innerHTML = `<button class="polaroid-more-btn" onclick="collapsePolaroids()">
-            Ver menos fotos
-            <span class="material-symbols-outlined">expand_less</span>
-        </button>`;
+        _moreBtn.appendChild(document.createTextNode('Ver menos fotos'));
+        _moreBtnIcon.textContent = 'expand_less';
+        _moreBtn.appendChild(_moreBtnIcon);
+        _moreBtn.addEventListener('click', collapsePolaroids);
     }
+    moreWrap.appendChild(_moreBtn);
 }
 
 async function loadMorePolaroids() {
-    const grid = document.getElementById('polaroid-grid');
+    var grid = document.getElementById('polaroid-grid');
     if (!grid) return;
-    // Load all remaining at once
-    const remaining = _allGuestPhotos.length - _visibleCount;
+    var remaining = _allGuestPhotos.length - _visibleCount;
     if (remaining > 0) await _renderPolaroidBatch(grid, remaining);
 }
 
-// Collapses the polaroid grid back to the initial 6 cards and scrolls to the grid.
 function collapsePolaroids() {
-    const grid = document.getElementById('polaroid-grid');
+    var grid = document.getElementById('polaroid-grid');
     if (!grid) return;
 
-    // Remove all cards beyond the initial 6
-    const cards = grid.querySelectorAll('.polaroid-card');
-    Array.from(cards).slice(POLAROID_INITIAL).forEach(card => card.remove());
+    var cards = grid.querySelectorAll('.polaroid-card');
+    Array.from(cards).slice(POLAROID_INITIAL).forEach(function (card) { card.remove(); });
     _visibleCount = POLAROID_INITIAL;
 
     _updatePolaroidButton(grid);
-
-    // Scroll the grid into view
     grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Opens the full-size photo lightbox. Skips photos that are still showing
-// the placeholder (1x1 GIF) while their real image is being fetched.
+var _lightboxTrapCleanup = null;
 function openPhotoLightbox(card) {
-    const img = card ? card.querySelector('img') : null;
-    if (!img || !img.src || img.src.includes('R0lGODlh')) return; // still loading placeholder
-    const lightbox = document.getElementById('photo-lightbox');
+    var img = card ? card.querySelector('img') : null;
+    if (!img || !img.src || img.src.includes('R0lGODlh')) return;
+    var lightbox = document.getElementById('photo-lightbox');
     if (!lightbox) return;
-    document.getElementById('lightbox-img').src = img.src;
-    const author = card.querySelector('.polaroid-author');
-    document.getElementById('lightbox-caption').textContent = author ? author.textContent.trim() : '';
+    var author = card.querySelector('.polaroid-author');
+    var authorName = author ? author.textContent.trim() : '';
+    var lbImg = document.getElementById('lightbox-img');
+    lbImg.src = img.src;
+    // Set meaningful alt text so screen readers describe the photo
+    lbImg.alt = authorName ? ('Foto de ' + authorName) : 'Foto de invitado';
+    document.getElementById('lightbox-caption').textContent = authorName;
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
+    // Move focus to the close button and trap it inside
+    var closeBtn = document.getElementById('lightbox-close-btn');
+    if (closeBtn) closeBtn.focus();
+    if (_lightboxTrapCleanup) _lightboxTrapCleanup();
+    _lightboxTrapCleanup = _trapFocus(lightbox);
 }
 
-// Hides the photo lightbox and restores page scrolling.
 function closePhotoLightbox() {
-    const lightbox = document.getElementById('photo-lightbox');
-    if (lightbox) lightbox.classList.remove('active');
+    var lightbox = document.getElementById('photo-lightbox');
+    if (!lightbox) return;
+    lightbox.classList.remove('active');
     document.body.style.overflow = '';
+    if (_lightboxTrapCleanup) { _lightboxTrapCleanup(); _lightboxTrapCleanup = null; }
 }
 
 const __galleryImageCache = new Map();
 
-// Fetches a single guest photo from the Apps Script as a base64 data URL.
-// Results are cached in memory so each file is only downloaded once per session.
 async function fetchGalleryImageDataUrl(fileId) {
-    const key = String(fileId || '').trim();
-    if (__galleryImageCache.has(key)) return __galleryImageCache.get(key);
+    var key = String(fileId || '').trim();
+    if (__galleryImageCache.has(key)) {
+        return __galleryImageCache.get(key);
+    }
 
-    const url = `${GALLERY_SCRIPT_URL}?action=getPhoto&fileId=${encodeURIComponent(key)}`;
-    const resp = await fetch(url);
-    const json = await resp.json();
+    var url  = _rsvpStore.getGalleryScriptUrl() + '?action=getPhoto&fileId=' + encodeURIComponent(key);
+    var resp = await fetch(url);
+    var json = await resp.json();
     if (!json || !json.success) {
         throw new Error((json && json.message) ? json.message : 'No se pudo cargar la imagen');
     }
-    const contentType = String(json.contentType || 'image/jpeg');
-    const base64 = String(json.base64 || '');
-    const dataUrl = `data:${contentType};base64,${base64}`;
+    var contentType = String(json.contentType || 'image/jpeg');
+    var base64      = String(json.base64 || '');
+    var dataUrl     = 'data:' + contentType + ';base64,' + base64;
     __galleryImageCache.set(key, dataUrl);
     return dataUrl;
 }
 
-// Hides the RSVP confirmation modal and restores page scrolling.
 function closeRsvpModal() {
-    const modal = document.getElementById('rsvp-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    var modal = document.getElementById('rsvp-modal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    // Return focus to the confirm button so the keyboard user is not lost
+    var trigger = document.getElementById('confirm-attendance-btn');
+    if (trigger) trigger.focus();
 }
 
-// Shows the photo upload modal and locks page scrolling.
+var _uploadModalCleanup = null;
 function openUploadModal() {
-    const modal = document.getElementById('upload-modal');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
+    var modal = document.getElementById('upload-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    // Move focus into the modal so screen readers announce the dialog
+    var heading = document.getElementById('upload-modal-title');
+    if (heading) heading.focus();
+    // Activate focus trap
+    if (_uploadModalCleanup) _uploadModalCleanup();
+    _uploadModalCleanup = _trapFocus(modal);
 }
 
-// Hides the photo upload modal and restores page scrolling.
 function closeUploadModal() {
-    const modal = document.getElementById('upload-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    var modal = document.getElementById('upload-modal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    if (_uploadModalCleanup) { _uploadModalCleanup(); _uploadModalCleanup = null; }
+    // Return focus to the trigger that opened the modal
+    var trigger = document.getElementById('upload-trigger-btn');
+    if (trigger) trigger.focus();
 }
 
 // ============================================
-// DOMContentLoaded – one consolidated listener for post-parse setup:
-//   1. Deferred guest photo load (1 s delay to avoid blocking initial render)
-//   2. RSVP modal backdrop click-to-close
-//   3. Global Escape key handler for all modals
+// DOMContentLoaded – consolidated post-parse setup
 // ============================================
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Load guest photos after a short delay
-    setTimeout(function () {
-        loadGuestPhotos();
-    }, 1000);
+    // 1. Load guest photos after a short delay to avoid blocking initial render
+    setTimeout(function () { loadGuestPhotos(); }, 1000);
 
     // 2. Close RSVP modal when clicking the backdrop
-    const rsvpModal = document.getElementById('rsvp-modal');
+    var rsvpModal = document.getElementById('rsvp-modal');
     if (rsvpModal) {
         rsvpModal.addEventListener('click', function (e) {
-            if (e.target === rsvpModal) {
-                closeRsvpModal();
-            }
+            if (e.target === rsvpModal) closeRsvpModal();
         });
     }
 
@@ -1882,10 +2256,10 @@ document.addEventListener('DOMContentLoaded', function () {
      3. Overlay is hidden and music starts
    ============================================ */
 function openInvitation() {
-    const envelope = document.getElementById('main-envelope');
-    const overlay = document.getElementById('intro-overlay');
-    const wrapper = document.getElementById('envelope-wrapper');
-    const prompt = document.getElementById('open-prompt');
+    var envelope = document.getElementById('main-envelope');
+    var overlay  = document.getElementById('intro-overlay');
+    var wrapper  = document.getElementById('envelope-wrapper');
+    var prompt   = document.getElementById('open-prompt');
 
     wrapper.style.pointerEvents = 'none';
     if (prompt) prompt.style.opacity = '0';
@@ -1901,10 +2275,9 @@ function openInvitation() {
         // Phase 3: Remove overlay after fade-out completes, then start music
         setTimeout(function () {
             overlay.style.visibility = 'hidden';
-            overlay.style.display = 'none';
+            overlay.style.display    = 'none';
             document.body.classList.remove('envelope-visible');
 
-            // Start music once the invitation is fully open
             if (typeof startMusicAfterEnvelope === 'function') {
                 startMusicAfterEnvelope();
             }

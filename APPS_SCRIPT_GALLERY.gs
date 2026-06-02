@@ -1,14 +1,35 @@
 // ========== CONFIGURACIÓN ==========
-const DRIVE_FOLDER_ID = '1hKX5k9xZfphAo2FzdvB2osMWbRimOZxo';  // ID de la carpeta de Google Drive
-const GALLERY_SPREADSHEET_ID = '1YZbX8HIpzAttLVtE2CUTBi5tMgbD98RhXMhq-F7T5sk';  // ID del Google Sheet
-const SHEET_NAME = 'Galeria';  // Nombre de la hoja en el Sheet
-
-// Email para notificaciones
-const EMAIL_NOTIFICACION = 'karla.y.jose.18.12.26@gmail.com';
-
-// RSVP sheet (source of truth for CODIGO_GRUPO)
-const RSVP_SPREADSHEET_ID = '1tFt-UjwaQS80uM1ECrMxnLJGU-MWO9lWnxZyPnYV530';
+const SHEET_NAME = 'Galeria';
 const RSVP_SHEET_NAME = 'RSVP-Boda-KarlaJose';
+
+// Get configuration from PropertiesService (set via Project Settings > Script Properties)
+function getDriveFolderId() {
+  const id = PropertiesService.getScriptProperties().getProperty('DRIVE_FOLDER_ID');
+  if (!id) throw new Error('DRIVE_FOLDER_ID not configured in Script Properties');
+  return id;
+}
+
+function getGallerySpreadsheetId() {
+  const id = PropertiesService.getScriptProperties().getProperty('GALLERY_SPREADSHEET_ID');
+  if (!id) throw new Error('GALLERY_SPREADSHEET_ID not configured in Script Properties');
+  return id;
+}
+
+function getEmailNotificacion() {
+  const email = PropertiesService.getScriptProperties().getProperty('EMAIL_NOTIFICACION');
+  if (!email) throw new Error('EMAIL_NOTIFICACION not configured in Script Properties');
+  return email;
+}
+
+function getRsvpSpreadsheetId() {
+  const id = PropertiesService.getScriptProperties().getProperty('RSVP_SPREADSHEET_ID');
+  if (!id) throw new Error('RSVP_SPREADSHEET_ID not configured in Script Properties');
+  return id;
+}
+
+function getAdminSecret() {
+  return PropertiesService.getScriptProperties().getProperty('ADMIN_SECRET') || '';
+}
 
 // ========== SEGURIDAD / VALIDACIÓN ==========
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -88,7 +109,7 @@ function isValidRsvpGroupCode(groupCode) {
   if (cached === '1') return true;
   if (cached === '0') return false;
 
-  const ss = SpreadsheetApp.openById(RSVP_SPREADSHEET_ID);
+  const ss = SpreadsheetApp.openById(getRsvpSpreadsheetId());
   const sheet = ss.getSheetByName(RSVP_SHEET_NAME);
   if (!sheet) return false;
   const values = sheet.getDataRange().getValues();
@@ -170,7 +191,7 @@ function isAllowedImageBytes(bytes, contentType) {
 }
 
 function ensureSheetAndHeaders() {
-  const ss = SpreadsheetApp.openById(GALLERY_SPREADSHEET_ID);
+  const ss = SpreadsheetApp.openById(getGallerySpreadsheetId());
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
@@ -227,7 +248,7 @@ function doPost(e) {
     Logger.log('Error en doPost: ' + error);
     return jsonResponse({
       success: false,
-      message: 'Error: ' + error.toString()
+      message: 'Error interno. Por favor intenta de nuevo.'
     });
   }
 }
@@ -242,11 +263,11 @@ function doGet(e) {
     
     if (action === 'getPhotos') {
       const section = params.section || 'all';
-      return getPhotos(section, params.groupCode);
+      return getPhotos(section, params.groupCode, e);
     }
 
     if (action === 'getPhoto') {
-      return getPhoto(params.fileId, params.groupCode);
+      return getPhoto(params.fileId, params.groupCode, e);
     }
     
     return ContentService.createTextOutput('Gallery API funcionando correctamente');
@@ -255,7 +276,7 @@ function doGet(e) {
     Logger.log('Error en doGet: ' + error);
     return jsonResponse({
       success: false,
-      message: 'Error: ' + error.toString()
+      message: 'Error interno. Por favor intenta de nuevo.'
     });
   }
 }
@@ -299,7 +320,7 @@ function uploadPhoto(data) {
     }
     
     // Obtener carpeta de Google Drive
-    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    const folder = DriveApp.getFolderById(getDriveFolderId());
     
     // Decodificar base64
     const bytes = Utilities.base64Decode(parsed.base64);
@@ -349,7 +370,7 @@ function uploadPhoto(data) {
     // Enviar email de notificación (opcional)
     try {
       MailApp.sendEmail({
-        to: EMAIL_NOTIFICACION,
+        to: getEmailNotificacion(),
         subject: '📸 Nueva foto subida - Boda Karla & Jose',
         body: `
           ¡Hola! Se ha subido una nueva foto a la galería.
@@ -394,9 +415,21 @@ function uploadPhoto(data) {
 /**
  * Obtener todas las fotos o filtradas por sección
  */
-function getPhotos(section, groupCode) {
+function getPhotos(section, groupCode, e) {
   try {
-    requireValidGroupCodeOrThrow(groupCode);
+    // Rate limit by visitor token (can be passed from client or derived from request)
+    const visitorToken = e.parameter.visitorToken || String(e.source || 'anonymous');
+    const rl = checkRateLimit(visitorToken, 30, 300); // 30 calls per 5 min
+    if (!rl.allowed) {
+      return jsonResponse({ success: false, message: 'Demasiadas solicitudes. Intenta más tarde.' });
+    }
+    
+    // For the public gallery, allow loading approved photos without group code validation
+    // This displays approved photos to all visitors
+    if (groupCode) {
+      requireValidGroupCodeOrThrow(groupCode);
+    }
+    
     const sheet = ensureSheetAndHeaders();
     
     if (!sheet) {
@@ -457,14 +490,25 @@ function getPhotos(section, groupCode) {
     Logger.log('Error en getPhotos: ' + error);
     return jsonResponse({
       success: false,
-      message: 'Error al obtener fotos: ' + error.toString()
+      message: 'Error interno. Por favor intenta de nuevo.'
     });
   }
 }
 
-function getPhoto(fileId, groupCode) {
+function getPhoto(fileId, groupCode, e) {
   try {
-    requireValidGroupCodeOrThrow(groupCode);
+    // Rate limit by visitor token
+    const visitorToken = e.parameter.visitorToken || String(e.source || 'anonymous');
+    const rl = checkRateLimit(visitorToken, 60, 300); // 60 calls per 5 min for individual photo fetch
+    if (!rl.allowed) {
+      return jsonResponse({ success: false, message: 'Demasiadas solicitudes. Intenta más tarde.' });
+    }
+    
+    // For the public gallery, allow loading approved photos without group code validation
+    if (groupCode) {
+      requireValidGroupCodeOrThrow(groupCode);
+    }
+    
     const id = String(fileId || '').trim();
     if (!id) {
       return jsonResponse({ success: false, message: 'fileId requerido' });
@@ -496,21 +540,26 @@ function getPhoto(fileId, groupCode) {
     });
   } catch (error) {
     Logger.log('Error en getPhoto: ' + error);
-    return jsonResponse({ success: false, message: 'Error al obtener foto: ' + error.toString() });
+    return jsonResponse({ success: false, message: 'Error interno. Por favor intenta de nuevo.' });
   }
 }
 
 /**
- * Función auxiliar para eliminar una foto (opcional)
+ * Función auxiliar para eliminar una foto (requiere admin secret)
  */
-function deletePhoto(fileId) {
+function deletePhoto(fileId, adminSecret) {
   try {
+    // Gate behind admin authentication
+    if (adminSecret !== getAdminSecret()) {
+      return jsonResponse({ success: false, message: 'No autorizado' });
+    }
+    
     // Eliminar de Drive
     const file = DriveApp.getFileById(fileId);
     file.setTrashed(true);
     
     // Eliminar de Sheets
-    const ss = SpreadsheetApp.openById(GALLERY_SPREADSHEET_ID);
+    const ss = SpreadsheetApp.openById(getGallerySpreadsheetId());
     const sheet = ss.getSheetByName(SHEET_NAME);
     const data = sheet.getDataRange().getValues();
     const headers = data[0];

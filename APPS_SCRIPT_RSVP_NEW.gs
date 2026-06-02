@@ -1,7 +1,24 @@
-const SPREADSHEET_ID = '1tFt-UjwaQS80uM1ECrMxnLJGU-MWO9lWnxZyPnYV530';
 const SHEET_NAME = 'RSVP-Boda-KarlaJose';
 
-const EMAIL_DESTINATARIO = 'karla.y.jose.18.12.26@gmail.com'; 
+// Get configuration from PropertiesService (set via Project Settings > Script Properties)
+function getSpreadsheetId() {
+  const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!id) throw new Error('SPREADSHEET_ID not configured in Script Properties');
+  return id;
+}
+
+function getEmailDestinatario() {
+  const email = PropertiesService.getScriptProperties().getProperty('EMAIL_DESTINATARIO');
+  if (!email) throw new Error('EMAIL_DESTINATARIO not configured in Script Properties');
+  return email;
+}
+
+/**
+ * HTML escaping helper to prevent injection attacks in email bodies
+ */
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+} 
 
 /**
  * Función principal que maneja las solicitudes GET
@@ -15,19 +32,21 @@ function doGet(e) {
     if (!action) {
       return ContentService.createTextOutput('RSVP API funcionando correctamente');
     }
-    
+
+    // Mutating actions must arrive via POST only.
+    // Rejecting them here prevents accidental replay via browser pre-fetchers,
+    // link-preview bots, or logged GET URLs.
+    const POST_ONLY_ACTIONS = ['updateAttendance', 'sendTicketEmail'];
+    if (POST_ONLY_ACTIONS.indexOf(action) !== -1) {
+      return jsonResponse({ result: 'error', message: 'Esta acción requiere POST.' });
+    }
+
     if (action === 'searchGuest') {
       return searchGuestByName(params.name, params.email, params.groupCode);
-    } else if (action === 'updateAttendance') {
-      // Decodificar el JSON de updates
-      const updates = JSON.parse(params.updates);
-      return updateGuestAttendance(updates, params.token);
     } else if (action === 'verifyTicket') {
       return verifyTicket(params.ticketId);
     } else if (action === 'getTicketQr') {
       return getTicketQr(params.ticketId);
-    } else if (action === 'sendTicketEmail') {
-      return sendTicketEmail(params.token, params.ticketDataUrl, params.filename);
     }
     
     return ContentService.createTextOutput(JSON.stringify({
@@ -36,9 +55,10 @@ function doGet(e) {
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
+    Logger.log('Error in doGet: ' + error);
     return ContentService.createTextOutput(JSON.stringify({
       result: 'error',
-      message: 'Error en el servidor: ' + error.toString()
+      message: 'Error interno. Por favor intenta de nuevo.'
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -64,7 +84,17 @@ function doPost(e) {
     if (action === 'searchGuest') {
       return searchGuestByName(params.name, params.email, params.groupCode);
     } else if (action === 'updateAttendance') {
-      return updateGuestAttendance(params.updates, params.token);
+      // updates arrives as a JSON string from the URLSearchParams body —
+      // parse it before passing to updateGuestAttendance.
+      let parsedUpdates;
+      try {
+        parsedUpdates = (typeof params.updates === 'string')
+          ? JSON.parse(params.updates)
+          : params.updates;
+      } catch (_e) {
+        return jsonResponse({ result: 'error', message: 'Formato de datos inválido.' });
+      }
+      return updateGuestAttendance(parsedUpdates, params.token);
     } else if (action === 'verifyTicket') {
       return verifyTicket(params.ticketId);
     } else if (action === 'getTicketQr') {
@@ -79,9 +109,10 @@ function doPost(e) {
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
+    Logger.log('Error in doPost: ' + error);
     return ContentService.createTextOutput(JSON.stringify({
       result: 'error',
-      message: 'Error en el servidor: ' + error.toString()
+      message: 'Error interno. Por favor intenta de nuevo.'
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -129,9 +160,82 @@ function maskEmail(email) {
   return head + '***@' + domain;
 }
 
+
+/**
+ * Server-side rate limiter using CacheService.
+ *
+ * Limits how many times a given (email + groupCode) combination can call
+ * searchGuest within a rolling time window. This prevents enumeration of
+ * the guest list by brute-forcing group codes.
+ *
+ * @param {string} key        - Unique identifier for this caller (hashed email+code)
+ * @param {number} maxCalls   - Max allowed calls within the window (default 10)
+ * @param {number} windowSecs - Rolling window in seconds (default 300 = 5 min)
+ * @returns {{ allowed: boolean, remaining: number }}
+ */
+function checkRateLimit(key, maxCalls, windowSecs) {
+  maxCalls   = maxCalls   || 10;
+  windowSecs = windowSecs || 300;
+
+  const cache     = CacheService.getScriptCache();
+  const cacheKey  = 'rl_' + key;
+  const raw       = cache.get(cacheKey);
+  const cached    = raw ? JSON.parse(raw) : null;
+  const now       = Date.now();
+  const windowMs  = windowSecs * 1000;
+  
+  // Fixed window: reset if window has expired
+  let count = 0;
+  let windowStart = now;
+  if (cached) {
+    if (now - cached.start <= windowMs) {
+      count = cached.count;
+      windowStart = cached.start;
+    } else {
+      // Window expired, reset
+      count = 0;
+      windowStart = now;
+    }
+  }
+
+  if (count >= maxCalls) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  // Store fixed window with timestamp
+  cache.put(cacheKey, JSON.stringify({count: count + 1, start: windowStart}), windowSecs);
+  return { allowed: true, remaining: maxCalls - count - 1 };
+}
+
+/**
+ * Returns a short non-reversible key for rate limiting that does not
+ * store PII in the cache. Combines email + groupCode so each combination
+ * gets its own bucket — a guest can retry with a different code without
+ * being blocked by a previous failed attempt.
+ */
+function rateLimitKey(email, groupCode) {
+  const combined = normalizeEmail(email) + '|' + normalizeGroupCode(groupCode);
+  // Digest produces a byte array; encode to hex for a cache-safe string.
+  const bytes  = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, combined);
+  const hex    = bytes.map(function(b) {
+    return ('0' + (b & 0xFF).toString(16)).slice(-2);
+  }).join('');
+  return hex;
+}
+
 function searchGuestByName(searchName, email, groupCode) {
   try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    // Rate limit: max 10 search attempts per (email+code) combination per 5 minutes.
+    // This prevents guest-list enumeration via brute-forced group codes.
+    const rlResult = checkRateLimit(rateLimitKey(email, groupCode), 10, 300);
+    if (!rlResult.allowed) {
+      return jsonResponse({
+        result: 'error',
+        message: 'Demasiados intentos. Por favor espera 5 minutos antes de intentar de nuevo.'
+      });
+    }
+
+    const ss = SpreadsheetApp.openById(getSpreadsheetId());
     const sheet = ss.getSheetByName(SHEET_NAME);
     let data = sheet.getDataRange().getValues();
     
@@ -149,9 +253,10 @@ function searchGuestByName(searchName, email, groupCode) {
     let groupCodeCol = findGroupCodeColumn(headers);
     
     if (idNombreCol === -1 || idApellidoCol === -1 || idGrupoCol === -1) {
+      Logger.log('Missing required columns. Headers found: ' + headers.join(', '));
       return jsonResponse({
         result: 'error',
-        message: 'No se encontraron las columnas necesarias. Columnas encontradas: ' + headers.join(', ')
+        message: 'Error de configuración del servidor. Contacta a los organizadores.'
       });
     }
 
@@ -293,7 +398,7 @@ function updateGuestAttendance(updates, token) {
     const tokenData = JSON.parse(tokenRaw);
     const allowedGroup = String(tokenData.group || '');
 
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const ss = SpreadsheetApp.openById(getSpreadsheetId());
     const sheet = ss.getSheetByName(SHEET_NAME);
     let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const estadoCol = headers.indexOf('ID_ESTADO') + 1; // +1 porque getRange usa 1-index
@@ -321,9 +426,10 @@ function updateGuestAttendance(updates, token) {
     }
 
     if (nombreCol === 0 || apellidoCol === 0 || grupoCol === 0) {
+      Logger.log('Missing required columns in updateGuestAttendance. Headers found: ' + headers.join(', '));
       return ContentService.createTextOutput(JSON.stringify({
         result: 'error',
-        message: 'No se encontraron las columnas necesarias (ID_NOMBRE, ID_APELLIDO(S), ID_GRUPO)'
+        message: 'Error de configuración del servidor. Contacta a los organizadores.'
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
@@ -444,7 +550,7 @@ function sendTicketEmail(token, ticketDataUrl, filename) {
     const safeName = String(filename || '').trim() || ('boleto-' + String(group || 'grupo') + '.png');
     const ticketBlob = Utilities.newBlob(Utilities.base64Decode(base64), 'image/png', safeName);
 
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const ss = SpreadsheetApp.openById(getSpreadsheetId());
     const sheet = ss.getSheetByName(SHEET_NAME);
     const values = sheet.getDataRange().getValues();
     const headers = values[0].map(String);
@@ -504,8 +610,8 @@ function sendTicketEmail(token, ticketDataUrl, filename) {
     <p><strong>Fecha y hora:</strong> ${fechaFormateada}</p>
     
     <div class="grupo">
-      <h3>📋 Grupo: ${group}</h3>
-      <p><strong>Código de boleto:</strong> ${ticketId}</p>
+      <h3>📋 Grupo: ${esc(group)}</h3>
+      <p><strong>Código de boleto:</strong> ${esc(ticketId)}</p>
       <p>Tu boleto va adjunto en este correo (PNG).</p>
     </div>
 
@@ -522,7 +628,7 @@ function sendTicketEmail(token, ticketDataUrl, filename) {
     confirmed.forEach(function (n) {
       mensaje += `
         <tr>
-          <td>${n}</td>
+          <td>${esc(n)}</td>
         </tr>
       `;
     });
@@ -566,7 +672,7 @@ function verifyTicket(ticketId) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const ss = SpreadsheetApp.openById(getSpreadsheetId());
     const sheet = ss.getSheetByName(SHEET_NAME);
     const data = sheet.getDataRange().getValues();
     if (!data || data.length < 2) {
@@ -686,6 +792,7 @@ function enviarCorreoConfirmacion(grupoNombre, cambios) {
   try {
     const fecha = new Date();
     const fechaFormateada = Utilities.formatDate(fecha, 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
+    const spreadsheetId = getSpreadsheetId();
     
     // Construir el cuerpo del mensaje
     let mensaje = `
@@ -716,7 +823,7 @@ function enviarCorreoConfirmacion(grupoNombre, cambios) {
     <p><strong>Fecha y hora:</strong> ${fechaFormateada}</p>
     
     <div class="grupo">
-      <h3>📋 Grupo: ${grupoNombre}</h3>
+      <h3>📋 Grupo: ${esc(grupoNombre)}</h3>
       <p>Se han actualizado ${cambios.length} invitado(s)</p>
     </div>
     
@@ -739,9 +846,9 @@ function enviarCorreoConfirmacion(grupoNombre, cambios) {
       
       mensaje += `
         <tr>
-          <td>${cambio.nombre}</td>
-          <td>${cambio.estadoAnterior}</td>
-          <td class="${claseEstado}">${cambio.estadoNuevo}</td>
+          <td>${esc(cambio.nombre)}</td>
+          <td>${esc(cambio.estadoAnterior)}</td>
+          <td class="${claseEstado}">${esc(cambio.estadoNuevo)}</td>
         </tr>
       `;
     });
@@ -751,7 +858,7 @@ function enviarCorreoConfirmacion(grupoNombre, cambios) {
     </table>
     
     <p style="margin-top: 20px;">
-      <a href="https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}" 
+      <a href="https://docs.google.com/spreadsheets/d/${spreadsheetId}" 
          style="background-color: #2E8B57; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
         Ver Google Sheet
       </a>
@@ -768,7 +875,7 @@ function enviarCorreoConfirmacion(grupoNombre, cambios) {
     
     // Enviar el correo
     MailApp.sendEmail({
-      to: EMAIL_DESTINATARIO,
+      to: getEmailDestinatario(),
       subject: `✅ Confirmación RSVP: ${grupoNombre}`,
       htmlBody: mensaje
     });

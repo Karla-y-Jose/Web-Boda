@@ -1,0 +1,17 @@
+{
+  "name": "boda-karla-jose",
+  "version": "1.0.0",
+  "description": "Wedding website for Karla & Jose — static site with Google Apps Script backend",
+  "private": true,
+  "scripts": {
+    "build": "pwsh ./build.ps1",
+    "build:esbuild": "npx esbuild js/scripts.js --bundle=false --minify --outfile=js/scripts.min.js && npx esbuild css/styles.css --minify --outfile=css/styles.min.css",
+    "lint": "npx eslint js/scripts.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
