@@ -1434,14 +1434,14 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
 // Playlist - add your MP3 files here
 const playlist = [
     {
-        title: "Te Amo y Más",
-        artist: "Gustavo Santaolalla, Paul Williams, Diego Luna",
-        src:   "mp3/Te Amo y Más - Gustavo Santaolalla, Paul Williams, Diego Luna.mp3"
-    },
-    {
         title:  "How Deep Is Your Love",
         artist: "Bee Gees",
         src:    "mp3/How Deep Is Your Love - Bee Gees.mp3"
+    },
+    {
+        title: "Te Amo y Más",
+        artist: "Gustavo Santaolalla, Paul Williams, Diego Luna",
+        src:   "mp3/Te Amo y Más - Gustavo Santaolalla, Paul Williams, Diego Luna.mp3"
     },
     {
         title:  "Patadas de Ahogado",
