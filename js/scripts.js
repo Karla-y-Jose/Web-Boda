@@ -1434,6 +1434,11 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
 // Playlist - add your MP3 files here
 const playlist = [
     {
+        title: "Te Amo y Más",
+        artist: "Gustavo Santaolalla, Paul Williams, Diego Luna",
+        src:   "mp3/Te Amo y Más - Gustavo Santaolalla, Paul Williams, Diego Luna.mp3"
+    },
+    {
         title:  "How Deep Is Your Love",
         artist: "Bee Gees",
         src:    "mp3/How Deep Is Your Love - Bee Gees.mp3"
@@ -1442,6 +1447,11 @@ const playlist = [
         title:  "Patadas de Ahogado",
         artist: "LATIN MAFIA",
         src:    "mp3/Patadas de Ahogado - LATIN MAFIA.mp3"
+    },
+    {
+        title: "Love never felt so good",
+        artist: "Michael Jackson",
+        src:   "mp3/Love never felt so good - Michael Jackson.mp3"
     },
     {
         title:  "Del Altar a la Tumba",
