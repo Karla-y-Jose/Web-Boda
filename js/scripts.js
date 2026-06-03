@@ -1612,7 +1612,7 @@ if (audioPlayer) {
 
     if (progressBar) {
         progressBar.addEventListener('click', function (e) {
-            if (playlist.length === 0) return;
+            if (playlist.length === 0 || !isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
             var rect       = progressBar.getBoundingClientRect();
             var clickX     = e.clientX - rect.left;
             var percentage = clickX / rect.width;
