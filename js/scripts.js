@@ -769,12 +769,11 @@ function sendTicketEmail(ticketDataUrl, filename) {
         });
 }
 
-// Returns the Apps Script URL that verifies a ticket code.
-// Used as the QR code payload so event staff can scan and validate attendance.
+// Returns a URL to the static validation page.
+// Used as the QR code payload so event staff can scan and see the validation page.
 function buildVerifyTicketUrl(ticketId) {
-    var endpoint = _rsvpStore.getEndpoint();
-    if (!endpoint) return '';
-    return endpoint + '?action=verifyTicket&ticketId=' + encodeURIComponent(String(ticketId || '').trim());
+    // Point to the static validation page
+    return 'validar-boleto.html?ticketId=' + encodeURIComponent(String(ticketId || '').trim());
 }
 
 // Renders a QR code entirely in the browser using the bundled qrcode library.
