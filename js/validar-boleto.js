@@ -10,6 +10,9 @@ const errorMessage = document.getElementById('error-message');
 const loadingBody = document.getElementById('loading-body');
 const codeValueEl = document.getElementById('code-value');
 const guestListEl = document.getElementById('guest-list');
+const tableSectionEl = document.getElementById('table-section');
+const tableLabelEl = document.getElementById('table-label');
+const tableValueEl = document.getElementById('table-value');
 
 // If no ticketId provided, show error immediately
 if (!ticketId) {
@@ -62,15 +65,55 @@ function verifyTicketWithRSVP(ticketId) {
         });
 }
 
+function formatTableText(tableStr) {
+    if (!tableStr) return '';
+    const clean = String(tableStr).trim();
+    if (/^mesa/i.test(clean)) {
+        return clean;
+    }
+    if (clean.includes(',')) {
+        return 'Mesas ' + clean;
+    }
+    return 'Mesa ' + clean;
+}
+
 function displayValidTicket(data) {
     // Display ticket code
     codeValueEl.textContent = data.ticketId;
     
+    // Display table assignment if available
+    const tableAssigned = data.mesa || (Array.isArray(data.mesas) ? data.mesas.join(', ') : '');
+    if (tableAssigned && tableSectionEl && tableValueEl) {
+        const formatted = formatTableText(tableAssigned);
+        tableValueEl.textContent = formatted;
+        if (tableLabelEl) {
+            tableLabelEl.textContent = formatted.toLowerCase().startsWith('mesas') ? 'Mesas Asignadas' : 'Mesa Asignada';
+        }
+        tableSectionEl.style.display = 'block';
+    } else if (tableSectionEl) {
+        tableSectionEl.style.display = 'none';
+    }
+    
     // Display list of confirmed guests
-    const guests = data.invitados || [];
-    if (guests.length > 0) {
-        guestListEl.innerHTML = guests
-            .map(guest => '<div class="guest-item">' + escapeHtml(guest) + '</div>')
+    // Supports both detailed objects and simple string arrays
+    const detailedGuests = data.invitadosDetalle || data.invitados || [];
+    const hasMultipleDifferentTables = Array.isArray(data.mesas) && data.mesas.length > 1;
+
+    if (detailedGuests.length > 0) {
+        guestListEl.innerHTML = detailedGuests
+            .map(guest => {
+                const isObj = typeof guest === 'object' && guest !== null;
+                const name = isObj ? (guest.nombre || '') : String(guest);
+                const guestMesa = isObj && guest.mesa ? formatTableText(guest.mesa) : '';
+
+                let html = '<div class="guest-item">';
+                html += '<span class="guest-item-name">' + escapeHtml(name) + '</span>';
+                if (hasMultipleDifferentTables && guestMesa) {
+                    html += '<span class="guest-item-table">' + escapeHtml(guestMesa) + '</span>';
+                }
+                html += '</div>';
+                return html;
+            })
             .join('');
     } else {
         guestListEl.textContent = '—';

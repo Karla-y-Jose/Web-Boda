@@ -251,6 +251,7 @@ function searchGuestByName(searchName, email, groupCode) {
     let estadoCol = headers.indexOf('ID_ESTADO');
     let emailCol = findEmailColumn(headers);
     let groupCodeCol = findGroupCodeColumn(headers);
+    let mesaCol = headers.indexOf('ID_MESA') !== -1 ? headers.indexOf('ID_MESA') : headers.indexOf('MESA');
     
     if (idNombreCol === -1 || idApellidoCol === -1 || idGrupoCol === -1) {
       Logger.log('Missing required columns. Headers found: ' + headers.join(', '));
@@ -350,7 +351,8 @@ function searchGuestByName(searchName, email, groupCode) {
         nombre: data[i][idNombreCol],
         apellido: data[i][idApellidoCol],
         estado: estadoCol !== -1 ? data[i][estadoCol] : 'Pendiente',
-        grupo: data[i][idGrupoCol]
+        grupo: data[i][idGrupoCol],
+        mesa: mesaCol !== -1 ? data[i][mesaCol] : ''
       });
     }
 
@@ -690,6 +692,8 @@ function verifyTicket(ticketId) {
     if (apellidoCol === -1) apellidoCol = headers.indexOf('ID_APELLIDO');
     const grupoCol = headers.indexOf('ID_GRUPO');
     const ticketCol = headers.indexOf('TICKET_ID');
+    let mesaCol = headers.indexOf('ID_MESA');
+    if (mesaCol === -1) mesaCol = headers.indexOf('MESA');
 
     if (ticketCol === -1) {
       return ContentService.createTextOutput(JSON.stringify({
@@ -700,6 +704,8 @@ function verifyTicket(ticketId) {
     }
 
     const matches = [];
+    const guestsDetailed = [];
+    const tablesSet = [];
     let groupName = '';
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
@@ -712,7 +718,18 @@ function verifyTicket(ticketId) {
       const nombre = nombreCol !== -1 ? String(row[nombreCol] || '') : '';
       const apellido = apellidoCol !== -1 ? String(row[apellidoCol] || '') : '';
       const fullName = (nombre + ' ' + apellido).trim();
-      if (fullName) matches.push(fullName);
+      const mesa = mesaCol !== -1 ? String(row[mesaCol] || '').trim() : '';
+
+      if (fullName) {
+        matches.push(fullName);
+        guestsDetailed.push({
+          nombre: fullName,
+          mesa: mesa
+        });
+        if (mesa && tablesSet.indexOf(mesa) === -1) {
+          tablesSet.push(mesa);
+        }
+      }
       if (!groupName && grupoCol !== -1) groupName = String(row[grupoCol] || '');
     }
 
@@ -729,7 +746,10 @@ function verifyTicket(ticketId) {
       valid: true,
       ticketId: id,
       grupo: groupName,
-      invitados: matches
+      mesa: tablesSet.join(', '),
+      mesas: tablesSet,
+      invitados: matches,
+      invitadosDetalle: guestsDetailed
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({

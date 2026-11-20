@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    WEDDING WEBSITE - MAIN SCRIPTS
    ============================================ */
 
@@ -1339,11 +1339,22 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
    GALLERY LIGHTBOX
    ============================================ */
 (function () {
-    // Collect all gallery item sources in DOM order
-    function getGalleryImages() {
-        return Array.from(document.querySelectorAll('.gallery-item[data-src]'))
-            .map(function (btn) { return btn.dataset.src; });
-    }
+    // Full gallery: all images navigable in the lightbox.
+    // Bento grid shows a subset; the rest are reachable via prev/next once opened.
+    var GALLERY_IMAGES = [
+        'img/pedida1.webp',
+        'img/pedida2.webp',
+        'img/pedida3.webp',
+        'img/sesion1.webp',
+        'img/sesion2.webp',
+        'img/sesion3.webp',
+        'img/sesion4.webp',
+        'img/sesion5.webp',
+        'img/sesion6.webp',
+        'img/sesion7.webp',
+        'img/sesion8.webp',
+        'img/sesion9.webp'
+    ];
 
     // Build lightbox DOM once
     var lb = document.createElement('div');
@@ -1367,7 +1378,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     var lbTouchStartX = 0;
 
     function lbOpen(index) {
-        lbImages = getGalleryImages();
+        lbImages = GALLERY_IMAGES;
         lbIndex  = index;
         lbShow();
         lb.classList.add('active');
@@ -1391,12 +1402,12 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     function lbPrev() { lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; lbShow(); }
     function lbNext() { lbIndex = (lbIndex + 1) % lbImages.length; lbShow(); }
 
-    // Delegate clicks on gallery buttons
+    // Delegate clicks on gallery buttons (bento items with .gallery-item[data-src])
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.gallery-item[data-src]');
         if (btn) {
-            var srcs = getGalleryImages();
-            var idx  = srcs.indexOf(btn.dataset.src);
+            var src = btn.dataset.src;
+            var idx = GALLERY_IMAGES.indexOf(src);
             lbOpen(idx >= 0 ? idx : 0);
         }
     });
