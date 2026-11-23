@@ -146,6 +146,27 @@ function findGroupCodeColumn(headers) {
   return -1;
 }
 
+function findMesaColumn(headers) {
+  if (!headers || !headers.length) return -1;
+  const clean = headers.map(function(h) {
+    return String(h || '').trim().toUpperCase().replace(/[\s_-]+/g, '');
+  });
+  const candidates = ['IDMESA', 'MESA', 'MESAS', 'IDMESAS', 'NOMESA', 'NUMEROMESA', 'TABLE', 'TABLEID', 'IDTABLE'];
+  for (let c = 0; c < candidates.length; c++) {
+    const idx = clean.indexOf(candidates[c]);
+    if (idx !== -1) return idx;
+  }
+  // Fallback 1: substring match for MESA
+  for (let i = 0; i < clean.length; i++) {
+    if (clean[i].indexOf('MESA') !== -1) return i;
+  }
+  // Fallback 2: check column H (index 7, 8th column)
+  if (headers.length > 7 && String(headers[7] || '').trim() !== '') {
+    return 7;
+  }
+  return -1;
+}
+
 function jsonResponse(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -251,7 +272,7 @@ function searchGuestByName(searchName, email, groupCode) {
     let estadoCol = headers.indexOf('ID_ESTADO');
     let emailCol = findEmailColumn(headers);
     let groupCodeCol = findGroupCodeColumn(headers);
-    let mesaCol = headers.indexOf('ID_MESA') !== -1 ? headers.indexOf('ID_MESA') : headers.indexOf('MESA');
+    let mesaCol = findMesaColumn(headers);
     
     if (idNombreCol === -1 || idApellidoCol === -1 || idGrupoCol === -1) {
       Logger.log('Missing required columns. Headers found: ' + headers.join(', '));
@@ -692,8 +713,7 @@ function verifyTicket(ticketId) {
     if (apellidoCol === -1) apellidoCol = headers.indexOf('ID_APELLIDO');
     const grupoCol = headers.indexOf('ID_GRUPO');
     const ticketCol = headers.indexOf('TICKET_ID');
-    let mesaCol = headers.indexOf('ID_MESA');
-    if (mesaCol === -1) mesaCol = headers.indexOf('MESA');
+    let mesaCol = findMesaColumn(headers);
 
     if (ticketCol === -1) {
       return ContentService.createTextOutput(JSON.stringify({
@@ -718,7 +738,7 @@ function verifyTicket(ticketId) {
       const nombre = nombreCol !== -1 ? String(row[nombreCol] || '') : '';
       const apellido = apellidoCol !== -1 ? String(row[apellidoCol] || '') : '';
       const fullName = (nombre + ' ' + apellido).trim();
-      const mesa = mesaCol !== -1 ? String(row[mesaCol] || '').trim() : '';
+      const mesa = (mesaCol !== -1 && row[mesaCol] !== undefined && row[mesaCol] !== null) ? String(row[mesaCol]).trim() : '';
 
       if (fullName) {
         matches.push(fullName);
