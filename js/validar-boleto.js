@@ -78,20 +78,41 @@ function formatTableText(tableStr) {
 }
 
 function displayValidTicket(data) {
+    console.log('Ticket verification response:', data);
+
     // Display ticket code
     codeValueEl.textContent = data.ticketId;
     
-    // Display table assignment if available
-    const tableAssigned = data.mesa || (Array.isArray(data.mesas) ? data.mesas.join(', ') : '');
-    if (tableAssigned && tableSectionEl && tableValueEl) {
-        const formatted = formatTableText(tableAssigned);
-        tableValueEl.textContent = formatted;
-        if (tableLabelEl) {
-            tableLabelEl.textContent = formatted.toLowerCase().startsWith('mesas') ? 'Mesas Asignadas' : 'Mesa Asignada';
+    // Extract table assignment from all possible response formats
+    let tableAssigned = data.mesa || data.id_mesa || data.ID_MESA || '';
+    if (!tableAssigned && Array.isArray(data.mesas) && data.mesas.length > 0) {
+        tableAssigned = data.mesas.filter(Boolean).join(', ');
+    }
+    if (!tableAssigned && Array.isArray(data.invitadosDetalle)) {
+        const unique = [];
+        data.invitadosDetalle.forEach(g => {
+            if (g && g.mesa && unique.indexOf(String(g.mesa).trim()) === -1) {
+                unique.push(String(g.mesa).trim());
+            }
+        });
+        tableAssigned = unique.join(', ');
+    }
+
+    // Display table section
+    if (tableSectionEl && tableValueEl) {
+        if (tableAssigned) {
+            const formatted = formatTableText(tableAssigned);
+            tableValueEl.textContent = formatted;
+            if (tableLabelEl) {
+                tableLabelEl.textContent = formatted.toLowerCase().startsWith('mesas') ? 'Mesas Asignadas' : 'Mesa Asignada';
+            }
+        } else {
+            tableValueEl.textContent = 'Por asignar';
+            if (tableLabelEl) {
+                tableLabelEl.textContent = 'Mesa Asignada';
+            }
         }
         tableSectionEl.style.display = 'block';
-    } else if (tableSectionEl) {
-        tableSectionEl.style.display = 'none';
     }
     
     // Display list of confirmed guests
@@ -108,7 +129,7 @@ function displayValidTicket(data) {
 
                 let html = '<div class="guest-item">';
                 html += '<span class="guest-item-name">' + escapeHtml(name) + '</span>';
-                if (hasMultipleDifferentTables && guestMesa) {
+                if (guestMesa && (hasMultipleDifferentTables || !tableAssigned)) {
                     html += '<span class="guest-item-table">' + escapeHtml(guestMesa) + '</span>';
                 }
                 html += '</div>';
