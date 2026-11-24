@@ -738,7 +738,10 @@ function verifyTicket(ticketId) {
       const nombre = nombreCol !== -1 ? String(row[nombreCol] || '') : '';
       const apellido = apellidoCol !== -1 ? String(row[apellidoCol] || '') : '';
       const fullName = (nombre + ' ' + apellido).trim();
-      const mesa = (mesaCol !== -1 && row[mesaCol] !== undefined && row[mesaCol] !== null) ? String(row[mesaCol]).trim() : '';
+      let mesa = (mesaCol !== -1 && row[mesaCol] !== undefined && row[mesaCol] !== null) ? String(row[mesaCol]).trim() : '';
+      if (!mesa && row.length > 7 && row[7] !== undefined && row[7] !== null) {
+        mesa = String(row[7]).trim();
+      }
 
       if (fullName) {
         matches.push(fullName);
@@ -769,7 +772,12 @@ function verifyTicket(ticketId) {
       mesa: tablesSet.join(', '),
       mesas: tablesSet,
       invitados: matches,
-      invitadosDetalle: guestsDetailed
+      invitadosDetalle: guestsDetailed,
+      debug: {
+        mesaCol: mesaCol,
+        foundHeaders: headers,
+        tablesSet: tablesSet
+      }
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({

@@ -68,6 +68,9 @@ function verifyTicketWithRSVP(ticketId) {
 function formatTableText(tableStr) {
     if (!tableStr) return '';
     const clean = String(tableStr).trim();
+    if (/^novios$/i.test(clean) || /^mesa\s*(de\s*)?novios$/i.test(clean)) {
+        return 'Mesa de Novios';
+    }
     if (/^mesa/i.test(clean)) {
         return clean;
     }
